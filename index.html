@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menú — Aroma a Café</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --espresso:  #2b1a0f;
+    --dark-roast:#3d2314;
+    --caramel:   #c8813a;
+    --cream:     #f5ede0;
+    --latte:     #e8d5b7;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--espresso);
+    color: var(--cream);
+    font-family: 'Lato', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0; opacity:.4;
+  }
+
+  .page { position:relative; z-index:1; max-width:480px; margin:0 auto; padding:0 0 60px; }
+
+  /* HERO */
+  .hero { display:flex; flex-direction:column; align-items:center; padding:50px 24px 36px; text-align:center; }
+  .hero::after { content:''; display:block; width:60px; height:2px; background:var(--caramel); margin:0 auto; border-radius:2px; }
+  .logo-ring {
+    width:110px; height:110px; border-radius:50%;
+    border:2px solid var(--caramel);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:24px; background:var(--dark-roast);
+    box-shadow:0 0 0 6px rgba(200,129,58,.12), 0 8px 32px rgba(0,0,0,.4);
+    animation:fadeDown .8s ease both;
+  }
+  .logo-ring svg { width:64px; height:64px; }
+  .hero-name { font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:700; color:var(--cream); letter-spacing:.01em; line-height:1.1; animation:fadeDown .8s .1s ease both; }
+  .hero-name span { color:var(--caramel); font-style:italic; }
+  .hero-sub { font-size:.72rem; font-weight:300; letter-spacing:.25em; text-transform:uppercase; color:var(--latte); margin-top:8px; margin-bottom:28px; opacity:.8; animation:fadeDown .8s .2s ease both; }
+
+  /* SECTION */
+  .section { padding:0 20px; margin-top:36px; animation:fadeUp .7s ease both; }
+  .section-header { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+  .section-icon { width:38px; height:38px; border-radius:50%; background:var(--dark-roast); border:1.5px solid var(--caramel); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1rem; }
+  .section-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:600; color:var(--caramel); letter-spacing:.04em; }
+  .section-line { flex:1; height:1px; background:linear-gradient(to right,rgba(200,129,58,.5),transparent); }
+
+  /* ITEM CARD */
+  .item {
+    margin-bottom:8px;
+    border-radius:14px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(200,129,58,.12);
+    overflow:hidden;
+    transition:border-color .2s, transform .15s;
+    cursor:pointer;
+  }
+  .item:hover { border-color:rgba(200,129,58,.32); transform:translateY(-1px); }
+  .item.open  { border-color:rgba(200,129,58,.4); background:rgba(200,129,58,.07); }
+
+  .item-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 18px;
+  }
+  .item-left { flex:1; }
+  .item-name { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:600; color:var(--cream); line-height:1.3; }
+  .item-tagline { font-size:.72rem; font-weight:300; color:var(--latte); margin-top:2px; opacity:.7; letter-spacing:.02em; }
+
+  .item-right { display:flex; align-items:center; gap:10px; margin-left:16px; }
+  .item-price { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--caramel); white-space:nowrap; }
+  .item-chevron { font-size:.7rem; color:var(--caramel); opacity:.7; transition:transform .3s; flex-shrink:0; }
+  .item.open .item-chevron { transform:rotate(180deg); }
+
+  /* EXPANDABLE DETAIL */
+  .item-detail {
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease, padding .35s ease;
+    padding:0 18px;
+  }
+  .item.open .item-detail { max-height:200px; padding:0 18px 14px; }
+  .item-detail-inner {
+    border-top:1px solid rgba(200,129,58,.2);
+    padding-top:12px;
+    font-size:.82rem;
+    font-weight:300;
+    color:var(--latte);
+    line-height:1.65;
+    letter-spacing:.015em;
+  }
+  .item-detail-inner strong { color:var(--caramel); font-weight:600; font-family:'Playfair Display',serif; font-style:italic; }
+
+  /* DIVIDER */
+  .divider { margin:36px 20px 0; height:1px; background:linear-gradient(to right,transparent,rgba(200,129,58,.3),transparent); }
+
+  /* INFO SECTION (hours + social) */
+  .info-section { padding:0 20px; margin-top:36px; animation:fadeUp .7s .35s ease both; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .info-card {
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(200,129,58,.14);
+    border-radius:14px;
+    padding:16px 14px;
+  }
+  .info-card-title { font-family:'Playfair Display',serif; font-size:.85rem; color:var(--caramel); margin-bottom:10px; letter-spacing:.05em; display:flex; align-items:center; gap:6px; }
+  .info-row { font-size:.75rem; color:var(--latte); margin-bottom:5px; display:flex; justify-content:space-between; opacity:.85; }
+  .info-row span:last-child { font-weight:600; color:var(--cream); }
+
+  .social-list { list-style:none; }
+  .social-list li { font-size:.78rem; color:var(--latte); margin-bottom:7px; display:flex; align-items:center; gap:8px; opacity:.85; }
+  .social-list li a { color:var(--latte); text-decoration:none; transition:color .2s; }
+  .social-list li a:hover { color:var(--caramel); }
+  .social-icon { font-size:.9rem; flex-shrink:0; }
+
+  /* FOOTER */
+  .footer { text-align:center; padding:40px 24px 0; animation:fadeUp .7s .45s ease both; }
+  .footer-quote { font-family:'Playfair Display',serif; font-style:italic; font-size:.9rem; color:var(--latte); opacity:.6; line-height:1.6; }
+  .footer-dots { margin-top:18px; display:flex; justify-content:center; gap:6px; }
+  .footer-dots span { width:4px; height:4px; border-radius:50%; background:var(--caramel); opacity:.5; }
+  .footer-dots span:nth-child(2) { opacity:.8; }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+  .section:nth-child(3){ animation-delay:.15s; }
+  .section:nth-child(5){ animation-delay:.3s; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="logo-ring">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 14 Q22 10 25 7 Q28 4 26 1" stroke="#c8813a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M32 14 Q30 9 33 6 Q36 3 34 0" stroke="#c8813a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M40 14 Q38 10 41 7 Q44 4 42 1" stroke="#c8813a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M14 20 h36 l-4 20 a4 4 0 0 1-4 3 H22 a4 4 0 0 1-4-3 z" fill="#f5ede0"/>
+        <path d="M50 24 q8 0 8 8 q0 8-8 8" stroke="#f5ede0" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <ellipse cx="32" cy="44" rx="22" ry="4" fill="#e8d5b7"/>
+      </svg>
+    </div>
+    <h1 class="hero-name">Aroma <span>a</span> Café</h1>
+    <p class="hero-sub">Café de especialidad &amp; postres artesanales</p>
+  </div>
+
+  <!-- CALIENTES -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">☕</div>
+      <h2 class="section-title">Bebidas Calientes</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Espresso Doble</div>
+          <div class="item-tagline">Intenso · Aromático</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$35</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          Doble extracción de espresso concentrado. <strong>Puro carácter</strong> en cada sorbo — notas profundas con un finish persistente. Perfecto para quienes aman el café sin filtros.
+        </div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Americano</div>
+          <div class="item-tagline">Suave · Clásico</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$40</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          Espresso diluido con agua caliente para una bebida <strong>más ligera pero igual de aromática</strong>. El equilibrio ideal entre intensidad y suavidad.
+        </div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Latte</div>
+          <div class="item-tagline">Cremoso · Aterciopelado</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$55</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          Espresso con una generosa cantidad de leche vaporizada y una fina capa de espuma. <strong>Suave y reconfortante</strong>, con un sabor a café bien balanceado.
+        </div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Capuchino</div>
+          <div class="item-tagline">Espumoso · Equilibrado</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$60</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          La clásica combinación de espresso, leche vaporizada y <strong>espuma densa y cremosa</strong>. Perfecto en proporciones iguales para una experiencia redonda y satisfactoria.
+        </div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Chocolate</div>
+          <div class="item-tagline">Dulce · Artesanal</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$60</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          Cacao artesanal disuelto en leche caliente y vaporizada. <strong>Rico, envolvente y reconfortante</strong> — ideal para los que prefieren algo dulce y cálido.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FRÍOS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🧋</div>
+      <h2 class="section-title">Bebidas Frías</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Frappé Oreo</div>
+          <div class="item-tagline">Dulce · Cremoso</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$60</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          Café blend con leche y <strong>galletas Oreo trituradas</strong>, servido bien frío. Una combinación irresistible de sabor a café y chocolate con textura crujiente.
+        </div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Frappé Clásico</div>
+          <div class="item-tagline">Puro · Refrescante</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$60</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          Solo café — sin adornos. <strong>El frappé en su forma más pura:</strong> café intenso batido con hielo para un resultado frío, espumoso y lleno de sabor.
+        </div>
+      </div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left">
+          <div class="item-name">Smoothie</div>
+          <div class="item-tagline">Mango · Frutos rojos</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$60</div>
+          <div class="item-chevron">▼</div>
+        </div>
+      </div>
+      <div class="item-detail">
+        <div class="item-detail-inner">
+          Frutas naturales licuadas para una bebida <strong>fresca y vibrante</strong>. Elige entre mango tropical o la mezcla de frutos rojos. Sin café — perfecto para cualquier momento del día.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- HORARIOS Y REDES -->
+  <div class="info-section">
+    <div class="section-header">
+      <div class="section-icon">🕐</div>
+      <h2 class="section-title">Encuéntranos</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="info-grid">
+      <!-- Horarios -->
+      <div class="info-card">
+        <div class="info-card-title">⏰ Horarios</div>
+        <div class="info-row"><span>Lun – Vie</span><span>8am – 8pm</span></div>
+        <div class="info-row"><span>Sábado</span><span>9am – 9pm</span></div>
+        <div class="info-row"><span>Domingo</span><span>10am – 6pm</span></div>
+      </div>
+
+      <!-- Redes -->
+      <div class="info-card">
+        <div class="info-card-title">📱 Redes</div>
+        <ul class="social-list">
+          <li>
+            <span class="social-icon">📸</span>
+            <a href="#" target="_blank">@aromacafe</a>
+          </li>
+          <li>
+            <span class="social-icon">🎵</span>
+            <a href="#" target="_blank">@aromacafe</a>
+          </li>
+          <li>
+            <span class="social-icon">💬</span>
+            <a href="https://wa.me/521234567890" target="_blank">WhatsApp</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p class="footer-quote">"Cada taza, una experiencia."</p>
+    <div class="footer-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggle(el) {
+    const isOpen = el.classList.contains('open');
+    // close all
+    document.querySelectorAll('.item.open').forEach(i => i.classList.remove('open'));
+    // open clicked if it was closed
+    if (!isOpen) el.classList.add('open');
+  }
+</script>
+</body>
+</html>
