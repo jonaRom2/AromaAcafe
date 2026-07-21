@@ -167,6 +167,23 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
 .send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
 .mostrador-tag{display:flex;align-items:center;gap:8px;padding:10px 14px;margin:10px 20px 4px;background:rgba(200,129,58,0.08);border:1px solid rgba(200,129,58,0.2);border-radius:10px;flex-shrink:0;}
 .mostrador-tag span{font-size:.8rem;color:var(--latte);letter-spacing:.03em;}
+/* PRÓXIMAMENTE */
+.coming-soon-card{
+  position:relative;border-radius:16px;
+  border:1.5px dashed rgba(200,129,58,0.45);
+  background:linear-gradient(145deg,rgba(200,129,58,0.08),rgba(255,255,255,0.02));
+  padding:30px 20px;text-align:center;overflow:hidden;
+}
+.coming-soon-badge{
+  display:inline-block;padding:5px 14px;border-radius:20px;
+  background:rgba(200,129,58,0.18);border:1px solid rgba(200,129,58,0.4);
+  color:var(--gold2);font-size:.66rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;
+  font-family:'Lato',sans-serif;
+}
+.coming-soon-icon{font-size:2.1rem;margin-bottom:10px;}
+.coming-soon-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--cream);margin-bottom:6px;}
+.coming-soon-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.92rem;color:var(--latte);opacity:.8;line-height:1.6;max-width:280px;margin:0 auto;}
 
 @keyframes fd{from{opacity:0;transform:translateY(-13px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -397,6 +414,62 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
 
   <div class="div-fancy"><div class="df-l"></div><span class="df-star">✦</span><div class="df-l"></div></div>
 
+  <div class="div-fancy"><div class="df-l"></div><span class="df-star">✦</span><div class="df-l"></div></div>
+
+  <!-- ══ CUERNITOS ══ -->
+  <div class="section">
+    <div class="sec-hd">
+      <div class="sec-icon">🥐</div>
+      <h2 class="sec-title">Cuernitos</h2>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Cuernito Sencillo</div><div class="item-tag">Recién horneado · Hojaldrado</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 25</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Cuernito clásico horneado diario. <b>Ligero, dorado y con capas crujientes.</b> Perfecto para acompañar tu café.
+        <button class="add-btn" onclick="addItem(event,'Cuernito Sencillo',25)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Cuernito de Jamón y Queso</div><div class="item-tag">Salado · Relleno</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 38</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Nuestro cuernito hojaldrado relleno de <b>jamón y queso derretido</b>. Ideal para un desayuno completo.
+        <button class="add-btn" onclick="addItem(event,'Cuernito Jamón y Queso',38)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Cuernito de Nutella</div><div class="item-tag">Dulce · Relleno</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 42</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Relleno de Nutella tibia dentro de un cuernito recién horneado. <b>Dulce, cremoso e indulgente.</b>
+        <button class="add-btn" onclick="addItem(event,'Cuernito de Nutella',42)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="div-fancy"><div class="df-l"></div><span class="df-star">✦</span><div class="df-l"></div></div>
+
+  <!-- ══ PRÓXIMAMENTE: CREPAS ══ -->
+  <div class="section">
+    <div class="coming-soon-card">
+      <div class="coming-soon-badge">✦ Próximamente ✦</div>
+      <div class="coming-soon-icon">🥞</div>
+      <div class="coming-soon-title">Crepas</div>
+      <div class="coming-soon-sub">Estamos preparando algo dulce y salado para ti. ¡Muy pronto en el menú!</div>
+    </div>
+  </div>
+
   <!-- ══ INFO ══ -->
   <div class="info-sec">
     <div class="sec-hd">
@@ -507,6 +580,8 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
     </button>
   </div>
 </div>
+
+
 
 <script>
 const WA = '522381880036';
