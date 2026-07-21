@@ -13,6 +13,7 @@
   --cream:#f5ede0;--latte:#dfc9a4;--red:#d97070;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:112%;}
 body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-height:100vh;overflow-x:hidden;}
 .bg-art{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
 .bg-art::before{content:'';position:absolute;inset:0;background:
@@ -188,9 +189,48 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
 
 @keyframes fd{from{opacity:0;transform:translateY(-13px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* SPLASH / BIENVENIDA */
+.splash{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.9s ease, visibility 0.9s ease;
+  overflow:hidden;
+}
+.splash::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 80% 60% at 50% 0%,rgba(180,100,30,0.22) 0%,transparent 65%),
+  radial-gradient(ellipse 60% 40% at 50% 100%,rgba(180,100,30,0.14) 0%,transparent 60%),
+  radial-gradient(ellipse 100% 100% at 50% 50%,rgba(10,5,0,0.5) 0%,transparent 80%);}
+.splash.fade-out{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-inner{position:relative;z-index:1;text-align:center;padding:24px;animation:splashIn 0.9s ease both;}
+@keyframes splashIn{from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}}
+.splash-logo-wrap{position:relative;width:130px;height:130px;margin:0 auto 22px;}
+.splash-logo-glow{position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(200,129,58,0.3) 0%,transparent 70%);animation:pulse 3.2s ease-in-out infinite;}
+.splash-logo{width:130px;height:130px;border-radius:50%;object-fit:cover;border:2px solid var(--caramel);box-shadow:0 0 0 5px rgba(200,129,58,0.10),0 16px 50px rgba(0,0,0,0.65);display:block;position:relative;z-index:1;}
+.splash-title{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--cream);letter-spacing:.02em;text-shadow:0 2px 20px rgba(0,0,0,0.5);}
+.splash-title em{color:var(--gold2);font-style:italic;}
+.splash-divider{display:flex;align-items:center;gap:8px;width:160px;margin:18px auto;}
+.splash-divider .hd-line{flex:1;height:1px;background:rgba(200,129,58,.3);}
+.splash-divider .htr-dot{width:5px;height:5px;background:var(--caramel);transform:rotate(45deg);flex-shrink:0;}
+.splash-phrase{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;color:var(--gold2);opacity:.92;line-height:1.6;max-width:280px;margin:0 auto;padding:0 12px;}
+
 </style>
 </head>
 <body>
+<!-- SPLASH / BIENVENIDA -->
+<div class="splash" id="splash">
+  <div class="splash-inner">
+    <div class="splash-logo-wrap">
+      <div class="splash-logo-glow"></div>
+      <img class="splash-logo" src="logo.jpg" alt="Aroma a Café">
+    </div>
+    <h1 class="splash-title">Aroma <em>a</em> Café</h1>
+    <div class="splash-divider"><div class="hd-line"></div><div class="htr-dot"></div><div class="hd-line"></div></div>
+    <p class="splash-phrase" id="splashPhrase"></p>
+  </div>
+</div>
+
 <div class="bg-art"></div>
 <div class="grain"></div>
 <div class="corner c-tl"><svg viewBox="0 0 80 80" fill="none"><path d="M4 4 L4 46" stroke="#c8813a" stroke-width="1.4" stroke-linecap="round"/><path d="M4 4 L46 4" stroke="#c8813a" stroke-width="1.4" stroke-linecap="round"/><path d="M4 18 L18 18 L18 4" stroke="#c8813a" stroke-width="0.8" stroke-linecap="round" fill="none"/><circle cx="4" cy="4" r="2.5" fill="#c8813a"/><path d="M22 4 Q4 4 4 22" stroke="#c8813a" stroke-width="0.7" fill="none" stroke-dasharray="2 3" opacity="0.6"/></svg></div>
@@ -314,6 +354,22 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
         <button class="add-btn" onclick="addItemMilk(event,'Chocolate',60,this)">+ Agregar al pedido</button>
       </div></div>
     </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Taro Latte</div><div class="item-tag">Dulce · Único · Aterciopelado</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 55</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Leche vaporizada con taro — <b>dulce, suave y con un color morado característico</b>. Un sabor único, ligeramente terroso y reconfortante.
+        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
+        <div class="milk-sel">
+          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
+          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
+        </div>
+        <button class="add-btn" onclick="addItemMilk(event,'Taro Latte',55,this)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
   </div>
 
   <div class="div-fancy"><div class="df-l"></div><span class="df-star">✦</span><div class="df-l"></div></div>
@@ -387,6 +443,33 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
         <button class="add-btn" onclick="addItemMilk(event,'Frappé Moka',60,this)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Frappé Taro</div><div class="item-tag">Dulce · Único · Cremoso</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 60</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Taro licuado con leche y hielo — <b>cremoso, dulce y con ese característico tono morado.</b> Una alternativa diferente al café, refrescante y llena de sabor.
+        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
+        <div class="milk-sel">
+          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
+          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
+        </div>
+        <button class="add-btn" onclick="addItemMilk(event,'Frappé Taro',60,this)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Affogato</div><div class="item-tag">Espresso · Helado · Clásico italiano</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 60</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Una bola de helado de vainilla <b>"ahogada"</b> en un shot de espresso caliente. El contraste de frío y caliente crea una mezcla cremosa e intensa — un postre y un café en uno solo.
+        <button class="add-btn" onclick="addItem(event,'Affogato',60)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
@@ -585,6 +668,39 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
 <script>
 const WA = '522381880036';
 let cart = [];
+
+// ══ SPLASH / BIENVENIDA ══
+const splashPhrases = [
+  "El arte de la vida comienza con el café",
+  "Un buen día empieza con una buena taza",
+  "Café en mano, todo se ve mejor",
+  "Pequeñas pausas, grandes momentos",
+  "El aroma que despierta el alma",
+  "Hecho con calma, disfrutado con calma",
+  "Cada taza cuenta una historia",
+  "La felicidad huele a café recién hecho",
+  "Un respiro, una taza, un buen momento",
+  "El café no pregunta, solo entiende"
+];
+
+function diaDelAnio(fecha){
+  const inicio = new Date(fecha.getFullYear(), 0, 0);
+  const diferencia = fecha - inicio;
+  return Math.floor(diferencia / 86400000);
+}
+
+const indiceFrase = diaDelAnio(new Date()) % splashPhrases.length;
+document.getElementById('splashPhrase').textContent = splashPhrases[indiceFrase];
+
+window.addEventListener('load', function(){
+  document.body.style.overflow = 'hidden';
+  setTimeout(function(){
+    const splash = document.getElementById('splash');
+    splash.classList.add('fade-out');
+    document.body.style.overflow = '';
+    setTimeout(function(){ splash.style.display = 'none'; }, 900);
+  }, 2600);
+});
 
 function toggle(el){
   const open = el.classList.contains('open');
