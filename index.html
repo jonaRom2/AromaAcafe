@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Menú — Aroma a Café</title>
+<link rel="icon" type="image/jpeg" href="logo.jpg">
+<link rel="apple-touch-icon" href="logo.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -153,15 +155,15 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
 .pos-bl .bubble-dot.d2{top:-27px;left:-2px;}
 
 /* MILK SELECTOR */
-.milk-sel{display:flex;gap:8px;margin-top:12px;}
-.milk-btn{
+.milk-sel,.opt-sel{display:flex;gap:8px;margin-top:12px;}
+.milk-btn,.opt-btn{
   flex:1;padding:7px 6px;border-radius:8px;font-size:.72rem;font-weight:600;
   font-family:'Lato',sans-serif;letter-spacing:.04em;cursor:pointer;
   background:rgba(255,255,255,0.04);border:1px solid rgba(200,129,58,0.25);
   color:var(--latte);transition:background .2s,border-color .2s,color .2s;
   text-align:center;
 }
-.milk-btn.active{background:rgba(200,129,58,0.18);border-color:rgba(200,129,58,0.6);color:var(--gold2);}
+.milk-btn.active,.opt-btn.active{background:rgba(200,129,58,0.18);border-color:rgba(200,129,58,0.6);color:var(--gold2);}
 .milk-label{font-size:.68rem;color:var(--latte);opacity:.55;margin-bottom:5px;letter-spacing:.06em;font-family:'Lato',sans-serif;}
 
 /* ADD BUTTON */
@@ -642,6 +644,55 @@ body{background:var(--bg);color:var(--cream);font-family:'Lato',sans-serif;min-h
 
   <div class="div-fancy"><div class="df-l"></div><span class="df-star">✦</span><div class="df-l"></div></div>
 
+  <!-- ══ FRAPPÉS DE TEMPORADA ══ -->
+  <div class="section">
+    <div class="sec-hd">
+      <div class="sec-icon">🍹</div>
+      <h2 class="sec-title">Frappés de Temporada</h2>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Frappé de Rompope Coronado</div><div class="item-tag">Dulce · Canela · Cremoso</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Rompope licuado con hielo hasta quedar espeso y cremoso, coronado con crema batida y un toque de canela espolvoreada. <b>Ese sabor a vainilla y nuez moscada</b> que solo el rompope tiene, ahora bien frío.
+        <button class="add-btn" onclick="addItem(event,'Frappé de Rompope Coronado',70)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Frappé de Pitahaya</div><div class="item-tag">Tropical · Natural · Vibrante</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 65</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Pitahaya licuada con hielo hasta lograr <b>un color rosa intenso que ya antoja con solo verlo</b>. Ligera, natural y con ese dulzor sutil tan particular de la fruta del dragón.
+        <button class="add-btn" onclick="addItem(event,'Frappé de Pitahaya',65)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Frappé Piña Colada</div><div class="item-tag">Tropical · Coco · Piña</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Piña y crema de coco licuadas con hielo hasta quedar espesas y tropicales — <b>un clásico de playa en frappé</b>. Elige si lo prefieres con un toque de ron o completamente sin alcohol.
+        <div class="milk-label" style="margin-top:12px;">🍹 PREPARACIÓN</div>
+        <div class="opt-sel">
+          <button class="opt-btn active" onclick="selectOption(event,this)">Con alcohol</button>
+          <button class="opt-btn" onclick="selectOption(event,this)">Sin alcohol</button>
+        </div>
+        <button class="add-btn" onclick="addItemOption(event,'Frappé Piña Colada',70,this)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="div-fancy"><div class="df-l"></div><span class="df-star">✦</span><div class="df-l"></div></div>
+
   <!-- ══ CROISSANTS ══ -->
   <div class="section">
     <div class="sec-hd">
@@ -922,6 +973,28 @@ function addItemMilk(e, name, price, btn){
   e.stopPropagation();
   const milk = getMilk(btn);
   const label = name + (milk ? ' (Leche ' + milk + ')' : '');
+  pushCart(label, price, null);
+  flash(btn);
+}
+
+function selectOption(e, btn){
+  e.stopPropagation();
+  const grp = btn.closest('.opt-sel');
+  grp.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function getOption(btn){
+  const grp = btn.closest('.item-body-inner').querySelector('.opt-sel');
+  if(!grp) return null;
+  const active = grp.querySelector('.opt-btn.active');
+  return active ? active.textContent.trim() : null;
+}
+
+function addItemOption(e, name, price, btn){
+  e.stopPropagation();
+  const opt = getOption(btn);
+  const label = name + (opt ? ' (' + opt + ')' : '');
   pushCart(label, price, null);
   flash(btn);
 }
