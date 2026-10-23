@@ -488,6 +488,11 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
 .open-badge.closed{border-color:rgba(176,58,58,.4);color:#8f2f2f;}.open-badge.closed .ob-dot{background:#b03a3a;animation:none;}
 @media (prefers-reduced-motion:reduce){.ob-dot{animation:none!important}}
 
+.shot-card{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:12px 14px;border-radius:14px;
+  background:#2e211b;color:#f5ede0;font-family:'Lato',sans-serif;font-size:.8rem;}
+.shot-card b{font-weight:700;}.shot-card span{color:#e8c07a;font-weight:700;margin-left:4px;}
+.shot-card .combo-add-btn{background:rgba(232,192,122,.18);border-color:rgba(232,192,122,.55);color:#f0d49a;}
+
 </style>
 </head>
 <body>
@@ -545,7 +550,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
     <a href="#calientes" data-t="calientes">☕ Calientes</a>
     <a href="#frappes" data-t="frappes">🧋 Frappés</a>
     <a href="#frias" data-t="frias">🥶 Frías</a>
-    <a href="#temporada" data-t="temporada">🍹 Temporada</a>
+    <a href="#temporada" data-t="temporada">🍹 Especialidad</a>
     <a href="#croissants" data-t="croissants">🥐 Croissants</a>
     <a href="#postres" data-t="postres">🍫 Postres</a>
     <a href="#info" data-t="info">📍 Ubicación</a>
@@ -584,7 +589,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
         <div class="item-left"><div class="item-name">Latte</div><div class="item-tag">Cremoso · Aterciopelado</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 55</div><div class="chevron">▼</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 60</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Leche vaporizada hasta quedar sedosa, casi como <b>terciopelo líquido</b>, con un espresso que se asoma entre trago y trago. La opción ideal cuando quieres algo suave que dure toda la conversación.
@@ -593,7 +598,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Latte',55,this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemMilk(event,'Latte',60,this)">+ Agregar al pedido</button>
         <div class="combo-suggest">
           <span class="combo-suggest-text">¿Lo acompañas con un <b>Croissant de Jamón y Queso</b>? +$39</span>
           <button class="combo-add-btn" onclick="addItem(event,'Croissant de Jamón y Queso',39)">+ Agregar</button>
@@ -604,7 +609,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
         <div class="item-left"><div class="item-name">Latte Caramelo</div><div class="item-tag">Dulce · Caramelo · Cremoso</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 60</div><div class="chevron">▼</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Leche vaporizada y espresso con un chorro de caramelo. <b>Dulce, suave y con ese final acaramelado</b> que lo hace perfecto para la tarde.
@@ -613,7 +618,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Latte Caramelo',60,this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemMilk(event,'Latte Caramelo',70,this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
@@ -625,7 +630,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
       </div>
       <div class="item-row">
         <div class="item-left"><div class="item-name">Capuchino</div><div class="item-badge favorito">⭐ Favorito de la casa</div><div class="item-tag">Espumoso · Equilibrado</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 60</div><div class="chevron">▼</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 65</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Espuma densa que se sostiene en la superficie, leche vaporizada tibia y un espresso marcado por debajo — <b>el clásico que sabe a mañana bien empezada.</b>
@@ -634,7 +639,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Capuchino',60,this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemMilk(event,'Capuchino',65,this)">+ Agregar al pedido</button>
         <div class="combo-suggest">
           <span class="combo-suggest-text">¿Lo acompañas con un <b>Brownie con Helado de Vainilla</b>? +$50</span>
           <button class="combo-add-btn" onclick="addItem(event,'Brownie con Helado de Vainilla',50)">+ Agregar</button>
@@ -645,7 +650,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
         <div class="item-left"><div class="item-name">Café Moka</div><div class="item-tag">Chocolate · Espresso · Cremoso</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 60</div><div class="chevron">▼</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 65</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Chocolate derretido que se mezcla con el espresso y la leche vaporizada, dejando <b>un último trago espeso y dulce</b> que se queda en el paladar. Para los días que piden un capricho.
@@ -654,7 +659,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Café Moka',60,this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemMilk(event,'Café Moka',65,this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
@@ -734,91 +739,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
 
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Americano</div><div class="item-tag">Intenso · Refrescante · Kid's / Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Espresso licuado con hielo hasta quedar espumoso y helado. <b>Café directo y sin rodeos</b>, para cuando el calor no da tregua.
-        <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
-        <div class="opt-sel size-sel">
-          <button class="opt-btn active" data-price="65" onclick="selectOption(event,this)">Kid's · $65</button>
-          <button class="opt-btn" data-price="75" onclick="selectOption(event,this)">Grande · $75</button>
-        </div>
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemSized(event,'Frappé Americano',this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Latte</div><div class="item-tag">Cremoso · Suave · Kid's / Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Espresso y leche licuados con hielo hasta lograr <b>una textura suave y cremosa</b>. El latte de siempre, en versión frappé.
-        <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
-        <div class="opt-sel size-sel">
-          <button class="opt-btn active" data-price="65" onclick="selectOption(event,this)">Kid's · $65</button>
-          <button class="opt-btn" data-price="75" onclick="selectOption(event,this)">Grande · $75</button>
-        </div>
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemSized(event,'Frappé Latte',this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Latte Caramelo</div><div class="item-tag">Dulce · Caramelo · Cremoso · Kid's / Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Café y leche licuados con hielo y un chorro de caramelo. <b>Dulce, cremoso y con ese final acaramelado</b> que se queda en el paladar.
-        <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
-        <div class="opt-sel size-sel">
-          <button class="opt-btn active" data-price="65" onclick="selectOption(event,this)">Kid's · $65</button>
-          <button class="opt-btn" data-price="75" onclick="selectOption(event,this)">Grande · $75</button>
-        </div>
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemSized(event,'Frappé Latte Caramelo',this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Capuchino</div><div class="item-tag">Espumoso · Equilibrado · Kid's / Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Espresso y leche licuados con hielo hasta quedar espumosos. <b>El sabor del capuchino de siempre</b>, pero helado y refrescante.
-        <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
-        <div class="opt-sel size-sel">
-          <button class="opt-btn active" data-price="65" onclick="selectOption(event,this)">Kid's · $65</button>
-          <button class="opt-btn" data-price="75" onclick="selectOption(event,this)">Grande · $75</button>
-        </div>
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemSized(event,'Frappé Capuchino',this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Café Moka</div><div class="item-tag">Chocolate · Café · Frío · Kid's / Grande</div></div>
+        <div class="item-left"><div class="item-name">Frappé Moka</div><div class="item-tag">Chocolate · Café · Frío · Kid's / Grande</div></div>
         <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
@@ -833,17 +754,17 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemSized(event,'Frappé Café Moka',this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemSized(event,'Frappé Moka',this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Chocolate</div><div class="item-tag">Dulce · Cremoso · Kid's / Grande</div></div>
+        <div class="item-left"><div class="item-name">Frappé Clásico</div><div class="item-tag">Puro · Refrescante · Kid's / Grande</div></div>
         <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
-        Cacao licuado con leche y hielo hasta quedar espeso. <b>Sin café</b>, solo chocolate bien frío y cremoso.
+        Café licuado con hielo hasta quedar espumoso y helado, sin azúcares ni sabores de más. <b>Solo café frío, intenso y directo</b>, para cuando el calor no da tregua.
         <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
         <div class="opt-sel size-sel">
           <button class="opt-btn active" data-price="65" onclick="selectOption(event,this)">Kid's · $65</button>
@@ -854,47 +775,66 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemSized(event,'Frappé Chocolate',this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemSized(event,'Frappé Clásico',this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Mazapán</div><div class="item-tag">Dulce · Cacahuate · Único · Kid's / Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 70 / 80</div><div class="chevron">▼</div></div>
+        <div class="item-left"><div class="item-name">Frappé Caramelo</div><div class="item-tag">Dulce · Caramelo · Cremoso · Kid's / Grande</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
-        El clásico dulce mexicano hecho frappé: <b>mazapán licuado con leche y hielo</b>, con ese sabor a cacahuate que a todos nos recuerda la infancia.
+        Café y leche licuados con hielo y un chorro de caramelo. <b>Dulce, cremoso y con ese final acaramelado</b> que se queda en el paladar.
         <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
         <div class="opt-sel size-sel">
-          <button class="opt-btn active" data-price="70" onclick="selectOption(event,this)">Kid's · $70</button>
-          <button class="opt-btn" data-price="80" onclick="selectOption(event,this)">Grande · $80</button>
+          <button class="opt-btn active" data-price="65" onclick="selectOption(event,this)">Kid's · $65</button>
+          <button class="opt-btn" data-price="75" onclick="selectOption(event,this)">Grande · $75</button>
         </div>
         <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
         <div class="milk-sel">
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemSized(event,'Frappé Mazapán',this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemSized(event,'Frappé Caramelo',this)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Frappé Cajeta</div><div class="item-tag">Dulce · Cajeta · Tradicional · Kid's / Grande</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 65 / 75</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Café licuado con hielo y cajeta, ese dulce de leche de cabra tan nuestro. <b>Cremoso, dulce y con un toque a caramelo quemado</b> que no se olvida.
+        <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
+        <div class="opt-sel size-sel">
+          <button class="opt-btn active" data-price="65" onclick="selectOption(event,this)">Kid's · $65</button>
+          <button class="opt-btn" data-price="75" onclick="selectOption(event,this)">Grande · $75</button>
+        </div>
+        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
+        <div class="milk-sel">
+          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
+          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
+        </div>
+        <button class="add-btn" onclick="addItemSized(event,'Frappé Cajeta',this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
     <div class="item destacado" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Combo Frappé</div><div class="item-badge popular">🎉 Combo</div><div class="item-tag">1 Kid's + 1 Grande · mismo sabor</div></div>
+        <div class="item-left"><div class="item-name">Combo Frappé</div><div class="item-badge popular">🎉 Combo</div><div class="item-tag">1 Kid's + 1 Grande · mismo sabor · no aplica en especiales</div></div>
         <div class="item-right"><div class="item-price"><span>MXN</span> 130</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
-        Un frappé <b>Kid's</b> y uno <b>Grande</b> del mismo sabor, para compartir (o para ti, sin juzgar).
+        Un frappé <b>Kid's</b> y uno <b>Grande</b> del mismo sabor, para compartir (o para ti, sin juzgar). <i>No aplica en frappés de especialidad.</i>
         <div class="milk-label" style="margin-top:12px;">🧋 SABOR</div>
         <div class="opt-sel flavor-sel wrap">
           <button class="opt-btn active" onclick="selectOption(event,this)">Oreo</button>
-          <button class="opt-btn" onclick="selectOption(event,this)">Americano</button>
-          <button class="opt-btn" onclick="selectOption(event,this)">Latte</button>
-          <button class="opt-btn" onclick="selectOption(event,this)">Latte Caramelo</button>
-          <button class="opt-btn" onclick="selectOption(event,this)">Capuchino</button>
-          <button class="opt-btn" onclick="selectOption(event,this)">Café Moka</button>
-          <button class="opt-btn" onclick="selectOption(event,this)">Chocolate</button>
+          <button class="opt-btn" onclick="selectOption(event,this)">Moka</button>
+          <button class="opt-btn" onclick="selectOption(event,this)">Clásico</button>
+          <button class="opt-btn" onclick="selectOption(event,this)">Caramelo</button>
+          <button class="opt-btn" onclick="selectOption(event,this)">Cajeta</button>
         </div>
         <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
         <div class="milk-sel">
@@ -902,22 +842,6 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
         <button class="add-btn" onclick="addItemCombo(event,this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Clásico</div><div class="item-tag">Puro · Refrescante</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 65</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Café licuado con hielo hasta quedar espumoso y helado, sin azúcares ni sabores de más. <b>Solo café frío, intenso y directo</b>, para cuando el calor no da tregua.
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Frappé Clásico',65,this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
@@ -962,8 +886,8 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
 
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Latte Frío</div><div class="item-tag">Cremoso · Refrescante · Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 65</div><div class="chevron">▼</div></div>
+        <div class="item-left"><div class="item-name">Iced Latte</div><div class="item-tag">Cremoso · Refrescante · Grande</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Espresso servido sobre leche bien fría y hielo, dejando <b>capas que se mezclan poco a poco</b> con cada trago. El latte de siempre, pero fresco y perfecto para el calor.
@@ -972,57 +896,25 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Latte Frío',65,this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemMilk(event,'Iced Latte',70,this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Americano Frío</div><div class="item-tag">Suave · Refrescante · Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
+        <div class="item-left"><div class="item-name">Iced Americano</div><div class="item-tag">Suave · Refrescante · Grande</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 55</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Espresso sobre agua fría y hielo. <b>Todo el aroma tostado del americano</b>, ligero y bien helado.
-        <button class="add-btn" onclick="addItem(event,'Americano Frío',70)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItem(event,'Iced Americano',55)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Capuchino Frío</div><div class="item-tag">Espumoso · Equilibrado · Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Espresso con leche fría y espuma sobre hielo. <b>El capuchino de siempre</b>, ahora fresco.
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Capuchino Frío',70,this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Latte Caramelo Frío</div><div class="item-tag">Dulce · Caramelo · Grande</div></div>
+        <div class="item-left"><div class="item-name">Iced Moka</div><div class="item-tag">Chocolate · Espresso · Grande</div></div>
         <div class="item-right"><div class="item-price"><span>MXN</span> 75</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Latte frío con un toque de caramelo que se mezcla en cada trago. <b>Dulce, cremoso y refrescante.</b>
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Latte Caramelo Frío',75,this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Café Moka Frío</div><div class="item-tag">Chocolate · Espresso · Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Chocolate y espresso con leche fría sobre hielo. <b>Intenso, dulce y bien helado.</b>
@@ -1031,23 +923,7 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
           <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
           <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
         </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Café Moka Frío',70,this)">+ Agregar al pedido</button>
-      </div></div>
-    </div>
-
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Chocolate Frío</div><div class="item-tag">Dulce · Artesanal · Grande</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Cacao artesanal con leche fría y hielo. <b>Sin café</b>, solo chocolate de verdad, bien frío.
-        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
-        <div class="milk-sel">
-          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
-          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
-        </div>
-        <button class="add-btn" onclick="addItemMilk(event,'Chocolate Frío',70,this)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItemMilk(event,'Iced Moka',75,this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
@@ -1098,18 +974,56 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
   <div id="temporada" class="section">
     <div class="sec-hd">
       <div class="sec-icon">🍹</div>
-      <h2 class="sec-title">Frappés de Temporada</h2>
+      <h2 class="sec-title">Frappés de Especialidad</h2>
       <div class="sec-line"></div>
     </div>
 
     <div class="item" onclick="toggle(this)">
       <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé de Rompope Coronado</div><div class="item-tag">Dulce · Canela · Cremoso</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
+        <div class="item-left"><div class="item-name">Frappé de Rompope Coronado</div><div class="item-tag">Dulce · Canela · Cremoso · Grande</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 90</div><div class="chevron">▼</div></div>
       </div>
       <div class="item-body"><div class="item-body-inner">
         Rompope licuado con hielo hasta quedar espeso y cremoso, coronado con crema batida y un toque de canela espolvoreada. <b>Ese sabor a vainilla y nuez moscada</b> que solo el rompope tiene, ahora bien frío.
-        <button class="add-btn" onclick="addItem(event,'Frappé de Rompope Coronado',70)">+ Agregar al pedido</button>
+        <button class="add-btn" onclick="addItem(event,'Frappé de Rompope Coronado',90)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Frappé Piña Colada</div><div class="item-tag">Tropical · Coco · Piña · Solo Grande</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 80 / 95</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        Piña y crema de coco licuadas con hielo hasta quedar espesas y tropicales — <b>un clásico de playa en frappé</b>. Elige si lo prefieres con un toque de ron o completamente sin alcohol.
+        <div class="milk-label" style="margin-top:12px;">🍹 PREPARACIÓN</div>
+        <div class="opt-sel size-sel">
+          <button class="opt-btn active" data-price="80" onclick="selectOption(event,this)">Sin alcohol · $80</button>
+          <button class="opt-btn" data-price="95" onclick="selectOption(event,this)">Con alcohol · $95</button>
+        </div>
+        <button class="add-btn" onclick="addItemSized(event,'Frappé Piña Colada (Grande)',this)">+ Agregar al pedido</button>
+      </div></div>
+    </div>
+
+
+    <div class="item" onclick="toggle(this)">
+      <div class="item-row">
+        <div class="item-left"><div class="item-name">Frappé Mazapán</div><div class="item-tag">Dulce · Cacahuate · Único · Kid's / Grande</div></div>
+        <div class="item-right"><div class="item-price"><span>MXN</span> 70 / 80</div><div class="chevron">▼</div></div>
+      </div>
+      <div class="item-body"><div class="item-body-inner">
+        El clásico dulce mexicano hecho frappé: <b>mazapán licuado con leche y hielo</b>, con ese sabor a cacahuate que a todos nos recuerda la infancia.
+        <div class="milk-label" style="margin-top:12px;">📏 TAMAÑO</div>
+        <div class="opt-sel size-sel">
+          <button class="opt-btn active" data-price="70" onclick="selectOption(event,this)">Kid's · $70</button>
+          <button class="opt-btn" data-price="80" onclick="selectOption(event,this)">Grande · $80</button>
+        </div>
+        <div class="milk-label" style="margin-top:12px;">🥛 TIPO DE LECHE</div>
+        <div class="milk-sel">
+          <button class="milk-btn active" onclick="selectMilk(event,this)">Entera</button>
+          <button class="milk-btn" onclick="selectMilk(event,this)">Deslactosada</button>
+        </div>
+        <button class="add-btn" onclick="addItemSized(event,'Frappé Mazapán',this)">+ Agregar al pedido</button>
       </div></div>
     </div>
 
@@ -1124,21 +1038,11 @@ html.js .orn-row:not(.in) .orn{scale:.4;opacity:0;}
       </div></div>
     </div>
 
-    <div class="item" onclick="toggle(this)">
-      <div class="item-row">
-        <div class="item-left"><div class="item-name">Frappé Piña Colada</div><div class="item-tag">Tropical · Coco · Piña</div></div>
-        <div class="item-right"><div class="item-price"><span>MXN</span> 70</div><div class="chevron">▼</div></div>
-      </div>
-      <div class="item-body"><div class="item-body-inner">
-        Piña y crema de coco licuadas con hielo hasta quedar espesas y tropicales — <b>un clásico de playa en frappé</b>. Elige si lo prefieres con un toque de ron o completamente sin alcohol.
-        <div class="milk-label" style="margin-top:12px;">🍹 PREPARACIÓN</div>
-        <div class="opt-sel">
-          <button class="opt-btn active" onclick="selectOption(event,this)">Con alcohol</button>
-          <button class="opt-btn" onclick="selectOption(event,this)">Sin alcohol</button>
-        </div>
-        <button class="add-btn" onclick="addItemOption(event,'Frappé Piña Colada',70,this)">+ Agregar al pedido</button>
-      </div></div>
+    <div class="shot-card">
+      <div class="shot-txt">🥃 <b>Shot de ron</b> en cualquier bebida <span>+$20</span></div>
+      <button class="combo-add-btn" onclick="addItem(event,'Shot de ron (extra)',20)">+ Agregar</button>
     </div>
+
   </div>
 
   <div class="div-fancy"><div class="df-l"></div><span class="df-star">✦</span><div class="df-l"></div></div>
