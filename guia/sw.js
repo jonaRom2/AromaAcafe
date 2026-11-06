@@ -1,6 +1,6 @@
 /* Guía del Café · Aroma a Café — funciona sin internet.
    Para publicar una actualización: cambie VERSION (por ejemplo "guia-v2") y suba los archivos. */
-const VERSION = "guia-v1";
+const VERSION = "guia-v2";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png", "./icons/apple-touch-icon.png",
