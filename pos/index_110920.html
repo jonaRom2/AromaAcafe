@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2e211b">
+<title>Aroma a Café — POS</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aroma POS">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0e5d8;--bg2:#e8dac9;--card:#fbf6ee;--card2:#fffaf3;--soft:#f3e2cc;
+  --ink:#2e211b;--ink2:#5e4637;--muted:#7a6252;
+  --caramel:#a8621e;--gold:#8a4f17;--gold2:#7a4410;
+  --line:rgba(74,48,32,.16);--line2:rgba(74,48,32,.3);
+  --ok:#1f7a45;--okbg:rgba(31,122,69,.12);--warn:#9a5c0c;--warnbg:rgba(217,149,31,.16);--red:#9a2f2f;--redbg:rgba(176,58,58,.1);
+  --blue:#1d6676;--bluebg:rgba(30,120,140,.12);
+  --shadow:0 2px 6px rgba(74,48,32,.07),0 10px 24px -14px rgba(74,48,32,.3);
+  --top:62px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+[hidden]{display:none!important;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--ink);font-family:'Lato',system-ui,sans-serif;font-size:16px;line-height:1.45;overflow:hidden;}
+button,input,textarea,select{font:inherit;color:inherit;}
+button{cursor:pointer;border:0;background:none;}
+input,textarea,select{background:#fff;border:1.5px solid var(--line2);border-radius:10px;padding:9px 12px;width:100%;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--caramel);box-shadow:0 0 0 3px rgba(168,98,30,.18);}
+h1,h2,h3{font-family:'Playfair Display',serif;line-height:1.2;}
+.muted{color:var(--muted);}
+.money{font-variant-numeric:tabular-nums;}
+
+/* ===== BARRA SUPERIOR ===== */
+.top{height:var(--top);background:var(--ink);color:#f5ede0;display:flex;align-items:center;gap:14px;padding:0 14px;}
+.brand{display:flex;align-items:center;gap:10px;flex:none;}
+.brand img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid #e8c07a;background:#5a3a26;}
+.brand b{font-family:'Playfair Display',serif;font-size:1.12rem;white-space:nowrap;}
+.brand b em{color:#e8c07a;}
+.brand small{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7;}
+.tabs{display:flex;gap:4px;margin-left:10px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{position:relative;padding:10px 16px;border-radius:12px;color:#d9c8b4;font-weight:700;white-space:nowrap;min-height:44px;}
+.tab:hover{background:rgba(255,255,255,.07);}
+.tab.on{background:#e8c07a;color:var(--ink);}
+.tab .cnt{position:absolute;top:2px;right:2px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#d94b3a;color:#fff;font-size:.72rem;display:flex;align-items:center;justify-content:center;}
+.top-r{margin-left:auto;display:flex;align-items:center;gap:12px;flex:none;}
+.clockw{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05;}
+.ver{font-size:.66rem;font-weight:700;opacity:.6;letter-spacing:.04em;}
+.clock{font-weight:900;font-size:1.15rem;font-variant-numeric:tabular-nums;}
+.st{font-size:.78rem;font-weight:900;padding:4px 10px;border-radius:20px;background:rgba(46,161,95,.2);color:#9ee0b5;}
+.st.closed{background:rgba(217,75,58,.2);color:#ffb3a8;}
+@media (max-width:900px){.st{display:none;}}
+@media (max-width:560px){.tl{display:none;}.tab{font-size:1.25rem;padding:8px 14px;}.brand{display:none;}}
+@media (max-width:700px){.brand b,.brand small{display:none;}.tab{padding:10px 11px;font-size:.92rem;}.st{display:none;}}
+
+.panel{height:calc(100vh - var(--top));height:calc(100dvh - var(--top));display:none;}
+.panel.on{display:block;}
+.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* ===== PEDIDOS ===== */
+.ped{display:grid;grid-template-columns:230px 1fr 350px;height:100%;}
+@media (max-width:1300px) and (min-width:1101px){.ped{grid-template-columns:210px 1fr 330px;}.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}}
+.col{min-height:0;display:flex;flex-direction:column;}
+.col-o{background:var(--bg2);border-right:1px solid var(--line);}
+.col-t{background:var(--card);border-left:1px solid var(--line);}
+.sec-t{font-size:.74rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);margin:14px 0 8px;}
+.olist{padding:4px 12px 16px;}
+.mesas{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mesa{position:relative;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px;text-align:left;min-height:78px;transition:.15s;}
+.mesa b{font-size:1rem;display:block;}
+.mesa small{font-size:.8rem;color:var(--muted);}
+.mesa.busy{border-color:rgba(168,98,30,.55);background:#f6e6d1;}
+.mesa.busy small{color:var(--gold2);font-weight:700;}
+.mesa.sel{border-color:var(--ink);box-shadow:0 0 0 3px rgba(46,33,27,.15);}
+.mesa .dot{position:absolute;top:10px;right:10px;width:10px;height:10px;border-radius:50%;background:#7fb98f;}
+.mesa.busy .dot{background:var(--caramel);}
+.newbtns{display:grid;gap:8px;}
+.nb{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px dashed var(--line2);border-radius:12px;padding:10px 12px;font-weight:700;min-height:48px;text-align:left;}
+.nb:hover{border-color:var(--caramel);color:var(--gold2);}
+.nb .i{font-size:1.2rem;}
+.ocard{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:9px 11px;margin-bottom:8px;}
+.ocard.sel{border-color:var(--ink);box-shadow:0 0 0 3px rgba(46,33,27,.15);}
+.ocard .r1{display:flex;justify-content:space-between;gap:8px;font-weight:900;}
+.ocard .r2{font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between;gap:6px;margin-top:2px;}
+.tag{flex:none;display:inline-flex;align-items:center;gap:3px;font-size:.7rem;font-weight:900;padding:2px 8px;border-radius:20px;background:var(--soft);color:var(--ink2);}
+.tag.wa{background:rgba(26,138,74,.13);color:#1a6b3c;}
+.tag.ll{background:var(--bluebg);color:var(--blue);}
+.tag.inbar{background:var(--warnbg);color:var(--warn);}
+.tag.ok{background:var(--okbg);color:var(--ok);}
+.tag.nc{background:rgba(70,130,60,.15);color:#2c6436;}
+.tag.off{background:var(--redbg);color:var(--red);}
+
+.col-c{min-width:0;}
+.cbar{padding:12px 14px 8px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line);background:var(--bg);}
+.cbar input{max-width:260px;}
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 14px;border-bottom:1px solid var(--line);}
+.cats::-webkit-scrollbar{display:none;}
+.cat{flex:none;padding:9px 14px;border-radius:30px;background:var(--card);border:1.5px solid var(--line2);font-weight:700;font-size:.92rem;min-height:42px;white-space:nowrap;}
+.cat.on{background:var(--caramel);border-color:var(--caramel);color:#fff;}
+.grid{padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));grid-auto-rows:max-content;gap:10px;align-content:start;}
+.pb{position:relative;display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 12px 14px;min-height:104px;box-shadow:var(--shadow);transition:transform .1s,border-color .15s;}
+.pb:hover{border-color:var(--caramel);}
+.pb:active{transform:scale(.97);}
+.pb .em{font-size:1.4rem;line-height:1;}
+.pb b{font-size:.98rem;line-height:1.2;}
+.pb .pr{margin-top:4px;font-weight:900;color:var(--gold2);font-size:.95rem;}
+.pb .tg{display:flex;gap:4px;flex-wrap:wrap;}
+.pb.off{opacity:.45;}
+.pb.off::after{content:'Agotado';position:absolute;top:10px;right:10px;font-size:.7rem;font-weight:900;color:var(--red);background:var(--redbg);padding:2px 8px;border-radius:20px;}
+
+.thead{padding:14px 16px 10px;border-bottom:1px solid var(--line);}
+.thead h2{font-size:1.3rem;display:flex;align-items:center;gap:8px;}
+.thead .sub{font-size:.85rem;color:var(--muted);margin-top:2px;}
+.thead .meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+.thead .meta input{padding:7px 10px;font-size:.9rem;}
+.titems{flex:1;padding:8px 12px;}
+.ti{border-bottom:1px dashed var(--line);padding:10px 4px;}
+.ti .r1{display:flex;gap:8px;align-items:flex-start;}
+.ti .r1>div{min-width:0;}
+.ti .nm{flex:1;font-weight:900;font-size:.98rem;}
+.ti .dt{font-size:.82rem;color:var(--muted);}
+.ti .nt{font-size:.82rem;color:var(--gold2);font-style:italic;}
+.ti .r2{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.ti .tot{margin-left:auto;font-weight:900;}
+.qty{display:inline-flex;align-items:center;background:var(--card2);border:1.5px solid var(--line2);border-radius:10px;}
+.qty button{width:36px;height:36px;font-size:1.2rem;font-weight:900;}
+.qty span{min-width:26px;text-align:center;font-weight:900;}
+.x{color:var(--red);font-size:.82rem;font-weight:700;text-decoration:underline;padding:6px;}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);}
+.empty .ic{font-size:2.4rem;margin-bottom:6px;}
+.tfoot{border-top:1px solid var(--line);padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:var(--card2);}
+.tsum{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.tsum b{font-size:1.6rem;}
+.tbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;padding:11px 16px;min-height:48px;font-weight:900;font-size:1rem;transition:transform .1s,background .15s;}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.b-main{background:var(--caramel);color:#fff;}
+.b-main:hover:not(:disabled){background:var(--gold);}
+.b-dark{background:var(--ink);color:#fff;}
+.b-ok{background:var(--ok);color:#fff;}
+.b-line{background:var(--card);border:1.5px solid var(--line2);}
+.b-line:hover{border-color:var(--caramel);}
+.b-red{background:var(--redbg);color:var(--red);}
+.b-wa{background:#1a8a4a;color:#fff;}
+.pulse{animation:pulseB 1.4s ease-in-out infinite;}
+@keyframes pulseB{0%,100%{box-shadow:0 0 0 0 rgba(168,98,30,.55)}50%{box-shadow:0 0 0 8px rgba(168,98,30,0)}}
+.b-sm{min-height:36px;padding:7px 12px;font-size:.88rem;border-radius:10px;}
+.full{grid-column:1/-1;}
+
+/* tablet vertical / celular */
+@media (max-width:1100px){
+  .ped{grid-template-columns:1fr 340px;grid-template-rows:auto 1fr;}
+  .col-o{grid-column:1/-1;border-right:0;border-bottom:1px solid var(--line);}
+  .olist{display:flex;gap:10px;overflow-x:auto;padding:10px 12px;align-items:stretch;}
+  .olist .sec-t{display:none;}
+  .mesas{display:flex;gap:8px;}
+  .mesa{min-width:110px;min-height:64px;}
+  .newbtns{display:flex;gap:8px;}
+  .nb{white-space:nowrap;}
+  .owrap{display:flex;gap:8px;}
+  .ocard{min-width:170px;margin:0;}
+}
+/* tablet en vertical (11": ~600–900 px de ancho): catálogo arriba, pedido fijo abajo */
+@media (max-width:1100px) and (orientation:portrait) and (min-width:480px){
+  .ped{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) minmax(300px,42%);}
+  .col-t{border-left:0;border-top:2px solid var(--line2);box-shadow:0 -8px 20px -12px rgba(74,48,32,.35);}
+  .thead{padding:10px 14px 8px;display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;align-items:center;}
+  .thead h2{font-size:1.15rem;}.thead .sub{grid-column:1;}.thead .meta{margin-top:0;grid-row:1/3;grid-column:2;}
+  .tfoot{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:10px 14px;}
+  .tsum{margin:0;flex-direction:column;align-items:flex-start;}.tsum b{font-size:1.4rem;}
+  .tbtns{grid-template-columns:1fr 1fr auto;}.tbtns .full{grid-column:auto;}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+}
+/* celular */
+@media (max-width:479px){
+  body{overflow:auto;}
+  .panel.on{height:auto;min-height:calc(100dvh - var(--top));}
+  .ped{display:block;}
+  .col-t{border-left:0;border-top:2px solid var(--line2);}
+  .grid{grid-template-columns:repeat(3,1fr);padding:10px 10px 84px;gap:7px;}
+  .tfoot{padding-bottom:calc(84px + env(safe-area-inset-bottom));}
+}
+
+/* tarjetas compactas en vertical: mínimo 3 columnas */
+@media (max-width:1100px) and (orientation:portrait){
+  .grid{padding:10px;gap:8px;}
+  .pb{min-height:0;padding:9px 10px 10px;gap:3px;border-radius:12px;}
+  .pb .em{position:absolute;top:8px;right:8px;font-size:1.05rem;opacity:.9;}
+  .pb b{font-size:.9rem;padding-right:20px;}
+  .pb .tg .tag,.pb .tg span{font-size:.66rem;padding:1px 6px;}
+  .pb .pr{margin-top:2px;font-size:.9rem;}
+}
+@media (max-width:760px) and (orientation:portrait) and (min-width:480px){.grid{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:359px){.grid{grid-template-columns:repeat(2,1fr);}}
+
+/* ===== BARRA ===== */
+.barra{padding:16px;height:100%;}
+.bhead{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.bhead h1{font-size:1.6rem;}
+.bcols{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-items:start;}
+.bcard{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
+.bcard.done{opacity:.6;}
+.bcard .bh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;background:var(--soft);}
+.bcard .bh b{font-size:1.05rem;}
+.bcard .age{font-size:.82rem;font-weight:900;color:var(--muted);}
+.bcard .age.late{color:var(--red);}
+.bi{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-top:1px dashed var(--line);}
+.bi input[type=checkbox]{width:26px;height:26px;flex:none;accent-color:var(--ok);margin-top:2px;}
+.bi .t{flex:1;}
+.bi .t b{font-size:1rem;}
+.bi.ok .t b{text-decoration:line-through;color:var(--muted);}
+.bi .rb{flex:none;font-size:.8rem;font-weight:900;color:var(--gold2);background:var(--card2);border:1.5px solid var(--line2);border-radius:10px;padding:6px 9px;}
+.bcard .bf{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;}
+
+/* ===== VENTAS / ADMIN ===== */
+.page{padding:18px;height:100%;}
+.page-in{max-width:1180px;margin:0 auto;padding-bottom:40px;}
+.phead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.phead h1{font-size:1.7rem;margin-right:auto;}
+.seg{display:inline-flex;background:var(--card);border:1.5px solid var(--line2);border-radius:12px;padding:3px;}
+.seg button{padding:8px 14px;border-radius:9px;font-weight:700;font-size:.92rem;}
+.seg button.on{background:var(--ink);color:#fff;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px;}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);}
+.kpi small{font-size:.75rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.kpi b{display:block;font-size:1.6rem;margin-top:2px;}
+.kpi span{font-size:.82rem;color:var(--muted);}
+.kpi.main{background:var(--ink);color:#fff;}
+.kpi.main small,.kpi.main span{color:#d9c8b4;}
+.cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px;}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);}
+.box h3{font-size:1.1rem;margin-bottom:10px;}
+.bars{display:grid;gap:7px;}
+.bar{display:grid;grid-template-columns:120px 1fr 80px;gap:8px;align-items:center;font-size:.9rem;}
+.bar .bt{height:14px;border-radius:7px;background:var(--soft);overflow:hidden;}
+.bar .bt i{display:block;height:100%;background:var(--caramel);border-radius:7px;}
+.bar .bv{text-align:right;font-weight:900;}
+.hours{display:flex;align-items:flex-end;gap:4px;height:140px;padding-top:10px;}
+.hours .h{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.hours .h i{display:block;width:100%;background:var(--caramel);border-radius:5px 5px 0 0;min-height:2px;}
+.hours .h small{font-size:.66rem;color:var(--muted);}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:10px 0 14px;}
+.wd{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:.8rem;}
+.wd b{display:block;font-size:.95rem;}
+.wd.today{border-color:var(--caramel);background:#f6e6d1;}
+table{width:100%;border-collapse:collapse;font-size:.92rem;}
+th{text-align:left;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px;border-bottom:1.5px solid var(--line2);}
+td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr.anul td{opacity:.5;text-decoration:line-through;}
+.tw{overflow-x:auto;}
+.pill{display:inline-block;font-size:.72rem;font-weight:900;padding:2px 8px;border-radius:20px;background:var(--soft);}
+.adm-row td input{padding:6px 8px;max-width:90px;}
+.sw{position:relative;width:46px;height:26px;border-radius:13px;background:#cbbba8;transition:.15s;flex:none;}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.15s;}
+.sw.on{background:var(--red);}
+.sw.on::after{left:23px;}
+.frm{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end;}
+.frm label{font-size:.8rem;font-weight:900;color:var(--ink2);display:grid;gap:4px;}
+
+/* ===== INVENTARIO ===== */
+.st-ok{color:var(--ok);font-weight:900;}.st-na{color:var(--muted);font-weight:700;}.st-low{color:var(--warn);font-weight:900;}.st-out{color:var(--red);font-weight:900;}
+.org{font-size:.68rem;font-weight:900;padding:2px 7px;border-radius:20px;}
+.org.ticket{background:var(--okbg);color:var(--ok);}.org.mercado{background:var(--warnbg);color:var(--warn);}.org.sin{background:var(--redbg);color:var(--red);}
+.mg-g{color:var(--ok);font-weight:900;}.mg-a{color:var(--warn);font-weight:900;}.mg-r{color:var(--red);font-weight:900;}
+.rrow{display:grid;grid-template-columns:1fr 110px 54px 36px;gap:8px;align-items:center;margin-bottom:8px;}
+.rrow .u{font-size:.85rem;color:var(--muted);}
+.cnt-row{display:grid;grid-template-columns:1fr 130px 60px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.92rem;}
+.cnt-row input{padding:6px 8px;}
+.vtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.help-box{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.88rem;color:var(--ink2);margin-bottom:12px;}
+
+/* ===== SEGURIDAD / CAJA / TICKET ===== */
+.chip-top{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);color:#f5ede0;border-radius:20px;padding:6px 12px;font-weight:700;font-size:.85rem;white-space:nowrap;min-height:36px;}
+.chip-top.warn{background:rgba(217,149,31,.25);color:#ffd48a;}
+.chip-top.ok{background:rgba(46,161,95,.22);color:#9ee0b5;}
+@media (max-width:1000px){#cajaChip span,#userChip span{display:none;}}
+.lock{position:fixed;inset:0;z-index:400;background:radial-gradient(ellipse at 50% 0%,#4a3427,#2e211b 70%);color:#f5ede0;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;}
+.lock[hidden]{display:none;}
+.lock-in{width:100%;max-width:420px;text-align:center;}
+.lock img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid #e8c07a;margin:0 auto 12px;background:#5a3a26;}
+.lock h1{font-size:1.6rem;}.lock h1 em{color:#e8c07a;}
+.lock p{opacity:.8;margin:6px 0 16px;}
+.lusers{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.luser{padding:12px 18px;border-radius:14px;background:rgba(255,255,255,.08);color:#f5ede0;font-weight:900;min-width:120px;border:2px solid transparent;}
+.luser.on{border-color:#e8c07a;background:rgba(232,192,122,.15);}
+.luser small{display:block;font-weight:400;opacity:.7;font-size:.75rem;}
+.dots{display:flex;gap:12px;justify-content:center;margin:10px 0 16px;}
+.dots i{width:16px;height:16px;border-radius:50%;border:2px solid #e8c07a;}
+.dots i.f{background:#e8c07a;}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:300px;margin:0 auto;}
+.pad button{height:62px;border-radius:16px;background:rgba(255,255,255,.08);color:#fff;font-size:1.5rem;font-weight:900;}
+.pad button:active{background:rgba(232,192,122,.3);}
+.mod .pad button{background:var(--soft);color:var(--ink);}
+.mod .dots i{border-color:var(--caramel);}.mod .dots i.f{background:var(--caramel);}
+.lerr{color:#ffb3a8;font-weight:700;min-height:22px;}
+.mod .lerr{color:var(--red);}
+.lock .tin{background:rgba(255,255,255,.95);color:var(--ink);margin-bottom:10px;}
+.caja-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0;}
+.caja-grid div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;}
+.caja-grid small{display:block;font-size:.72rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.caja-grid b{font-size:1.2rem;}
+.caja-grid .hl{background:var(--ink);color:#fff;}.caja-grid .hl small{color:#d9c8b4;}
+.denoms{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+.denoms label{display:grid;grid-template-columns:60px 1fr;align-items:center;gap:6px;font-weight:900;font-size:.9rem;}
+.denoms input{padding:6px 8px;}
+.dif{font-size:1.3rem;font-weight:900;margin-top:10px;}
+.dif.ok{color:var(--ok);}.dif.bad{color:var(--red);}.dif.warn{color:var(--warn);}
+.done-big{font-size:2.4rem;font-weight:900;text-align:center;}
+.done-ch{font-size:1.5rem;font-weight:900;text-align:center;color:var(--ok);margin-top:4px;}
+.banner{display:flex;align-items:center;gap:10px;background:var(--warnbg);color:#6b4410;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:.92rem;}
+.banner .btn{margin-left:auto;}
+.meter{height:12px;border-radius:6px;background:var(--soft);overflow:hidden;margin:6px 0;}
+.meter i{display:block;height:100%;background:var(--caramel);}
+#printArea{display:none;}
+@media print{
+  @page{size:58mm auto;margin:0;}
+  body{background:#fff!important;overflow:visible!important;}
+  body>*:not(#printArea){display:none!important;}
+  #printArea{display:block!important;width:58mm;padding:2mm 3mm;font:11px/1.35 'Courier New',monospace;color:#000;}
+  #printArea .c{text-align:center;}#printArea .b{font-weight:bold;}#printArea .big{font-size:14px;}
+  #printArea .r{display:flex;justify-content:space-between;gap:4px;}
+  #printArea hr{border:0;border-top:1px dashed #000;margin:4px 0;}
+}
+
+/* ===== MODALES ===== */
+.mod{position:fixed;inset:0;z-index:100;background:rgba(46,33,27,.55);display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;visibility:hidden;transition:.2s;}
+.mod.on{opacity:1;visibility:visible;}
+.mbox{width:100%;max-width:560px;max-height:calc(100dvh - 28px);background:var(--card);border-radius:22px;display:flex;flex-direction:column;overflow:hidden;transform:translateY(16px);transition:.2s;}
+.mod.on .mbox{transform:none;}
+.mbox.wide{max-width:760px;}
+.mh{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--line);}
+.mh h2{font-size:1.4rem;}
+.mh .sub{font-size:.88rem;color:var(--muted);}
+.mh .cl{margin-left:auto;width:40px;height:40px;border-radius:50%;background:var(--soft);font-size:1.3rem;flex:none;}
+.mb{padding:14px 20px;overflow-y:auto;}
+.mf{padding:12px 20px 16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;background:var(--card2);}
+.mf .btn{flex:1;}
+.og{margin-bottom:14px;}
+.og h4{font-size:.8rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px;}
+.opts{display:flex;flex-wrap:wrap;gap:8px;}
+.op{flex:1 1 110px;padding:10px 12px;border-radius:12px;background:#fff;border:2px solid var(--line2);font-weight:700;text-align:center;min-height:50px;line-height:1.2;}
+.op small{display:block;font-weight:400;font-size:.78rem;color:var(--muted);}
+.op.on{border-color:var(--caramel);background:#f6e6d1;color:var(--gold2);}
+.chips{display:flex;flex-wrap:wrap;gap:6px;}
+.ch{padding:7px 12px;border-radius:20px;background:#fff;border:1.5px solid var(--line2);font-size:.88rem;font-weight:700;}
+.ch.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.pair{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:12px;padding:10px 12px;font-size:.92rem;}
+.pair .btn{margin-left:auto;}
+.incl{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.9rem;margin-bottom:12px;}
+.rec h4{font-size:.8rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin:14px 0 6px;}
+.rec ul,.rec ol{padding-left:20px;display:grid;gap:3px;}
+.rec .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;}
+.rec .facts div{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.85rem;}
+.rec .facts b{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.prm-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;}
+.prm-h small{color:var(--muted);font-weight:700;}
+.prm-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0;border-bottom:1px dashed var(--line);}
+.prm-row .pn{flex:1 1 100%;font-weight:700;font-size:.92rem;line-height:1.25;}
+.prm-row .pn small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;}
+.prm-b{padding:8px 12px;border-radius:20px;background:#fff;border:1.5px solid var(--line2);font-weight:700;font-size:.84rem;min-height:42px;}
+.prm-b.on{background:var(--caramel);border-color:var(--caramel);color:#fff;}
+.prm-d{font-weight:900;color:var(--ok);min-width:62px;text-align:right;margin-left:auto;font-size:1.05rem;}
+.prm-w{flex-basis:100%;font-size:.78rem;color:var(--red);font-weight:700;}
+.prm-sum{margin-top:8px;font-weight:900;color:var(--gold2);font-size:.9rem;}
+.sellos{margin:12px auto 0;max-width:320px;background:#f6e6d1;border:1.5px dashed var(--caramel);border-radius:14px;padding:10px 12px;text-align:center;font-weight:900;color:var(--gold2);}
+.pr-list .prl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px dashed var(--line);}
+.pr-list .prl .nm{flex:1 1 200px;}
+.pr-list .prl .nm small{display:block;color:var(--muted);font-size:.8rem;}
+.pr-off{opacity:.55;}
+.note{background:var(--warnbg);color:#6b4410;border-radius:12px;padding:10px 12px;font-size:.88rem;margin-top:10px;}
+.cobro-tot{display:flex;justify-content:space-between;align-items:baseline;background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;margin:10px 0;}
+.cobro-tot b{font-size:1.9rem;}
+.cambio{font-size:1.1rem;font-weight:900;margin-top:8px;}
+.cambio.neg{color:var(--red);}
+.lines{font-size:.9rem;}
+.lines div{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--line);}
+
+#goTicket{position:fixed;right:14px;bottom:14px;z-index:60;box-shadow:0 10px 24px rgba(0,0,0,.25);}
+@media (min-width:480px){#goTicket{display:none!important;}}
+body.tk-vis #goTicket{display:none!important;}
+.toast{pointer-events:none;opacity:0;position:fixed;left:50%;bottom:118px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:14px;font-weight:700;z-index:200;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:92vw;}
+.toast.on{transform:translateX(-50%);opacity:1;}
+.toast.err{background:var(--red);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><img src="../logo.jpg" alt="" onerror="this.style.visibility='hidden'"><div><b>Aroma <em>a</em> Café</b><small>Punto de venta</small></div></div>
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="ped">🧾<span class="tl"> Pedidos</span></button>
+    <button class="tab" data-tab="bar">☕<span class="tl"> Barra</span> <span class="cnt" id="barCnt" hidden>0</span></button>
+    <button class="tab" data-tab="ven">📊<span class="tl"> Ventas</span></button>
+    <button class="tab" data-tab="inv">📦<span class="tl"> Inventario</span> <span class="cnt" id="invCnt" hidden>0</span></button>
+    <button class="tab" data-tab="adm">⚙️<span class="tl"> Admin</span></button>
+  </nav>
+  <div class="top-r"><button class="chip-top" id="cajaChip" title="Caja">💰 <span id="cajaTxt">Caja cerrada</span></button><button class="chip-top" id="userChip" title="Cambiar de usuario">👤 <span id="userTxt">—</span></button><span class="st" id="openSt">Abierto</span><span class="clockw"><span class="clock" id="clock">--:--</span><small class="ver" id="verTag"></small></span></div>
+</header>
+
+<!-- ============ PEDIDOS ============ -->
+<section class="panel on" id="p-ped">
+  <div class="ped">
+    <aside class="col col-o scroll"><div class="olist" id="olist"></div></aside>
+    <div class="col col-c">
+      <div class="cbar"><input id="q" type="search" placeholder="🔍 Buscar producto…" autocomplete="off"><span class="muted" id="qInfo" style="font-size:.85rem"></span></div>
+      <div class="cats" id="cats"></div>
+      <div class="grid scroll" id="grid" style="flex:1"></div>
+    </div>
+    <aside class="col col-t" id="ticket"></aside>
+  </div>
+</section>
+
+<!-- ============ BARRA ============ -->
+<section class="panel scroll" id="p-bar"><div class="barra">
+  <div class="bhead"><h1>Barra</h1><span class="muted">Lo que falta preparar, en orden de llegada. Toque 📖 para ver la receta.</span>
+    <div class="seg" style="margin-left:auto"><button data-bf="pend" class="on">Por preparar</button><button data-bf="all">Todas</button></div></div>
+  <div class="bcols" id="bcols"></div>
+</div></section>
+
+<!-- ============ VENTAS ============ -->
+<section class="panel scroll" id="p-ven"><div class="page"><div class="page-in">
+  <div class="phead"><h1>Ventas</h1>
+    <div class="seg" id="vf"><button data-f="hoy" class="on">Hoy</button><button data-f="semana">Semana</button><button data-f="mes">Mes</button><button data-f="todo">Todo</button></div>
+    <button class="btn b-line b-sm" id="csvBtn">⬇️ Exportar CSV</button>
+  </div>
+  <div id="bkBanner"></div><div class="box" id="cajaBox" style="margin-bottom:14px"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="cards2">
+    <div class="box"><h3>Por forma de pago</h3><div class="bars" id="byPay"></div></div>
+    <div class="box"><h3>Por tipo de pedido</h3><div class="bars" id="byType"></div></div>
+  </div>
+  <div class="cards2">
+    <div class="box"><h3>Productos más vendidos</h3><div class="bars" id="topP"></div><h3 style="margin-top:16px">Promociones usadas</h3><div class="bars" id="byPromo"></div></div>
+    <div class="box"><h3>Ventas por hora</h3><p class="muted" style="font-size:.85rem">Para saber cuáles son sus horas pico.</p><div class="hours" id="hours"></div></div>
+  </div>
+  <div class="box" style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Semana actual</h3><span class="muted" id="wkRange"></span><button class="btn b-dark b-sm" id="closeWk" style="margin-left:auto">🔒 Cerrar semana</button></div>
+    <div class="week" id="week"></div>
+    <div id="cierres"></div></div>
+  <div class="box"><h3>Tickets</h3><div class="tw"><table><thead><tr><th>#</th><th>Fecha</th><th>Pedido</th><th>Productos</th><th>Pago</th><th style="text-align:right">Total</th><th></th></tr></thead><tbody id="vrows"></tbody></table></div></div>
+</div></div></section>
+
+<!-- ============ INVENTARIO ============ -->
+<section class="panel scroll" id="p-inv"><div class="page"><div class="page-in">
+  <div class="phead"><h1>Inventario</h1>
+    <div class="seg" id="invSeg"><button data-v="exist" class="on">Existencias</button><button data-v="compras">Compras</button><button data-v="costos">Costos por producto</button></div>
+    <button class="btn b-main b-sm" id="invBuy">🛒 Registrar compra</button><button class="btn b-line b-sm" id="invCount">📋 Conteo físico</button></div>
+  <div class="kpis" id="invKpis"></div>
+  <div class="box" id="invBody"></div>
+</div></div></section>
+
+<!-- ============ ADMIN ============ -->
+<section class="panel scroll" id="p-adm"><div class="page"><div class="page-in">
+  <div class="phead"><h1>Administración</h1></div>
+  <div class="box" style="margin-bottom:14px">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px"><h3 style="margin:0">Productos y precios</h3>
+      <select id="aCat" style="max-width:220px"></select><input id="aQ" type="search" placeholder="Buscar…" style="max-width:200px">
+      <button class="btn b-main b-sm" id="aNew" style="margin-left:auto">+ Producto</button></div>
+    <p class="muted" style="font-size:.85rem;margin-bottom:8px">Cambie un precio y se guarda solo. "Agotado" lo marca en gris en Pedidos para no venderlo. 📝 guarda la receta propia de Aroma (gramos, jarabes, toppings).</p>
+    <div class="tw"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Agotado</th><th>Receta</th><th></th></tr></thead><tbody id="arows"></tbody></table></div>
+  </div>
+  <div class="cards2">
+    <div class="box"><h3>Local</h3>
+      <div class="frm"><label>Número de mesas<input id="cfgMesas" type="number" min="0" max="20"></label><label>Celular DiMo<input id="cfgDimo" type="tel"></label><label>Minutos para alerta en barra<input id="cfgLate" type="number" min="3" max="60"></label></div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:700"><input type="checkbox" id="cfgLoza" style="width:20px;height:20px">En mesa se sirve en taza o plato de loza (no descontar vasos ni platos desechables)</label>
+      <button class="btn b-dark b-sm" id="cfgSave" style="margin-top:12px">Guardar</button></div>
+    <div class="box"><h3>Respaldo</h3><p class="muted" style="font-size:.88rem;margin-bottom:10px">Los datos viven en esta tablet. Descargue un respaldo cada semana (al cerrar la semana es buen momento).</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn b-line b-sm" id="bkDown">⬇️ Descargar respaldo</button><label class="btn b-line b-sm" style="cursor:pointer">⬆️ Restaurar<input type="file" id="bkUp" accept=".json" hidden></label><button class="btn b-line b-sm" id="reseed">↻ Volver a cargar catálogo del menú</button></div></div>
+  </div>
+  <div class="box"><h3>Promociones</h3><p class="muted" style="font-size:.85rem;margin-bottom:6px">Aparecen al cobrar. Se aplican a <b>un producto por persona</b>; en grupo, marque un producto por cada persona que la usa. El POS avisa si el precio con descuento queda debajo del costo.</p>
+    <div class="pr-list" id="prList"></div><button class="btn b-line b-sm" id="prNew" style="margin-top:10px">+ Nueva promoción</button></div>
+  <div class="cards2">
+    <div class="box"><h3>Usuarios</h3><p class="muted" style="font-size:.85rem;margin-bottom:8px">El dueño autoriza anulaciones, cortesías, cambios de precio e inventario. El empleado vende, cobra, registra compras y hace el corte.</p><div id="uList"></div><button class="btn b-line b-sm" id="uNew" style="margin-top:8px">+ Usuario</button></div>
+    <div class="box"><h3>Ticket e impresora</h3><p class="muted" style="font-size:.85rem;margin-bottom:8px">Para impresora térmica de 58 mm (Bluetooth o USB) configurada en la tablet como impresora del sistema.</p>
+      <div class="og"><h4>Al cobrar</h4><div class="opts" id="cfgPrint"><button class="op" data-v="preguntar">Preguntar</button><button class="op" data-v="siempre">Imprimir siempre</button><button class="op" data-v="nunca">No imprimir</button></div></div>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:700"><input type="checkbox" id="cfgComanda" style="width:20px;height:20px">Imprimir comanda al enviar a barra</label>
+      <button class="btn b-line b-sm" id="printTest" style="margin-top:10px">🖨️ Ticket de prueba</button></div>
+  </div>
+  <div class="cards2">
+    <div class="box"><h3>Almacenamiento y app</h3><div id="stoInfo"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn b-main b-sm" id="installBtn" hidden>📲 Instalar app en la tablet</button><button class="btn b-line b-sm" id="archBtn">🗄️ Archivar ventas de más de 6 meses</button></div></div>
+    <div class="box"><h3>Bitácora</h3><p class="muted" style="font-size:.85rem;margin-bottom:8px">Quién hizo qué y cuándo (últimos 200 movimientos).</p><div class="tw" style="max-height:320px;overflow:auto"><table><tbody id="logRows"></tbody></table></div></div>
+  </div>
+  <div class="box" style="border-color:rgba(176,58,58,.35)"><h3 style="color:var(--red)">Zona de riesgo</h3><p class="muted" style="font-size:.88rem;margin-bottom:10px">Borra todo el historial de ventas y cierres. Descargue un respaldo antes.</p><button class="btn b-red b-sm" id="wipe">Borrar historial de ventas</button></div>
+</div></div></section>
+
+<!-- ============ MODALES ============ -->
+<div class="mod" id="mProd"><div class="mbox"><div class="mh"><div><h2 id="mpName"></h2><div class="sub" id="mpSub"></div></div><button class="cl" data-close>×</button></div><div class="mb" id="mpBody"></div>
+  <div class="mf"><div class="qty"><button id="mpMinus">−</button><span id="mpQty">1</span><button id="mpPlus">+</button></div><button class="btn b-main" id="mpAdd">Agregar</button></div></div></div>
+
+<div class="mod" id="mNew"><div class="mbox"><div class="mh"><div><h2 id="mnTitle">Nuevo pedido</h2><div class="sub" id="mnSub"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="og"><h4>Nombre del cliente</h4><input id="mnName" placeholder="Ej. Ana (opcional en mostrador)"></div>
+    <div class="og" id="mnWhenG"><h4>¿Cuándo recoge?</h4><div class="opts" id="mnWhen"></div></div>
+    <div class="og" id="mnPayG"><h4>Pago previsto</h4><div class="opts" id="mnPay"></div></div></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="mnOk">Crear pedido</button></div></div></div>
+
+<div class="mod" id="mWA"><div class="mbox wide"><div class="mh"><div><h2>Pegar pedido de WhatsApp</h2><div class="sub">Copie el mensaje que llegó del menú digital y péguelo aquí.</div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><textarea id="waTxt" rows="8" placeholder="¡Hola Aroma a Café! Me gustaría hacer un pedido…"></textarea><div id="waPrev" style="margin-top:12px"></div></div>
+  <div class="mf"><button class="btn b-line" id="waRead">Leer mensaje</button><button class="btn b-wa" id="waOk" disabled>Crear pedido</button></div></div></div>
+
+<div class="mod" id="mPay"><div class="mbox"><div class="mh"><div><h2>Cobrar</h2><div class="sub" id="cbSub"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="lines" id="cbLines"></div>
+    <div class="og" id="cbPromoG" style="margin-top:14px"><div class="prm-h"><h4>🎁 Promociones</h4><small>1 producto por persona</small></div><div id="cbPromo"></div><div class="prm-sum" id="cbPromoSum"></div></div>
+    <div class="og" style="margin-top:14px"><h4>Otro descuento</h4><div class="opts" id="cbDesc"></div><div id="cbDescOtro" hidden style="margin-top:8px;display:grid;grid-template-columns:120px 1fr;gap:8px"><input id="cbDescAmt" type="number" min="0" placeholder="$"><input id="cbDescWhy" placeholder="Motivo"></div></div>
+    <div class="cobro-tot"><span>TOTAL</span><b id="cbTot">$0</b></div>
+    <div class="og"><h4>Forma de pago</h4><div class="opts" id="cbPay"></div></div>
+    <div id="cbCash"><div class="og"><h4>Recibido</h4><div class="chips" id="cbBills"></div><input id="cbRec" type="number" min="0" inputmode="decimal" placeholder="Monto recibido" style="margin-top:8px"></div><div class="cambio" id="cbCambio"></div></div>
+    <div id="cbDimo" class="note" hidden>📱 Verifique en la app del banco que llegó la transferencia por <b id="cbDimoAmt"></b> antes de entregar.<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:900"><input type="checkbox" id="cbDimoOk" style="width:22px;height:22px">Transferencia verificada</label></div>
+  </div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-ok" id="cbOk">Confirmar cobro</button></div></div></div>
+
+<div class="mod" id="mRec"><div class="mbox wide"><div class="mh"><div><h2 id="rcName"></h2><div class="sub" id="rcSub"></div></div><button class="cl" data-close>×</button></div><div class="mb rec" id="rcBody"></div></div></div>
+
+<div class="mod" id="mEdit"><div class="mbox"><div class="mh"><div><h2 id="meTitle">Producto</h2></div><button class="cl" data-close>×</button></div><div class="mb" id="meBody"></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="meOk">Guardar</button></div></div></div>
+
+<button class="btn b-dark" id="goTicket" hidden>🧾 Ver pedido</button>
+<div class="mod" id="mBuy"><div class="mbox"><div class="mh"><div><h2>Registrar compra</h2><div class="sub">Suma a la existencia y actualiza el costo del insumo.</div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="og"><h4>Insumo</h4><select id="buyIns"></select><p class="muted" id="buyInfo" style="font-size:.85rem;margin-top:6px"></p></div>
+    <div class="frm"><label>Empaques comprados<input id="buyQty" type="number" min="0" step="any" value="1"></label><label>Total pagado ($)<input id="buyTot" type="number" min="0" step="any"></label><label>Proveedor (opcional)<input id="buyProv"></label></div>
+    <p class="cambio" id="buyCalc" style="font-size:.95rem"></p></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="buyOk">Guardar compra</button></div></div></div>
+
+<div class="mod" id="mIns"><div class="mbox"><div class="mh"><div><h2 id="insTitle">Insumo</h2></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="frm">
+    <label>Nombre<input id="insName"></label><label>Categoría<input id="insCat" list="insCats"></label>
+    <label>Unidad base<select id="insUnit"><option value="g">g (gramos)</option><option value="ml">ml (mililitros)</option><option value="pza">pza (piezas)</option></select></label>
+    <label>Empaque (cómo lo compra)<input id="insEmp" placeholder="Ej. bolsa 5 kg"></label>
+    <label>Contenido del empaque (en unidad base)<input id="insCont" type="number" min="0" step="any"></label>
+    <label>Precio por empaque ($)<input id="insPrice" type="number" min="0" step="any"></label>
+    <label>Merma %<input id="insMerma" type="number" min="0" max="90" step="any"></label>
+    <label id="insMinL">Mínimo para alerta<input id="insMin" type="number" min="0" step="any"></label></div>
+    <datalist id="insCats"></datalist><p class="muted" id="insNote" style="font-size:.85rem;margin-top:10px"></p></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="insOk">Guardar</button></div></div></div>
+
+<div class="mod" id="mCount"><div class="mbox wide"><div class="mh"><div><h2>Conteo físico</h2><div class="sub">Escriba lo que hay en realidad. Deje en blanco lo que no contó.</div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><input id="cntQ" type="search" placeholder="Buscar insumo…" style="margin-bottom:10px"><div id="cntRows"></div></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="cntOk">Guardar conteo</button></div></div></div>
+
+<div class="mod" id="mRecEd"><div class="mbox wide"><div class="mh"><div><h2 id="reTitle">Receta</h2><div class="sub" id="reSub"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="vtabs" id="reTabs"></div><div id="reRows"></div><button class="btn b-line b-sm" id="reAdd">+ Agregar insumo</button><p class="cambio" id="reCost" style="font-size:1rem"></p></div>
+  <div class="mf"><button class="btn b-line" id="reReset">↺ Receta original</button><button class="btn b-main" id="reOk">Guardar receta</button></div></div></div>
+
+<div class="lock" id="lock" hidden><div class="lock-in">
+  <img src="icon-192.png" alt="" onerror="this.src='../logo.jpg'">
+  <h1>Aroma <em>a</em> Café</h1>
+  <div id="lockBody"></div>
+</div></div>
+
+<div class="mod" id="mPin"><div class="mbox" style="max-width:400px"><div class="mh"><div><h2>Autorización</h2><div class="sub" id="pinWhy"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb" style="text-align:center"><p class="muted" style="font-size:.9rem">Escriba el PIN del dueño</p><div class="dots" id="pinDots"></div><div class="lerr" id="pinErr"></div><div class="pad" id="pinPad"></div></div></div></div>
+
+<div class="mod" id="mTurno"><div class="mbox" style="max-width:460px"><div class="mh"><div><h2>Abrir caja</h2><div class="sub">Cuente el dinero con el que empieza el turno.</div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="og"><h4>Fondo de caja</h4><div class="chips" id="fondoChips"></div><input id="fondoIn" type="number" min="0" inputmode="decimal" placeholder="$" style="margin-top:8px"></div></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-ok" id="turnoOk">Abrir caja</button></div></div></div>
+
+<div class="mod" id="mMov"><div class="mbox" style="max-width:460px"><div class="mh"><div><h2 id="movTitle">Movimiento de caja</h2><div class="sub">Dinero que entra o sale de la caja sin ser venta.</div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="og"><h4>Tipo</h4><div class="opts" id="movTipo"><button class="op on" data-v="salida">➖ Salida</button><button class="op" data-v="entrada">➕ Entrada</button></div></div>
+    <div class="og"><h4>Monto</h4><input id="movAmt" type="number" min="0" inputmode="decimal" placeholder="$"></div>
+    <div class="og"><h4>Motivo</h4><div class="chips" id="movChips"></div><input id="movWhy" placeholder="Ej. compra de hielo" style="margin-top:8px"></div></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="movOk">Guardar</button></div></div></div>
+
+<div class="mod" id="mCorte"><div class="mbox wide"><div class="mh"><div><h2>Corte de caja</h2><div class="sub" id="corteSub"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="caja-grid" id="corteRes"></div>
+    <div class="og"><h4>Cuente el efectivo (opcional por billete y moneda)</h4><div class="denoms" id="denoms"></div></div>
+    <div class="og"><h4>Efectivo contado</h4><input id="corteCnt" type="number" min="0" step="any" inputmode="decimal" placeholder="$"></div>
+    <div class="dif" id="corteDif"></div>
+    <div class="og" style="margin-top:12px"><h4>Notas (opcional)</h4><input id="corteNota" placeholder="Ej. faltaron $20 por cambio mal dado"></div>
+    <p class="muted" style="font-size:.85rem">Al cerrar se guarda el corte, se descarga un respaldo y la tablet pide PIN de nuevo.</p></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-dark" id="corteOk">🔒 Cerrar turno</button></div></div></div>
+
+<div class="mod" id="mDone"><div class="mbox" style="max-width:420px"><div class="mb" style="padding-top:24px">
+  <div style="text-align:center;font-size:2.4rem">✅</div><div class="done-big money" id="doneTot"></div><div class="done-ch" id="doneCh"></div><p class="muted" style="text-align:center;margin-top:6px" id="doneSub"></p><div class="sellos" id="doneSellos" hidden></div></div>
+  <div class="mf"><button class="btn b-line" id="donePrint">🖨️ Ticket</button><button class="btn b-ok" id="doneOk">Listo</button></div></div></div>
+
+<div class="mod" id="mPromo"><div class="mbox" style="max-width:480px"><div class="mh"><div><h2 id="prTitle">Promoción</h2></div><button class="cl" data-close>×</button></div>
+  <div class="mb">
+    <div class="og"><h4>Nombre</h4><input id="prName" placeholder="Ej. 50% primera compra"></div>
+    <div class="og"><h4>Tipo de descuento</h4><div class="opts" id="prTipo"><button class="op" data-v="pct">Porcentaje (%)</button><button class="op" data-v="monto">Monto fijo ($)</button></div></div>
+    <div class="og"><h4 id="prValL">Porcentaje</h4><input id="prVal" type="number" min="1" inputmode="decimal"></div>
+    <div class="og"><h4>Aplica a</h4><div class="opts" id="prAplica"><button class="op" data-v="bebidas">☕ Bebidas</button><button class="op" data-v="alimentos">🍰 Postres y croissants</button><button class="op" data-v="todo">Todo el menú</button></div></div>
+    <div class="og"><h4>Válida hasta <span class="muted" style="font-weight:400">(opcional)</span></h4><input id="prHasta" type="date"></div>
+    <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:6px"><input type="checkbox" id="prSellos" style="width:20px;height:20px">Es la tarjeta de lealtad (mostrar sellos al cobrar)</label>
+    <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:10px"><input type="checkbox" id="prPin" style="width:20px;height:20px">Pedir PIN del dueño al aplicarla</label>
+  </div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="prOk">Guardar</button></div></div></div>
+
+<div class="mod" id="mUser"><div class="mbox" style="max-width:440px"><div class="mh"><div><h2 id="uTitle">Usuario</h2></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="frm"><label>Nombre<input id="uName"></label><label>Rol<select id="uRol"><option value="empleado">Empleado</option><option value="dueno">Dueño</option></select></label>
+    <label>PIN (4 a 6 números)<input id="uPin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label><label>Repetir PIN<input id="uPin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label></div>
+    <p class="muted" id="uNote" style="font-size:.85rem;margin-top:8px"></p></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="uOk">Guardar</button></div></div></div>
+
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= DATOS DEL MENÚ (generados del menú digital) ================= */
+const MENU_CATS=[{"id":"calientes","name":"Bebidas Calientes","short":"Calientes","icon":"☕","group":"Bebidas"},{"id":"frappes","name":"Frappés","short":"Frappés","icon":"🧋","group":"Bebidas"},{"id":"frias","name":"Bebidas Frías","short":"Frías","icon":"🧊","group":"Bebidas"},{"id":"especialidad","name":"Frappés de Especialidad","short":"Especialidad","icon":"🍹","group":"Bebidas"},{"id":"matcha","name":"Matcha","short":"Matcha","icon":"🍵","group":"Bebidas"},{"id":"sin-cafe","name":"Bebidas sin café","short":"Sin café","icon":"🌿","group":"Bebidas","virtual":true},{"id":"combos","name":"Combos para cada ocasión","short":"Combos","icon":"🎁","group":"Combos"},{"id":"croissants","name":"Croissants","short":"Croissants","icon":"🥐","group":"Alimentos"},{"id":"postres","name":"Postres","short":"Postres","icon":"🍰","group":"Alimentos"},{"id":"grano","name":"Café para casa","short":"Café en grano","icon":"🫘","group":"Para llevar a casa"}];
+const MENU_PRODS=[{"id":"cafe-de-olla","cat":"calientes","name":"Café de Olla","tag":"Tradicional · Canela · Piloncillo","price":20,"milk":false,"oz":"8 oz"},{"id":"ponche-de-frutas","cat":"calientes","name":"Ponche de Frutas","tag":"Navideño · Frutas · Canela","price":20,"milk":false,"nocafe":true,"oz":"8 oz"},{"id":"espresso","cat":"calientes","name":"Espresso","tag":"Intenso · Aromático","price":35,"milk":false},{"id":"americano","cat":"calientes","name":"Americano","tag":"Suave · Clásico","price":40,"milk":false,"oz":"12 oz"},{"id":"latte","cat":"calientes","name":"Latte","tag":"Cremoso · Aterciopelado","price":60,"milk":true,"pair":{"id":"croissant-de-jamon-y-queso"},"oz":"12 oz"},{"id":"latte-caramelo","cat":"calientes","name":"Latte Caramelo","tag":"Dulce · Caramelo · Cremoso","price":70,"milk":true,"oz":"12 oz"},{"id":"capuchino","cat":"calientes","name":"Capuchino","tag":"Espumoso · Equilibrado","price":65,"milk":true,"pair":{"id":"brownie-con-helado-de-vainilla"},"oz":"12 oz"},{"id":"cafe-moka","cat":"calientes","name":"Café Moka","tag":"Chocolate · Espresso · Cremoso","price":65,"milk":true,"oz":"12 oz"},{"id":"chocolate","cat":"calientes","name":"Chocolate","tag":"Dulce · Artesanal","price":60,"milk":true,"nocafe":true,"oz":"12 oz"},{"id":"taro-latte","cat":"calientes","name":"Taro Latte","tag":"Dulce · Único · Aterciopelado","price":55,"milk":true,"nocafe":true,"oz":"12 oz"},{"id":"frappe-oreo","cat":"frappes","name":"Frappé Oreo","tag":"Dulce · Cremoso · Pequeño / Grande","price":65,"sizes":[{"label":"Pequeño","price":65,"sub":"12 oz"},{"label":"Grande","price":75,"sub":"16 oz"}],"milk":true,"pair":{"id":"croissant-de-jamon-y-queso"}},{"id":"frappe-moka","cat":"frappes","name":"Frappé Moka","tag":"Chocolate · Café · Frío · Pequeño / Grande","price":65,"sizes":[{"label":"Pequeño","price":65,"sub":"12 oz"},{"label":"Grande","price":75,"sub":"16 oz"}],"milk":true},{"id":"frappe-clasico","cat":"frappes","name":"Frappé Clásico","tag":"Puro · Refrescante · Pequeño / Grande","price":65,"sizes":[{"label":"Pequeño","price":65,"sub":"12 oz"},{"label":"Grande","price":75,"sub":"16 oz"}],"milk":true},{"id":"frappe-caramelo","cat":"frappes","name":"Frappé Caramelo","tag":"Dulce · Caramelo · Cremoso · Pequeño / Grande","price":65,"sizes":[{"label":"Pequeño","price":65,"sub":"12 oz"},{"label":"Grande","price":75,"sub":"16 oz"}],"milk":true},{"id":"frappe-cajeta","cat":"frappes","name":"Frappé Cajeta","tag":"Dulce · Cajeta · Tradicional · Pequeño / Grande","price":65,"sizes":[{"label":"Pequeño","price":65,"sub":"12 oz"},{"label":"Grande","price":75,"sub":"16 oz"}],"milk":true},{"id":"desayuno-expres","cat":"combos","name":"Desayuno Exprés","tag":"Americano + Croissant Sencillo","price":60,"milk":false,"includes":["1 Americano (12 oz)","1 Croissant Sencillo"]},{"id":"desayuno-completo","cat":"combos","name":"Desayuno Completo","tag":"Latte + Croissant de Jamón y Queso","price":89,"milk":true,"includes":["1 Latte (12 oz)","1 Croissant de Jamón y Queso"]},{"id":"tarde-de-antojo","cat":"combos","name":"Tarde de Antojo","tag":"Frappé Grande + Brownie","price":99,"milk":true,"flavors":["Oreo","Moka","Clásico","Caramelo","Cajeta"],"flavorTitle":"Elija el sabor del frappé","includes":["1 Frappé Grande (16 oz)","1 Brownie"]},{"id":"cafe-y-pastel","cat":"combos","name":"Café y Pastel","tag":"Capuchino + rebanada a elegir","price":110,"milk":true,"flavors":["Cheesecake","Pastel de Zanahoria","Tarta de Manzana"],"flavorTitle":"Elija su postre","includes":["1 Capuchino (12 oz)","1 Rebanada: Cheesecake, Zanahoria o Manzana"]},{"id":"combo-estudiante","cat":"combos","name":"Combo Estudiante","tag":"Iced Americano + Galleta","price":65,"milk":false,"includes":["1 Iced Americano (16 oz)","1 Galleta"]},{"id":"clasico-mexicano","cat":"combos","name":"Clásico Mexicano","tag":"Café de Olla + Galleta","price":35,"milk":false,"includes":["1 Café de Olla (8 oz)","1 Galleta"]},{"id":"combo-navideno","cat":"combos","name":"Combo Navideño","tag":"2 Ponches + 2 Galletas","price":70,"milk":false,"includes":["2 Ponches de Frutas (8 oz)","2 Galletas"]},{"id":"combo-frappe","cat":"combos","name":"Combo Frappé","tag":"1 Pequeño + 1 Grande · mismo sabor · no aplica en especiales","price":130,"milk":true,"flavors":["Oreo","Moka","Clásico","Caramelo","Cajeta"],"flavorTitle":"Elija el sabor","includes":["1 Frappé Pequeño (12 oz)","1 Frappé Grande (16 oz)","Mismo sabor para los dos"]},{"id":"frappe-taro","cat":"frappes","name":"Frappé Taro","tag":"Dulce · Único · Cremoso","price":65,"milk":true,"nocafe":true,"oz":"16 oz"},{"id":"espresso-tonico","cat":"frias","name":"Espresso Tónico","tag":"Cítrico · Burbujeante · Único · Grande","price":80,"milk":false,"oz":"16 oz"},{"id":"iced-latte","cat":"frias","name":"Iced Latte","tag":"Cremoso · Refrescante · Grande","price":70,"milk":true,"oz":"16 oz"},{"id":"iced-americano","cat":"frias","name":"Iced Americano","tag":"Suave · Refrescante · Grande","price":55,"milk":false,"oz":"16 oz"},{"id":"iced-moka","cat":"frias","name":"Iced Moka","tag":"Chocolate · Espresso · Grande","price":75,"milk":true,"oz":"16 oz"},{"id":"affogato","cat":"frias","name":"Affogato","tag":"Espresso · Helado · Clásico italiano","price":60,"milk":false},{"id":"smoothie-de-mango","cat":"frias","name":"Smoothie de Mango","tag":"Tropical · Natural · Fresco","price":60,"milk":false,"nocafe":true,"oz":"16 oz"},{"id":"smoothie-de-frutos-rojos","cat":"frias","name":"Smoothie de Frutos Rojos","tag":"Berries · Natural · Antioxidante","price":60,"milk":false,"nocafe":true,"oz":"16 oz"},{"id":"frappe-de-rompope-coronado","cat":"especialidad","name":"Frappé de Rompope Coronado","tag":"Dulce · Canela · Cremoso · Grande","price":90,"milk":false,"nocafe":true,"oz":"16 oz"},{"id":"frappe-pina-colada","cat":"especialidad","name":"Frappé Piña Colada","tag":"Tropical · Coco · Piña · Solo Grande","price":80,"milk":false,"nocafe":true,"oz":"16 oz"},{"id":"frappe-mazapan","cat":"especialidad","name":"Frappé Mazapán","tag":"Dulce · Cacahuate · Único · Pequeño / Grande","price":70,"sizes":[{"label":"Pequeño","price":70,"sub":"12 oz"},{"label":"Grande","price":80,"sub":"16 oz"}],"milk":true,"nocafe":true},{"id":"frappe-de-pitahaya","cat":"especialidad","name":"Frappé de Pitahaya","tag":"Tropical · Natural · Vibrante","price":65,"milk":false,"nocafe":true,"oz":"16 oz"},{"id":"matcha-latte","cat":"matcha","name":"Matcha Latte","tag":"Suave · Cremoso · Té verde","price":75,"milk":true,"nocafe":true,"oz":"12 oz"},{"id":"iced-matcha-latte","cat":"matcha","name":"Iced Matcha Latte","tag":"Fresco · Cremoso · Té verde","price":80,"milk":true,"nocafe":true,"oz":"16 oz"},{"id":"frappe-matcha","cat":"matcha","name":"Frappé Matcha","tag":"Helado · Cremoso · Té verde","price":75,"sizes":[{"label":"Pequeño","price":75,"sub":"12 oz"},{"label":"Grande","price":85,"sub":"16 oz"}],"milk":true,"nocafe":true},{"id":"matcha-fresa","cat":"matcha","name":"Matcha Fresa","tag":"Frutal · Fresco · Té verde","price":85,"milk":true,"nocafe":true,"oz":"16 oz"},{"id":"croissant-sencillo","cat":"croissants","name":"Croissant Sencillo","tag":"Recién horneado · Hojaldrado","price":29,"milk":false},{"id":"croissant-de-jamon-y-queso","cat":"croissants","name":"Croissant de Jamón y Queso","tag":"Salado · Relleno","price":39,"milk":false},{"id":"croissant-de-nutella","cat":"croissants","name":"Croissant de Nutella","tag":"Dulce · Relleno","price":45,"milk":false},{"id":"cheesecake","cat":"postres","name":"Cheesecake","tag":"Cremoso · Suave · Rebanada","price":60,"milk":false},{"id":"pastel-de-zanahoria","cat":"postres","name":"Pastel de Zanahoria","tag":"Especiado · Húmedo · Rebanada","price":55,"milk":false},{"id":"tarta-de-manzana","cat":"postres","name":"Tarta de Manzana","tag":"Horneada · Canela · Rebanada","price":50,"milk":false},{"id":"carlota-de-limon","cat":"postres","name":"Carlota de Limón","tag":"Fresca · Cítrica · Porción","price":45,"milk":false},{"id":"brownie","cat":"postres","name":"Brownie","tag":"Chocolate · Húmedo · Pieza","price":35,"milk":false},{"id":"galletas","cat":"postres","name":"Galletas","tag":"Horneadas · Crujientes · Pieza","price":20,"milk":false},{"id":"brownie-con-helado-de-vainilla","cat":"postres","name":"Brownie con Helado de Vainilla","tag":"Chocolate · Tibio · Cremoso","price":50,"milk":false},{"id":"cafe-en-grano-cafe-del-dia","cat":"grano","name":"Café en grano · Café del día","tag":"Insoluble · Varía según el día","price":0,"milk":false,"ask":true}];
+const RECIPES={"espresso":{"name":"Espresso","size":"25 ml sencillo · 40–45 ml doble","cup":"Demitasse de porcelana (60–90 ml), precalentada","temp":"Agua 92–94 °C","tex":"No lleva","ice":"No","prep":"1–1.5 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Café molido","18 g"]],"steps":["Precalienta la taza.","Purga el grupo 2–3 s.","Muele 18 g y distribuye parejo.","Tampea nivelado, con presión firme.","Inicia la extracción y el cronómetro al mismo tiempo.","Detén al llegar a 36 g en báscula (25–30 s).","Sirve antes de 15 s para no perder la crema."]},"americano":{"name":"Americano","size":"8 oz","cup":"Taza de cerámica","temp":"Agua 85–90 °C","tex":"No lleva","ice":"No","prep":"1.5–2 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble","36 g"],["Agua caliente (85–90 °C)","180 ml"]],"steps":["Precalienta la taza.","Extrae el espresso doble en la taza.","Agrega 180 ml de agua caliente, sin hervir.","Sirve."]},"latte":{"name":"Latte","size":"8 oz","cup":"Taza de cerámica ancha","temp":"Leche 60–65 °C","tex":"Microespuma fina: crece 15–20 %, capa de 0.5–1 cm","ice":"No","prep":"2.5–3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble","36 g"],["Leche fría","180 g"]],"steps":["Precalienta la taza con agua caliente y sécala.","Sirve 180 g de leche fría (3–4 °C) en la jarra.","Purga la vaporizadora 2 s.","Airea 2–3 s, hasta que crezca 15–20 % con la punta apenas bajo la superficie.","Hunde la punta y gira la leche hasta 60–65 °C. La jarra debe quemar al tacto pero poder sostenerse.","Golpea la jarra en la barra y gírala para quitar burbujas.","Muele, distribuye y tampea; extrae el espresso.","Vierte alto para mezclar y baja la jarra al final para el arte latte.","Limpia y purga la vaporizadora de inmediato."]},"capuchino":{"name":"Capuchino","size":"150–180 ml (5–6 oz)","cup":"Porcelana gruesa de 150–160 ml","temp":"Leche 55 °C (hasta 60 °C)","tex":"Seca: crece 30–40 %, capa de 1.5–2 cm","ice":"No","prep":"2.5–3 min","ex":{"dose":"9 g","yield":"18–25 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta sencilla","label":"Espresso sencillo"},"ing":[["Espresso sencillo","25 ml"],["Leche fría","100 g"]],"steps":["Precalienta la taza con agua caliente y sécala.","Sirve 100 g de leche fría (3–4 °C) en la jarra.","Purga la vaporizadora 2 s.","Airea 4–5 s, hasta que crezca 30–40 % con la punta apenas bajo la superficie.","Hunde la punta y gira la leche hasta 55 °C. La jarra debe quemar al tacto pero poder sostenerse.","Golpea la jarra en la barra y gírala para quitar burbujas.","Muele, distribuye y tampea; extrae el espresso.","Vierte de golpe al centro para que la espuma se integre con la crema.","Limpia y purga la vaporizadora de inmediato."]},"cafe-moka":{"name":"Mocha","size":"8 oz","cup":"Taza de cerámica","temp":"Leche 60–65 °C","tex":"Microespuma fina, 0.5–1 cm","ice":"No","prep":"3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Salsa de chocolate","20 g"],["Espresso doble","36 g"],["Leche fría","160 g"],["Crema batida (opcional)","15 g"]],"steps":["Precalienta la taza con agua caliente y sécala.","Sirve 160 g de leche fría (3–4 °C) en la jarra.","Purga la vaporizadora 2 s.","Airea 2–3 s con la punta apenas bajo la superficie.","Hunde la punta y gira la leche hasta 60–65 °C. La jarra debe quemar al tacto pero poder sostenerse.","Golpea la jarra en la barra y gírala para quitar burbujas.","Muele, distribuye y tampea; extrae el espresso.","Sirve la salsa en la taza, extrae el espresso encima y revuelve hasta disolver; luego vierte la leche.","Limpia y purga la vaporizadora de inmediato."]},"espresso-tonico":{"name":"Espresso Tónico","size":"12 oz","cup":"Vaso alto de vidrio","temp":"2–4 °C","tex":"No lleva","ice":"Vaso lleno","prep":"2 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Hielo","vaso lleno"],["Agua tónica fría","130 ml"],["Espresso doble","36 g"],["Rodaja de naranja (opcional)","1"]],"steps":["Llena el vaso de hielo.","Sirve la tónica fría inclinando el vaso.","Extrae el espresso en una jarrita.","Viértelo muy despacio sobre el hielo para formar capas.","Sirve sin revolver."]},"iced-latte":{"name":"Latte frío","size":"12 oz","cup":"Vaso de vidrio o PET","temp":"2–4 °C","tex":"Leche fría sin texturizar (opcional espuma fría)","ice":"120 g","prep":"2 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Hielo","120 g"],["Leche fría","180 g"],["Espresso doble","36 g"]],"steps":["Llena el vaso con hielo.","Agrega la leche fría.","Extrae el espresso y viértelo despacio encima.","Sirve con popote."]},"iced-americano":{"name":"Americano frío","size":"12 oz","cup":"Vaso de vidrio o PET","temp":"2–4 °C","tex":"No lleva","ice":"Vaso lleno (120 g)","prep":"1.5–2 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Hielo","120 g"],["Agua fría","150 g"],["Espresso doble","36 g"]],"steps":["Llena el vaso de hielo.","Agrega el agua fría.","Extrae el espresso y viértelo encima.","Revuelve y sirve."]},"affogato":{"name":"Affogato","size":"1–2 bolas de helado + espresso","cup":"Copa o vaso de vidrio chico, enfriado","temp":"Espresso recién hecho sobre helado a −12 °C","tex":"No lleva","ice":"No","prep":"1.5–2 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Helado de vainilla","80 g (1–2 bolas)"],["Espresso doble","36 g"]],"steps":["Enfría la copa.","Sirve el helado.","Extrae el espresso al momento de entregar.","Vierte el espresso sobre el helado frente al cliente o justo antes de servir."]},"cafe-de-olla":{"name":"Café de olla","size":"8–10 oz","cup":"Jarro de barro","temp":"70–75 °C al servir","tex":"No lleva","ice":"No","prep":"10–12 min (o de un lote preparado)","ex":{"dose":"12 g de café grueso","yield":"330 ml de agua","ratio":"1:27 aprox. (con piloncillo)","time":[240,300],"method":"Infusión en olla · fuera del fuego 4–5 min · colar fino","label":"Infusión en olla"},"ing":[["Agua","330 ml"],["Piloncillo","25 g"],["Canela en raja","3 g"],["Café molido grueso","12 g"]],"steps":["Hierve el agua con el piloncillo y la canela 5 min.","Apaga el fuego.","Agrega el café, revuelve y deja reposar 4–5 min.","Cuela fino y sirve en jarro de barro."]},"frappe-clasico":{"name":"Frappé de café","size":"12 oz","cup":"Vaso PET con tapa domo","temp":"Bajo 0 °C (granizado)","tex":"Licuado","ice":"150 g licuado","prep":"3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble, enfriado","36 g"],["Leche fría","140 g"],["Base para frappé o jarabe","20 g"],["Hielo","150 g"]],"steps":["Extrae el espresso y enfríalo (jarrita sobre hielo o 1 min en el congelador).","En la licuadora: leche, base, espresso y al final el hielo.","Licua 30–40 s hasta que no queden trozos.","Sirve y tapa con domo."]},"latte-caramelo":{"name":"Latte","size":"8 oz","cup":"Taza de cerámica ancha","temp":"Leche 60–65 °C","tex":"Microespuma fina: crece 15–20 %, capa de 0.5–1 cm","ice":"No","prep":"2.5–3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble","36 g"],["Leche fría","180 g"]],"steps":["Precalienta la taza con agua caliente y sécala.","Sirve 180 g de leche fría (3–4 °C) en la jarra.","Purga la vaporizadora 2 s.","Airea 2–3 s, hasta que crezca 15–20 % con la punta apenas bajo la superficie.","Hunde la punta y gira la leche hasta 60–65 °C. La jarra debe quemar al tacto pero poder sostenerse.","Golpea la jarra en la barra y gírala para quitar burbujas.","Muele, distribuye y tampea; extrae el espresso.","Vierte alto para mezclar y baja la jarra al final para el arte latte.","Limpia y purga la vaporizadora de inmediato."],"base":true},"iced-moka":{"name":"Latte frío","size":"12 oz","cup":"Vaso de vidrio o PET","temp":"2–4 °C","tex":"Leche fría sin texturizar (opcional espuma fría)","ice":"120 g","prep":"2 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Hielo","120 g"],["Leche fría","180 g"],["Espresso doble","36 g"]],"steps":["Llena el vaso con hielo.","Agrega la leche fría.","Extrae el espresso y viértelo despacio encima.","Sirve con popote."],"base":true},"frappe-oreo":{"name":"Frappé de café","size":"12 oz","cup":"Vaso PET con tapa domo","temp":"Bajo 0 °C (granizado)","tex":"Licuado","ice":"150 g licuado","prep":"3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble, enfriado","36 g"],["Leche fría","140 g"],["Base para frappé o jarabe","20 g"],["Hielo","150 g"]],"steps":["Extrae el espresso y enfríalo (jarrita sobre hielo o 1 min en el congelador).","En la licuadora: leche, base, espresso y al final el hielo.","Licua 30–40 s hasta que no queden trozos.","Sirve y tapa con domo."],"base":true},"frappe-moka":{"name":"Frappé de café","size":"12 oz","cup":"Vaso PET con tapa domo","temp":"Bajo 0 °C (granizado)","tex":"Licuado","ice":"150 g licuado","prep":"3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble, enfriado","36 g"],["Leche fría","140 g"],["Base para frappé o jarabe","20 g"],["Hielo","150 g"]],"steps":["Extrae el espresso y enfríalo (jarrita sobre hielo o 1 min en el congelador).","En la licuadora: leche, base, espresso y al final el hielo.","Licua 30–40 s hasta que no queden trozos.","Sirve y tapa con domo."],"base":true},"frappe-caramelo":{"name":"Frappé de café","size":"12 oz","cup":"Vaso PET con tapa domo","temp":"Bajo 0 °C (granizado)","tex":"Licuado","ice":"150 g licuado","prep":"3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble, enfriado","36 g"],["Leche fría","140 g"],["Base para frappé o jarabe","20 g"],["Hielo","150 g"]],"steps":["Extrae el espresso y enfríalo (jarrita sobre hielo o 1 min en el congelador).","En la licuadora: leche, base, espresso y al final el hielo.","Licua 30–40 s hasta que no queden trozos.","Sirve y tapa con domo."],"base":true},"frappe-cajeta":{"name":"Frappé de café","size":"12 oz","cup":"Vaso PET con tapa domo","temp":"Bajo 0 °C (granizado)","tex":"Licuado","ice":"150 g licuado","prep":"3 min","ex":{"dose":"18 g","yield":"36 g","ratio":"1:2","time":[25,30],"method":"Espresso · 9 bar · agua 92–94 °C · preinfusión 5–8 s · canasta doble","label":"Espresso doble"},"ing":[["Espresso doble, enfriado","36 g"],["Leche fría","140 g"],["Base para frappé o jarabe","20 g"],["Hielo","150 g"]],"steps":["Extrae el espresso y enfríalo (jarrita sobre hielo o 1 min en el congelador).","En la licuadora: leche, base, espresso y al final el hielo.","Licua 30–40 s hasta que no queden trozos.","Sirve y tapa con domo."],"base":true}};
+const CAT_EMOJI={"calientes":"☕","frappes":"🧋","frias":"🧊","especialidad":"🍹","matcha":"🍵","combos":"🎁","croissants":"🥐","postres":"🍰","grano":"🫘","otros":"➕"};
+const CATALOG_VERSION='55d7f856';
+const INS_DEF=[{"id":"cafe-en-grano","nombre":"Café en grano","cat":"Café","empaque":"kg","contenido":1000,"unidad":"g","precio":500,"merma":0.05,"origen":"ticket","nota":"Insoluble. También se descuenta al vender café en grano."},{"id":"leche-entera","nombre":"Leche entera","cat":"Lácteos","empaque":"L","contenido":1000,"unidad":"ml","precio":29,"merma":0.03,"origen":"ticket","nota":""},{"id":"leche-deslactosada","nombre":"Leche deslactosada","cat":"Lácteos","empaque":"L","contenido":1000,"unidad":"ml","precio":29,"merma":0.03,"origen":"ticket","nota":""},{"id":"leche-vegetal-avena-almendra","nombre":"Leche vegetal (avena/almendra)","cat":"Lácteos","empaque":"L","contenido":1000,"unidad":"ml","precio":40,"merma":0.03,"origen":"ticket","nota":"No está en el menú."},{"id":"crema-para-batir","nombre":"Crema para batir","cat":"Lácteos","empaque":"L","contenido":1000,"unidad":"ml","precio":64,"merma":0.05,"origen":"ticket","nota":""},{"id":"helado-de-vainilla","nombre":"Helado de vainilla","cat":"Lácteos","empaque":"bote 4 L","contenido":4000,"unidad":"ml","precio":202.55,"merma":0.05,"origen":"ticket","nota":"Una bola ≈ 90 ml."},{"id":"salsa-de-chocolate","nombre":"Salsa de chocolate","cat":"Saborizantes","empaque":"kg","contenido":1000,"unidad":"g","precio":35,"merma":0.02,"origen":"ticket","nota":""},{"id":"chocolate-en-polvo-chocomilk","nombre":"Chocolate en polvo / Chocomilk","cat":"Saborizantes","empaque":"bolsa 350 g","contenido":350,"unidad":"g","precio":50,"merma":0.02,"origen":"ticket","nota":""},{"id":"base-neutra-para-frappe","nombre":"Base neutra para frappé","cat":"Saborizantes","empaque":"kg","contenido":1000,"unidad":"g","precio":250,"merma":0.02,"origen":"mercado","nota":"Rango investigado $220-300/kg."},{"id":"cmc-espesante","nombre":"CMC (espesante)","cat":"Saborizantes","empaque":"bolsa 200 g","contenido":200,"unidad":"g","precio":42,"merma":0.02,"origen":"ticket","nota":""},{"id":"galleta-oreo-base-sin-relleno","nombre":"Galleta Oreo base (sin relleno)","cat":"Saborizantes","empaque":"kg","contenido":1000,"unidad":"g","precio":150,"merma":0.03,"origen":"mercado","nota":""},{"id":"base-de-taro-en-polvo","nombre":"Base de taro en polvo","cat":"Saborizantes","empaque":"kg","contenido":1000,"unidad":"g","precio":255,"merma":0.02,"origen":"mercado","nota":"Ya viene endulzada."},{"id":"jarabe-saborizante-caramelo","nombre":"Jarabe saborizante (caramelo)","cat":"Saborizantes","empaque":"L","contenido":1000,"unidad":"ml","precio":35,"merma":0.02,"origen":"ticket","nota":"Se usa para Latte y Frappé Caramelo."},{"id":"cajeta","nombre":"Cajeta","cat":"Saborizantes","empaque":"kg","contenido":1000,"unidad":"g","precio":0,"merma":0.02,"origen":"sin","nota":"NUEVO: captura el precio."},{"id":"matcha-en-polvo","nombre":"Matcha en polvo","cat":"Saborizantes","empaque":"kg","contenido":1000,"unidad":"g","precio":0,"merma":0.02,"origen":"sin","nota":"NUEVO: captura el precio."},{"id":"mazapan-pieza","nombre":"Mazapán (pieza)","cat":"Saborizantes","empaque":"pieza","contenido":1,"unidad":"pza","precio":0,"merma":0.02,"origen":"sin","nota":"NUEVO: captura el precio por pieza."},{"id":"canela-entera","nombre":"Canela entera","cat":"Saborizantes","empaque":"bolsa 125 g","contenido":125,"unidad":"g","precio":39,"merma":0.02,"origen":"ticket","nota":""},{"id":"piloncillo","nombre":"Piloncillo","cat":"Saborizantes","empaque":"kg","contenido":1000,"unidad":"g","precio":0,"merma":0.02,"origen":"sin","nota":"NUEVO: para el Café de Olla."},{"id":"rompope-coronado","nombre":"Rompope Coronado","cat":"Temporada","empaque":"botella 900 ml","contenido":900,"unidad":"ml","precio":195,"merma":0.03,"origen":"mercado","nota":""},{"id":"pina","nombre":"Piña","cat":"Temporada","empaque":"bolsa 800 g","contenido":800,"unidad":"g","precio":64,"merma":0.05,"origen":"ticket","nota":""},{"id":"calahua-pina-colada","nombre":"Calahua Piña Colada","cat":"Temporada","empaque":"L","contenido":1000,"unidad":"ml","precio":76,"merma":0.02,"origen":"ticket","nota":""},{"id":"calahua-coco","nombre":"Calahua Coco","cat":"Temporada","empaque":"L","contenido":1000,"unidad":"ml","precio":68,"merma":0.02,"origen":"ticket","nota":""},{"id":"ron-blanco","nombre":"Ron blanco","cat":"Temporada","empaque":"botella 750 ml","contenido":750,"unidad":"ml","precio":290,"merma":0.02,"origen":"mercado","nota":"Solo menú impreso."},{"id":"ponche-de-frutas-preparado","nombre":"Ponche de frutas (preparado)","cat":"Temporada","empaque":"L","contenido":1000,"unidad":"ml","precio":0,"merma":0.05,"origen":"sin","nota":"NUEVO: captura lo que cuesta preparar 1 L."},{"id":"pitahaya","nombre":"Pitahaya","cat":"Fruta","empaque":"kg","contenido":1000,"unidad":"g","precio":60,"merma":0.2,"origen":"mercado","nota":""},{"id":"mango","nombre":"Mango","cat":"Fruta","empaque":"kg","contenido":1000,"unidad":"g","precio":36,"merma":0.1,"origen":"ticket","nota":""},{"id":"fresas","nombre":"Fresas","cat":"Fruta","empaque":"bolsa 454 g","contenido":454,"unidad":"g","precio":69,"merma":0.08,"origen":"ticket","nota":""},{"id":"mermelada-de-frutos-rojos","nombre":"Mermelada de frutos rojos","cat":"Fruta","empaque":"frasco 450 g","contenido":450,"unidad":"g","precio":48,"merma":0.02,"origen":"ticket","nota":""},{"id":"zarzamora","nombre":"Zarzamora","cat":"Fruta","empaque":"kg","contenido":1000,"unidad":"g","precio":120,"merma":0.08,"origen":"mercado","nota":""},{"id":"blueberry","nombre":"Blueberry","cat":"Fruta","empaque":"kg","contenido":1000,"unidad":"g","precio":200,"merma":0.08,"origen":"mercado","nota":""},{"id":"durazno-en-almibar","nombre":"Durazno en almíbar","cat":"Fruta","empaque":"lata 820 g","contenido":820,"unidad":"g","precio":35.5,"merma":0.02,"origen":"ticket","nota":""},{"id":"croissant-pieza-horneada","nombre":"Croissant (pieza horneada)","cat":"Alimentos","empaque":"pieza","contenido":1,"unidad":"pza","precio":9,"merma":0.03,"origen":"ticket","nota":"Proveedor La Paz."},{"id":"brownie-porcion","nombre":"Brownie (porción)","cat":"Alimentos","empaque":"pieza","contenido":1,"unidad":"pza","precio":25,"merma":0.03,"origen":"ticket","nota":""},{"id":"cheesecake-rebanada","nombre":"Cheesecake (rebanada)","cat":"Alimentos","empaque":"pieza","contenido":1,"unidad":"pza","precio":0,"merma":0.0,"origen":"sin","nota":"NUEVO: costo por rebanada."},{"id":"pastel-de-zanahoria-rebanada","nombre":"Pastel de zanahoria (rebanada)","cat":"Alimentos","empaque":"pieza","contenido":1,"unidad":"pza","precio":0,"merma":0.0,"origen":"sin","nota":"NUEVO: costo por rebanada."},{"id":"tarta-de-manzana-rebanada","nombre":"Tarta de manzana (rebanada)","cat":"Alimentos","empaque":"pieza","contenido":1,"unidad":"pza","precio":0,"merma":0.0,"origen":"sin","nota":"NUEVO: costo por rebanada."},{"id":"carlota-de-limon-porcion","nombre":"Carlota de limón (porción)","cat":"Alimentos","empaque":"pieza","contenido":1,"unidad":"pza","precio":0,"merma":0.0,"origen":"sin","nota":"NUEVO: costo por porción."},{"id":"galleta-pieza","nombre":"Galleta (pieza)","cat":"Alimentos","empaque":"pieza","contenido":1,"unidad":"pza","precio":0,"merma":0.0,"origen":"sin","nota":"NUEVO: costo por pieza."},{"id":"nutella","nombre":"Nutella","cat":"Alimentos","empaque":"kg","contenido":1000,"unidad":"g","precio":209.69,"merma":0.02,"origen":"ticket","nota":""},{"id":"jamon","nombre":"Jamón","cat":"Alimentos","empaque":"kg","contenido":1000,"unidad":"g","precio":140,"merma":0.03,"origen":"mercado","nota":""},{"id":"queso-manchego","nombre":"Queso manchego","cat":"Alimentos","empaque":"kg","contenido":1000,"unidad":"g","precio":195,"merma":0.03,"origen":"mercado","nota":""},{"id":"quesillo","nombre":"Quesillo","cat":"Alimentos","empaque":"kg","contenido":1000,"unidad":"g","precio":156,"merma":0.03,"origen":"mercado","nota":""},{"id":"mayonesa","nombre":"Mayonesa","cat":"Alimentos","empaque":"kg","contenido":1000,"unidad":"g","precio":95,"merma":0.02,"origen":"mercado","nota":""},{"id":"chipotles-adobados","nombre":"Chipotles adobados","cat":"Alimentos","empaque":"lata 380 g","contenido":380,"unidad":"g","precio":35,"merma":0.02,"origen":"mercado","nota":""},{"id":"agua-purificada","nombre":"Agua purificada","cat":"Otros","empaque":"garrafón 20 L","contenido":20000,"unidad":"ml","precio":35,"merma":0.0,"origen":"ticket","nota":""},{"id":"agua-tonica","nombre":"Agua tónica","cat":"Otros","empaque":"pieza 355 ml","contenido":355,"unidad":"ml","precio":8.33,"merma":0.0,"origen":"ticket","nota":""},{"id":"hielo","nombre":"Hielo","cat":"Otros","empaque":"bolsa 5 kg","contenido":5000,"unidad":"g","precio":36,"merma":0.15,"origen":"ticket","nota":""},{"id":"azucar-stevia-sobre-1-g","nombre":"Azúcar Stevia (sobre 1 g)","cat":"Otros","empaque":"caja 400 sobres","contenido":400,"unidad":"pza","precio":138.1,"merma":0.0,"origen":"ticket","nota":"Se entrega a petición; no va en receta."},{"id":"vaso-caliente-12-oz-tapa","nombre":"Vaso caliente 12 oz + tapa","cat":"Desechables","empaque":"paquete 50","contenido":50,"unidad":"pza","precio":50,"merma":0.02,"origen":"ticket","nota":""},{"id":"vaso-caliente-16-oz-tapa","nombre":"Vaso caliente 16 oz + tapa","cat":"Desechables","empaque":"paquete 50","contenido":50,"unidad":"pza","precio":60,"merma":0.02,"origen":"ticket","nota":""},{"id":"vaso-frio-12-oz-tapa","nombre":"Vaso frío 12 oz + tapa","cat":"Desechables","empaque":"paquete 50","contenido":50,"unidad":"pza","precio":50,"merma":0.02,"origen":"ticket","nota":""},{"id":"vaso-frio-16-oz-tapa","nombre":"Vaso frío 16 oz + tapa","cat":"Desechables","empaque":"paquete 50","contenido":50,"unidad":"pza","precio":60,"merma":0.02,"origen":"ticket","nota":""},{"id":"vaso-unicel-8-oz","nombre":"Vaso unicel 8 oz","cat":"Desechables","empaque":"paquete 25","contenido":25,"unidad":"pza","precio":0,"merma":0.02,"origen":"sin","nota":"NUEVO: Café de Olla y Ponche."},{"id":"manga-faja-de-carton","nombre":"Manga / faja de cartón","cat":"Desechables","empaque":"paquete 100","contenido":100,"unidad":"pza","precio":0,"merma":0.02,"origen":"ticket","nota":""},{"id":"popote","nombre":"Popote","cat":"Desechables","empaque":"paquete 100","contenido":100,"unidad":"pza","precio":50,"merma":0.02,"origen":"ticket","nota":""},{"id":"servilleta","nombre":"Servilleta","cat":"Desechables","empaque":"paquete 500","contenido":500,"unidad":"pza","precio":50,"merma":0.05,"origen":"ticket","nota":""},{"id":"agitador-palita-18-cm","nombre":"Agitador / palita 18 cm","cat":"Desechables","empaque":"paquete 1000","contenido":1000,"unidad":"pza","precio":110,"merma":0.02,"origen":"ticket","nota":""},{"id":"cuchara-desechable","nombre":"Cuchara desechable","cat":"Desechables","empaque":"paquete 100","contenido":100,"unidad":"pza","precio":50,"merma":0.02,"origen":"mercado","nota":""},{"id":"plato-charola-desechable","nombre":"Plato / charola desechable","cat":"Desechables","empaque":"paquete 100","contenido":100,"unidad":"pza","precio":140,"merma":0.02,"origen":"mercado","nota":""}];
+const REC_DEF={"espresso":{"v":[[["cafe-en-grano",18],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]]},"americano":{"v":[[["cafe-en-grano",18],["agua-purificada",240],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]]},"latte":{"v":[[["cafe-en-grano",18],["leche-entera",250],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]]},"capuchino":{"v":[[["cafe-en-grano",18],["leche-entera",200],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]]},"cafe-moka":{"v":[[["cafe-en-grano",18],["leche-entera",220],["salsa-de-chocolate",30],["crema-para-batir",20],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]]},"chocolate":{"v":[[["chocolate-en-polvo-chocomilk",30],["leche-entera",260],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]]},"taro-latte":{"v":[[["base-de-taro-en-polvo",35],["leche-entera",250],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]]},"espresso-tonico":{"v":[[["cafe-en-grano",24],["agua-tonica",300],["hielo",160],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"iced-latte":{"v":[[["cafe-en-grano",24],["leche-entera",280],["hielo",160],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"frappe-oreo":{"v":[[["cafe-en-grano",18],["leche-entera",180],["base-neutra-para-frappe",30],["galleta-oreo-base-sin-relleno",30],["hielo",150],["crema-para-batir",25],["vaso-frio-12-oz-tapa",1],["popote",1],["servilleta",1]],[["cafe-en-grano",24],["leche-entera",250],["base-neutra-para-frappe",40],["galleta-oreo-base-sin-relleno",40],["hielo",220],["crema-para-batir",35],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"frappe-clasico":{"v":[[["cafe-en-grano",18],["leche-entera",180],["hielo",150],["vaso-frio-12-oz-tapa",1],["popote",1],["servilleta",1]],[["cafe-en-grano",24],["leche-entera",250],["hielo",220],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"frappe-moka":{"v":[[["cafe-en-grano",18],["leche-entera",180],["base-neutra-para-frappe",30],["salsa-de-chocolate",25],["hielo",150],["crema-para-batir",25],["vaso-frio-12-oz-tapa",1],["popote",1],["servilleta",1]],[["cafe-en-grano",24],["leche-entera",250],["base-neutra-para-frappe",40],["salsa-de-chocolate",35],["hielo",220],["crema-para-batir",35],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"frappe-taro":{"v":[[["base-de-taro-en-polvo",60],["leche-entera",220],["hielo",220],["crema-para-batir",35],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"affogato":{"v":[[["cafe-en-grano",18],["helado-de-vainilla",90],["vaso-frio-12-oz-tapa",1],["cuchara-desechable",1],["servilleta",1]]]},"smoothie-de-mango":{"v":[[["mango",230],["agua-purificada",120],["base-neutra-para-frappe",30],["hielo",220],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"smoothie-de-frutos-rojos":{"v":[[["mermelada-de-frutos-rojos",95],["fresas",85],["agua-purificada",120],["base-neutra-para-frappe",30],["hielo",220],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"frappe-de-rompope-coronado":{"v":[[["rompope-coronado",170],["leche-entera",110],["base-neutra-para-frappe",40],["hielo",220],["crema-para-batir",35],["canela-entera",1.5],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"frappe-de-pitahaya":{"v":[[["pitahaya",220],["agua-purificada",120],["base-neutra-para-frappe",30],["hielo",220],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"frappe-pina-colada":{"v":[[["calahua-pina-colada",210],["pina",110],["base-neutra-para-frappe",30],["hielo",220],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]]},"croissant-sencillo":{"v":[[["croissant-pieza-horneada",1],["plato-charola-desechable",1],["servilleta",1]]]},"croissant-de-jamon-y-queso":{"v":[[["croissant-pieza-horneada",1],["jamon",40],["queso-manchego",40],["plato-charola-desechable",1],["servilleta",1]]]},"croissant-de-nutella":{"v":[[["croissant-pieza-horneada",1],["nutella",40],["plato-charola-desechable",1],["servilleta",1]]]},"brownie-con-helado-de-vainilla":{"v":[[["brownie-porcion",1],["helado-de-vainilla",90],["plato-charola-desechable",1],["cuchara-desechable",1],["servilleta",1]]]},"latte-caramelo":{"v":[[["cafe-en-grano",18],["leche-entera",250],["jarabe-saborizante-caramelo",20],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]],"est":true},"cafe-de-olla":{"v":[[["cafe-en-grano",12],["piloncillo",25],["canela-entera",3],["agua-purificada",330],["vaso-unicel-8-oz",1],["servilleta",1]]],"est":true},"ponche-de-frutas":{"v":[[["ponche-de-frutas-preparado",240],["vaso-unicel-8-oz",1],["servilleta",1]]],"est":true},"iced-americano":{"v":[[["cafe-en-grano",24],["agua-purificada",220],["hielo",160],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"iced-moka":{"v":[[["cafe-en-grano",24],["leche-entera",250],["salsa-de-chocolate",35],["hielo",160],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"frappe-caramelo":{"v":[[["cafe-en-grano",18],["leche-entera",180],["base-neutra-para-frappe",30],["jarabe-saborizante-caramelo",25],["hielo",150],["crema-para-batir",25],["vaso-frio-12-oz-tapa",1],["popote",1],["servilleta",1]],[["cafe-en-grano",24],["leche-entera",250],["base-neutra-para-frappe",40],["jarabe-saborizante-caramelo",35],["hielo",220],["crema-para-batir",35],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"frappe-cajeta":{"v":[[["cafe-en-grano",18],["leche-entera",180],["base-neutra-para-frappe",30],["cajeta",30],["hielo",150],["crema-para-batir",25],["vaso-frio-12-oz-tapa",1],["popote",1],["servilleta",1]],[["cafe-en-grano",24],["leche-entera",250],["base-neutra-para-frappe",40],["cajeta",40],["hielo",220],["crema-para-batir",35],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"frappe-mazapan":{"v":[[["mazapan-pieza",2],["leche-entera",180],["base-neutra-para-frappe",30],["hielo",150],["vaso-frio-12-oz-tapa",1],["popote",1],["servilleta",1]],[["mazapan-pieza",3],["leche-entera",250],["base-neutra-para-frappe",40],["hielo",220],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"matcha-latte":{"v":[[["matcha-en-polvo",3],["leche-entera",250],["vaso-caliente-12-oz-tapa",1],["servilleta",1],["agitador-palita-18-cm",1]]],"est":true},"iced-matcha-latte":{"v":[[["matcha-en-polvo",4],["leche-entera",280],["hielo",160],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"frappe-matcha":{"v":[[["matcha-en-polvo",4],["leche-entera",180],["base-neutra-para-frappe",30],["hielo",150],["crema-para-batir",25],["vaso-frio-12-oz-tapa",1],["popote",1],["servilleta",1]],[["matcha-en-polvo",5],["leche-entera",250],["base-neutra-para-frappe",40],["hielo",220],["crema-para-batir",35],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"matcha-fresa":{"v":[[["matcha-en-polvo",4],["leche-entera",220],["fresas",80],["hielo",150],["vaso-frio-16-oz-tapa",1],["popote",1],["servilleta",1]]],"est":true},"cheesecake":{"v":[[["cheesecake-rebanada",1],["plato-charola-desechable",1],["cuchara-desechable",1],["servilleta",1]]]},"pastel-de-zanahoria":{"v":[[["pastel-de-zanahoria-rebanada",1],["plato-charola-desechable",1],["cuchara-desechable",1],["servilleta",1]]]},"tarta-de-manzana":{"v":[[["tarta-de-manzana-rebanada",1],["plato-charola-desechable",1],["cuchara-desechable",1],["servilleta",1]]]},"carlota-de-limon":{"v":[[["carlota-de-limon-porcion",1],["plato-charola-desechable",1],["cuchara-desechable",1],["servilleta",1]]]},"brownie":{"v":[[["brownie-porcion",1],["plato-charola-desechable",1],["servilleta",1]]]},"galletas":{"v":[[["galleta-pieza",1],["servilleta",1]]]},"cafe-en-grano-cafe-del-dia":{"v":[[]],"grams":"cafe-en-grano"},"desayuno-expres":{"combo":[{"pid":"americano"},{"pid":"croissant-sencillo"}]},"desayuno-completo":{"combo":[{"pid":"latte"},{"pid":"croissant-de-jamon-y-queso"}]},"tarde-de-antojo":{"combo":[{"flavor":1,"si":1},{"pid":"brownie"}]},"cafe-y-pastel":{"combo":[{"pid":"capuchino"},{"flavor":1}]},"combo-estudiante":{"combo":[{"pid":"iced-americano"},{"pid":"galletas"}]},"clasico-mexicano":{"combo":[{"pid":"cafe-de-olla"},{"pid":"galletas"}]},"combo-navideno":{"combo":[{"pid":"ponche-de-frutas","qty":2},{"pid":"galletas","qty":2}]},"combo-frappe":{"combo":[{"flavor":1,"si":0},{"flavor":1,"si":1}]}};
+const FLAVOR={"Oreo":"frappe-oreo","Moka":"frappe-moka","Clásico":"frappe-clasico","Caramelo":"frappe-caramelo","Cajeta":"frappe-cajeta","Cheesecake":"cheesecake","Pastel de Zanahoria":"pastel-de-zanahoria","Tarta de Manzana":"tarta-de-manzana"};
+
+/* ================= ALMACENAMIENTO ================= */
+const S={
+  get(k,d){try{const v=JSON.parse(localStorage.getItem('pos_'+k));return v==null?d:v;}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem('pos_'+k,JSON.stringify(v));if(window.mirrorSoon)mirrorSoon();}catch(e){toast('No se pudo guardar: memoria llena. Archive ventas antiguas en Admin.','err');}}
+};
+const $=id=>document.getElementById(id);
+const money=n=>'$'+(Math.round(n*100)/100).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:2});
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(m,t){const e=$('toast');e.textContent=m;e.className='toast on'+(t?' '+t:'');clearTimeout(e._t);e._t=setTimeout(()=>e.className='toast',2600);}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+let CFG=S.get('cfg2',{mesas:4,dimo:'2381880036',late:10});
+let CAT=S.get('catalogo2',null);
+function seedCatalog(keep){
+  const old={};(keep||[]).forEach(p=>old[p.id]=p);
+  CAT=MENU_PRODS.map(p=>{const o=old[p.id];const n=JSON.parse(JSON.stringify(p));if(o){n.off=!!o.off;n.receta=o.receta||'';}return n;});
+  (keep||[]).filter(p=>p.custom).forEach(p=>CAT.push(p));
+  S.set('catalogo2',CAT);S.set('catver',CATALOG_VERSION);
+}
+if(!CAT) seedCatalog([]);
+let OPEN=S.get('abiertas2',[]);
+let VENTAS=S.get('ventas',[]);
+let CIERRES=S.get('cierres',[]);
+let VCTR=S.get('vctr',VENTAS.length+1);
+function saveOpen(){S.set('abiertas2',OPEN);refreshBadges();}
+function saveCat(){S.set('catalogo2',CAT);}
+const prod=id=>CAT.find(p=>p.id===id);
+const catName=id=>(MENU_CATS.find(c=>c.id===id)||{name:'Otros'}).name;
+const emoji=p=>CAT_EMOJI[p.cat]||'☕';
+
+/* ================= RELOJ Y HORARIO ================= */
+function mxMin(){const p=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Mexico_City',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());let h=0,m=0;p.forEach(x=>{if(x.type==='hour')h=+x.value%24;if(x.type==='minute')m=+x.value;});return h*60+m;}
+function hhmm(min){let h=Math.floor(min/60)%24,m=min%60;const ap=h>=12?'pm':'am';h=h%12||12;return h+':'+String(m).padStart(2,'0')+' '+ap;}
+function tick(){const n=mxMin();$('clock').textContent=hhmm(n);const open=n>=450&&n<1320;const st=$('openSt');st.textContent=open?'Abierto':'Cerrado';st.className='st'+(open?'':' closed');}
+tick();setInterval(()=>{tick();if(curTab==='bar')renderBarra();if(curTab==='ped')renderOrders();},30000);
+
+/* ================= PESTAÑAS ================= */
+let curTab='ped';
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
+  if(b.dataset.tab==='adm'&&!isOwner())return owner('Entrar a Administración',()=>goTab(b));
+  goTab(b);});
+function goTab(b){curTab=b.dataset.tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+curTab));
+  if(curTab!=='ped')$('goTicket').hidden=true;
+  ({ped:renderPed,bar:renderBarra,ven:renderVentas,inv:renderInv,adm:renderAdmin})[curTab]();}
+function refreshBadges(){const n=OPEN.reduce((s,o)=>s+o.items.filter(i=>i.estado==='barra').length,0);const c=$('barCnt');c.textContent=n;c.hidden=!n;}
+
+/* ================= MODALES ================= */
+function openM(id){$(id).classList.add('on');}
+function closeM(id){$(id).classList.remove('on');}
+document.querySelectorAll('.mod').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-close]'))closeM(m.id);});});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mod.on').forEach(m=>closeM(m.id));});
+
+/* ================= ÓRDENES ================= */
+let curId=null;
+const cur=()=>OPEN.find(o=>o.id===curId);
+const oTotal=o=>o.items.reduce((s,i)=>s+i.total,0);
+const oQty=o=>o.items.reduce((s,i)=>s+i.qty,0);
+function oLabel(o){return o.tipo==='mesa'?'Mesa '+o.mesa:(o.tipo==='wa'?'WhatsApp':'Para llevar')+(o.cliente?' · '+o.cliente:'');}
+function minsAgo(ts){return Math.max(0,Math.round((Date.now()-ts)/60000));}
+function createOrder(o){o.id='o'+uid();o.items=[];o.creado=Date.now();OPEN.push(o);curId=o.id;saveOpen();return o;}
+function selectMesa(n){let o=OPEN.find(x=>x.tipo==='mesa'&&x.mesa===n);if(!o)o=createOrder({tipo:'mesa',mesa:n,cliente:''});curId=o.id;renderPed();}
+
+function renderOrders(){
+  let h='<div class="sec-t">Mesas</div><div class="mesas">';
+  for(let n=1;n<=CFG.mesas;n++){const o=OPEN.find(x=>x.tipo==='mesa'&&x.mesa===n);const busy=o&&o.items.length;
+    h+='<button class="mesa'+(busy?' busy':'')+(o&&o.id===curId?' sel':'')+'" data-mesa="'+n+'"><span class="dot"></span><b>Mesa '+n+'</b><small>'+(busy?money(oTotal(o))+' · '+minsAgo(o.creado)+' min':'Libre')+'</small></button>';}
+  h+='</div><div class="sec-t">Nuevo</div><div class="newbtns">'+
+    '<button class="nb" data-new="llevar"><span class="i">🥡</span>Para llevar / mostrador</button>'+
+    '<button class="nb" data-new="wa"><span class="i">💬</span>Pedido de WhatsApp</button>'+
+    '<button class="nb" data-paste><span class="i">📋</span>Pegar mensaje de WhatsApp</button></div>';
+  const others=OPEN.filter(o=>o.tipo!=='mesa').sort((a,b)=>(a.recogeMin??9999)-(b.recogeMin??9999)||a.creado-b.creado);
+  h+='<div class="sec-t">Pedidos abiertos ('+others.length+')</div><div class="owrap">';
+  if(!others.length)h+='<p class="muted" style="font-size:.85rem">Sin pedidos para llevar.</p>';
+  others.forEach(o=>{const pend=o.items.filter(i=>i.estado==='barra').length,ready=o.items.length&&o.items.every(i=>i.estado==='listo');
+    h+='<button class="ocard'+(o.id===curId?' sel':'')+'" data-oid="'+o.id+'"><div class="r1"><span>'+(o.tipo==='wa'?'💬 ':'🥡 ')+esc(o.cliente||'Sin nombre')+'</span><span class="money">'+money(oTotal(o))+'</span></div>'+
+    '<div class="r2"><span>'+(o.recoge?'⏰ '+esc(o.recoge):minsAgo(o.creado)+' min')+'</span>'+(ready?'<span class="tag ok">Listo</span>':pend?'<span class="tag inbar">En barra</span>':o.items.length?'':'<span class="tag">Vacío</span>')+'</div></button>';});
+  $('olist').innerHTML=h+'</div>';
+}
+$('olist').addEventListener('click',e=>{
+  const m=e.target.closest('[data-mesa]');if(m)return selectMesa(+m.dataset.mesa);
+  const o=e.target.closest('[data-oid]');if(o){curId=o.dataset.oid;return renderPed();}
+  const n=e.target.closest('[data-new]');if(n)return openNew(n.dataset.new);
+  if(e.target.closest('[data-paste]')){$('waTxt').value='';$('waPrev').innerHTML='';$('waOk').disabled=true;openM('mWA');setTimeout(()=>$('waTxt').focus(),100);}
+});
+
+/* nuevo pedido llevar / whatsapp */
+let mnTipo='llevar',mnWhen='asap',mnPay='mostrador';
+function pickupOpts(){const n=mxMin();const o=[['asap','Lo antes posible'],['15','En 15 min'],['30','En 30 min'],['60','En 1 hora']];return o;}
+function openNew(t){mnTipo=t;mnWhen='asap';mnPay='mostrador';$('mnTitle').textContent=t==='wa'?'Pedido de WhatsApp':'Para llevar / mostrador';
+  $('mnSub').textContent=t==='wa'?'Escriba el nombre y la hora que pidió el cliente.':'El nombre ayuda a llamar al cliente cuando esté listo.';
+  $('mnName').value='';$('mnWhenG').hidden=t!=='wa';$('mnPayG').hidden=t!=='wa';
+  $('mnWhen').innerHTML=pickupOpts().map(([v,l])=>'<button class="op'+(v===mnWhen?' on':'')+'" data-v="'+v+'">'+l+'</button>').join('')+'<input id="mnHora" type="time" style="flex:1 1 140px;min-height:50px" title="Otra hora">';
+  $('mnPay').innerHTML=[['mostrador','💵 Al recoger'],['dimo','📱 Transferencia DiMo']].map(([v,l])=>'<button class="op'+(v===mnPay?' on':'')+'" data-v="'+v+'">'+l+'</button>').join('');
+  openM('mNew');setTimeout(()=>$('mnName').focus(),100);}
+$('mnWhen').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;mnWhen=b.dataset.v;$('mnHora').value='';$('mnWhen').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x===b));});
+$('mnPay').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;mnPay=b.dataset.v;$('mnPay').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x===b));});
+$('mnOk').addEventListener('click',()=>{
+  const o={tipo:mnTipo,cliente:$('mnName').value.trim()};
+  if(mnTipo==='wa'){
+    if(!o.cliente){$('mnName').focus();return toast('Escriba el nombre del cliente','err');}
+    const hv=$('mnHora').value;const n=mxMin();
+    if(hv){const[h,m]=hv.split(':').map(Number);o.recogeMin=h*60+m;o.recoge=hhmm(o.recogeMin);}
+    else if(mnWhen==='asap'){o.recogeMin=n+15;o.recoge='Lo antes posible';}
+    else{o.recogeMin=n+(+mnWhen);o.recoge=hhmm(o.recogeMin);}
+    o.pagoPrev=mnPay==='dimo'?'Transferencia':'Al recoger';
+  }else if(!o.cliente){o.cliente='Mostrador '+(OPEN.filter(x=>x.tipo==='llevar').length+1);}
+  createOrder(o);closeM('mNew');renderPed();toast('Pedido creado: '+oLabel(o));
+});
+
+/* ================= CATÁLOGO ================= */
+let curCat='todos';
+function priceLbl(p){if(p.ask)return'Precio del día';if(p.sizes)return p.sizes.map(s=>money(s.price)).join(' / ');return money(p.price);}
+function renderCats(){
+  const used=MENU_CATS.filter(c=>!c.virtual&&CAT.some(p=>p.cat===c.id));
+  const extra=CAT.some(p=>!MENU_CATS.find(c=>c.id===p.cat))?[{id:'otros',short:'Otros',icon:'➕'}]:[];
+  $('cats').innerHTML=[{id:'todos',short:'Todo',icon:'⭐'},...used,{id:'sin-cafe',short:'Sin café',icon:'🌿'},...extra].map(c=>'<button class="cat'+(c.id===curCat?' on':'')+'" data-c="'+c.id+'">'+c.icon+' '+esc(c.short||c.name)+'</button>').join('');
+}
+$('cats').addEventListener('click',e=>{const b=e.target.closest('.cat');if(!b)return;curCat=b.dataset.c;$('q').value='';renderCats();renderGrid();});
+$('q').addEventListener('input',renderGrid);
+function renderGrid(){
+  const q=$('q').value.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  let L=CAT;
+  if(q)L=CAT.filter(p=>p.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q));
+  else if(curCat==='sin-cafe')L=CAT.filter(p=>p.nocafe);
+  else if(curCat==='otros')L=CAT.filter(p=>!MENU_CATS.find(c=>c.id===p.cat));
+  else if(curCat!=='todos')L=CAT.filter(p=>p.cat===curCat);
+  $('qInfo').textContent=q?L.length+' resultado(s)':'';
+  $('grid').innerHTML=L.map(p=>'<button class="pb'+(p.off?' off':'')+'" data-p="'+p.id+'"><span class="em">'+emoji(p)+'</span><b>'+esc(p.name)+'</b><span class="tg">'+(p.oz?'<span class="tag">'+p.oz+'</span>':'')+(p.nocafe?'<span class="tag nc">Sin café</span>':'')+(RECIPES[p.id]?'<span class="tag">📖</span>':'')+'</span><span class="pr">'+priceLbl(p)+'</span></button>').join('')||'<div class="empty"><div class="ic">🔍</div>Sin productos</div>';
+}
+$('grid').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;const p=prod(b.dataset.p);
+  if(p.off){toast(p.name+' está marcado como agotado','err');return;}openProd(p);});
+
+/* ================= MODAL PRODUCTO ================= */
+let MP=null;
+const NOTE_CHIPS=['Sin azúcar','Poco azúcar','Poco hielo','Sin hielo','Extra caliente','Tibio','Sin crema batida','Para llevar'];
+function openProd(p){
+  MP={p,qty:1,size:0,milk:'Entera',flavor:p.flavors?p.flavors[0]:null,notes:[],grano:'House Blend'};
+  $('mpName').textContent=p.name;$('mpSub').textContent=[catName(p.cat),p.oz,p.tag].filter(Boolean).join(' · ');
+  let h='';
+  if(p.includes)h+='<div class="incl"><b>Incluye:</b> '+p.includes.map(esc).join(' · ')+'</div>';
+  if(p.ask){h+='<div class="og"><h4>Café del día</h4><div class="opts" data-g="grano">'+['House Blend','Coatepec','Robusta','Otro'].map((v,k)=>'<button class="op'+(k?'':' on')+'" data-v="'+v+'">'+v+'</button>').join('')+'</div></div>'+
+    '<div class="frm"><label>Gramos<input id="mpGr" type="number" min="0" value="250"></label><label>Precio $<input id="mpPrice" type="number" min="0" placeholder="$"></label></div>';}
+  if(p.sizes)h+='<div class="og"><h4>Tamaño</h4><div class="opts" data-g="size">'+p.sizes.map((s,k)=>'<button class="op'+(k?'':' on')+'" data-v="'+k+'">'+esc(s.label)+'<small>'+(s.sub||'')+' · '+money(s.price)+'</small></button>').join('')+'</div></div>';
+  if(p.flavors)h+='<div class="og"><h4>'+esc(p.flavorTitle||'Sabor')+'</h4><div class="opts" data-g="flavor">'+p.flavors.map((f,k)=>'<button class="op'+(k?'':' on')+'" data-v="'+esc(f)+'">'+esc(f)+'</button>').join('')+'</div></div>';
+  if(p.milk)h+='<div class="og"><h4>Leche</h4><div class="opts" data-g="milk">'+['Entera','Deslactosada'].map((m,k)=>'<button class="op'+(k?'':' on')+'" data-v="'+m+'">🥛 '+m+'</button>').join('')+'</div></div>';
+  if(!p.ask&&!['croissants','postres'].includes(p.cat))h+='<div class="og"><h4>Indicaciones</h4><div class="chips" data-g="notes">'+NOTE_CHIPS.map(c=>'<button class="ch" data-v="'+c+'">'+c+'</button>').join('')+'</div></div>';
+  h+='<div class="og"><h4>Nota</h4><input id="mpNote" placeholder="Otra indicación (opcional)"></div>';
+  if(p.pair){const pp=prod(p.pair.id);if(pp&&!pp.off)h+='<div class="pair">💡 Sugiera: <b>'+esc(pp.name)+'</b> '+money(pp.price)+'<button class="btn b-line b-sm" id="mpPair">+ Agregar</button></div>';}
+  if(RECIPES[p.id]||p.receta)h+='<p style="margin-top:12px"><button class="btn b-line b-sm" id="mpRec">📖 Ver receta</button></p>';
+  $('mpBody').innerHTML=h;mpUpd();openM('mProd');
+}
+$('mpBody').addEventListener('click',e=>{
+  const b=e.target.closest('[data-v]');
+  if(b){const g=b.parentElement.dataset.g;
+    if(g==='notes'){b.classList.toggle('on');const v=b.dataset.v;MP.notes=MP.notes.includes(v)?MP.notes.filter(x=>x!==v):MP.notes.concat(v);}
+    else{b.parentElement.querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x===b));
+      if(g==='size')MP.size=+b.dataset.v;if(g==='milk')MP.milk=b.dataset.v;if(g==='flavor')MP.flavor=b.dataset.v;if(g==='grano')MP.grano=b.dataset.v;}
+    mpUpd();return;}
+  if(e.target.id==='mpPair'){const pp=prod(MP.p.pair.id);addItem(pp,{qty:1});e.target.textContent='✓ Agregado';e.target.disabled=true;}
+  if(e.target.id==='mpRec')openRecipe(MP.p.id);
+});
+$('mpBody').addEventListener('input',e=>{if(e.target.id==='mpPrice')mpUpd();});
+function mpUnit(){const p=MP.p;if(p.ask)return +($('mpPrice')||{}).value||0;if(p.sizes)return p.sizes[MP.size].price;return p.price;}
+function mpUpd(){$('mpQty').textContent=MP.qty;$('mpAdd').textContent='Agregar · '+money(mpUnit()*MP.qty);}
+$('mpMinus').onclick=()=>{if(MP.qty>1){MP.qty--;mpUpd();}};
+$('mpPlus').onclick=()=>{MP.qty++;mpUpd();};
+$('mpAdd').onclick=()=>{
+  const p=MP.p;const unit=mpUnit();
+  if(p.ask&&!unit){toast('Escriba el precio del café','err');$('mpPrice').focus();return;}
+  const det=[];let tam='';
+  if(p.sizes){const s=p.sizes[MP.size];tam=s.label;det.push(s.label+(s.sub?' '+s.sub:''));}
+  if(p.flavors)det.push(MP.flavor);
+  let grams=0;if(p.ask){grams=+$('mpGr').value||0;det.push(MP.grano);if(grams)det.push(grams+' g');}
+  const notes=MP.notes.slice();const nt=$('mpNote').value.trim();if(nt)notes.push(nt);
+  addItem(p,{qty:MP.qty,precioU:unit,detalle:det.join(', '),tamano:tam,leche:p.milk?MP.milk:'',notas:notes.join(', '),si:p.sizes?MP.size:0,flavor:p.flavors?MP.flavor:'',grams});
+  closeM('mProd');
+};
+function addItem(p,o){
+  let ord=cur();
+  if(!ord){ord=createOrder({tipo:'llevar',cliente:'Mostrador '+(OPEN.filter(x=>x.tipo==='llevar').length+1)});toast('Se creó un pedido para llevar');}
+  const precioU=o.precioU!=null?o.precioU:(p.sizes?p.sizes[0].price:p.price);
+  const it={uid:uid(),pid:p.id,nombre:p.name,icono:emoji(p),detalle:o.detalle||'',tamano:o.tamano||'',leche:o.leche||'',notas:o.notas||'',qty:o.qty||1,precioU,total:precioU*(o.qty||1),estado:'nuevo',si:o.si||0,flavor:o.flavor||'',grams:o.grams||0};
+  const same=ord.items.find(i=>i.estado==='nuevo'&&i.pid===it.pid&&i.detalle===it.detalle&&i.leche===it.leche&&i.notas===it.notas&&i.precioU===it.precioU);
+  if(same){same.qty+=it.qty;same.total=same.qty*same.precioU;}else ord.items.push(it);
+  saveOpen();renderTicket();renderOrders();
+}
+
+/* ================= TICKET ================= */
+function renderTicket(){
+  const o=cur();const T=$('ticket');
+  if(!o){$('goTicket').hidden=true;T.innerHTML='<div class="empty" style="margin:auto"><div class="ic">🧾</div><b>Elija una mesa o cree un pedido</b><p style="font-size:.9rem;margin-top:6px">Si toca un producto sin elegir, se crea un pedido para llevar.</p></div>';return;}
+  const tipoTag=o.tipo==='mesa'?'<span class="tag">🪑 Mesa</span>':o.tipo==='wa'?'<span class="tag wa">💬 WhatsApp</span>':'<span class="tag ll">🥡 Para llevar</span>';
+  let h='<div class="thead"><h2>'+esc(o.tipo==='mesa'?'Mesa '+o.mesa:(o.cliente||'Sin nombre'))+' '+tipoTag+'</h2><div class="sub">Abierto hace '+minsAgo(o.creado)+' min'+(o.recoge?' · Recoge: <b>'+esc(o.recoge)+'</b>':'')+(o.pagoPrev?' · Pago: '+esc(o.pagoPrev):'')+'</div>'+
+    '<div class="meta"><input id="tName" placeholder="Nombre del cliente" value="'+esc(o.cliente||'')+'"><input id="tNote" placeholder="Nota del pedido" value="'+esc(o.nota||'')+'"></div></div><div class="titems scroll">';
+  if(!o.items.length)h+='<div class="empty"><div class="ic">☕</div>Toque los productos para agregarlos</div>';
+  o.items.forEach(i=>{h+='<div class="ti"><div class="r1"><span>'+i.icono+'</span><div style="flex:1"><div class="nm">'+esc(i.nombre)+'</div>'+
+    (i.detalle||i.leche?'<div class="dt">'+esc([i.detalle,i.leche?'Leche '+i.leche.toLowerCase():''].filter(Boolean).join(' · '))+'</div>':'')+(i.notas?'<div class="nt">📝 '+esc(i.notas)+'</div>':'')+'</div>'+
+    (i.estado==='barra'?'<span class="tag inbar">En barra</span>':i.estado==='listo'?'<span class="tag ok">Listo</span>':'<span class="tag">Nuevo</span>')+'</div>'+
+    '<div class="r2"><span class="qty"><button data-q="-1" data-u="'+i.uid+'">−</button><span>'+i.qty+'</span><button data-q="1" data-u="'+i.uid+'">+</button></span><span class="muted" style="font-size:.85rem">'+money(i.precioU)+' c/u</span><button class="x" data-del="'+i.uid+'">Quitar</button><span class="tot money">'+money(i.total)+'</span></div></div>';});
+  const nuevos=o.items.filter(i=>i.estado==='nuevo').length;
+  h+='</div><div class="tfoot"><div class="tsum"><span class="muted">'+oQty(o)+' producto(s)</span><b class="money">'+money(oTotal(o))+'</b></div><div class="tbtns">'+
+    '<button class="btn '+(nuevos&&o.items.some(i=>i.estado!=='nuevo')?'b-main pulse':'b-dark')+'" id="tBar"'+(nuevos?'':' disabled')+'>☕ '+(nuevos&&o.items.some(i=>i.estado!=='nuevo')?'Enviar agregados':'Enviar a barra')+(nuevos?' ('+nuevos+')':'')+'</button>'+
+    '<button class="btn b-main" id="tPay"'+(o.items.length?'':' disabled')+'>💳 Cobrar</button>'+
+    '<button class="btn b-red b-sm full" id="tCancel">'+(o.items.length?'Cancelar pedido':'Cerrar')+'</button></div></div>';
+  T.innerHTML=h;
+  const g=$('goTicket');g.hidden=!o.items.length;g.textContent='🧾 Ver pedido · '+money(oTotal(o));
+}
+$('ticket').addEventListener('click',e=>{
+  const o=cur();if(!o)return;
+  const q=e.target.closest('[data-q]');if(q){const i=o.items.find(x=>x.uid===q.dataset.u);const dq=+q.dataset.q;
+    if(dq>0&&i.estado!=='nuevo'){
+      // ya se preparó o está en barra: lo que pide de más va como renglón nuevo para enviarlo a barra
+      let n=o.items.find(x=>x.estado==='nuevo'&&x.pid===i.pid&&x.detalle===i.detalle&&x.leche===i.leche&&x.notas===i.notas&&x.precioU===i.precioU);
+      if(n){n.qty++;n.total=n.qty*n.precioU;}else{n=Object.assign({},i,{uid:uid(),qty:1,total:i.precioU,estado:'nuevo'});delete n.enviado;o.items.push(n);}
+      toast('+1 '+i.nombre+' · toque "Enviar a barra"');
+    }else{
+      if(dq<0&&i.estado==='barra'&&!confirm(i.nombre+' ya está en barra. ¿Quitar uno?'))return;
+      i.qty+=dq;if(i.qty<=0)o.items=o.items.filter(x=>x!==i);else i.total=i.qty*i.precioU;
+    }
+    saveOpen();renderTicket();renderOrders();refreshBadges();return;}
+  const d=e.target.closest('[data-del]');if(d){const it=o.items.find(x=>x.uid===d.dataset.del);if(it&&it.estado!=='nuevo'&&!confirm('¿Quitar '+it.nombre+'? Ya se envió a barra.'))return;
+    o.items=o.items.filter(x=>x.uid!==d.dataset.del);saveOpen();renderTicket();renderOrders();refreshBadges();return;}
+  if(e.target.id==='tBar'){const nuevos=o.items.filter(i=>i.estado==='nuevo');if(CFG.comanda)printComanda(o,nuevos);o.items.forEach(i=>{if(i.estado==='nuevo'){i.estado='barra';i.enviado=Date.now();}});o.enviado=o.enviado||Date.now();saveOpen();renderTicket();renderOrders();toast('Enviado a barra ☕');return;}
+  if(e.target.id==='tPay'){const nv=o.items.filter(i=>i.estado==='nuevo').length;if(nv&&o.items.some(i=>i.estado!=='nuevo')&&!confirm('Hay '+nv+' producto(s) agregados que no se han enviado a barra. ¿Cobrar de todos modos?'))return;if(!TURNO)return askTurno(openPay);return openPay();}
+  if(e.target.id==='tCancel'){if(o.items.length&&!confirm('¿Cancelar el pedido de '+oLabel(o)+'? Se borran sus productos.'))return;
+    const doIt=()=>{if(o.items.length)log('Cancelar pedido',oLabel(o)+' · '+money(oTotal(o)));OPEN=OPEN.filter(x=>x!==o);curId=null;saveOpen();renderPed();};
+    if(o.items.some(i=>i.estado!=='nuevo'))return owner('Cancelar un pedido que ya se preparó',doIt);doIt();}
+});
+$('ticket').addEventListener('change',e=>{const o=cur();if(!o)return;if(e.target.id==='tName'){o.cliente=e.target.value.trim();saveOpen();renderOrders();renderTicket();}if(e.target.id==='tNote'){o.nota=e.target.value.trim();saveOpen();}});
+function renderPed(){renderOrders();renderCats();renderGrid();renderTicket();refreshBadges();}
+
+$('goTicket').onclick=()=>$('ticket').scrollIntoView({behavior:'smooth'});
+if('IntersectionObserver' in window)new IntersectionObserver(es=>document.body.classList.toggle('tk-vis',es[0].isIntersecting),{threshold:.15}).observe($('ticket'));
+/* ================= PEGAR WHATSAPP ================= */
+let WAP=null;
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();}
+function parseWA(t){
+  const r={cliente:'',recoge:'',pago:'',items:[],notas:''};
+  const g=re=>{const m=t.match(re);return m?m[1].trim():'';};
+  r.cliente=g(/Nombre:\*?\s*(.+)/);r.recoge=g(/Recoger en mostrador:\*?\s*(.+)/);r.pago=/DiMo|Transferencia/i.test(g(/Pago:\*?\s*(.+)/))?'Transferencia':(g(/Pago:\*?\s*(.+)/)?'Al recoger':'');
+  r.notas=g(/Notas:\*?\s*(.+)/);
+  t.split('\n').forEach(l=>{const m=l.match(/[•\-*]\s*(\d+)\s*x\s+(.+?)\s+[—-]+\s+\$\s*([\d.,]+)/);if(!m)return;
+    let qty=+m[1],rest=m[2].trim(),tot=+m[3].replace(/,/g,'');let name=rest,det='';
+    const pm=rest.match(/^(.*?)\s*\((.*)\)\s*$/);if(pm){name=pm[1].trim();det=pm[2].trim();}
+    const p=CAT.find(x=>norm(x.name)===norm(name))||CAT.find(x=>norm(name).startsWith(norm(x.name)));
+    let leche='';det=det.split(',').map(s=>s.trim()).filter(s=>{const lm=s.match(/^Leche\s+(.*)$/i);if(lm){leche=lm[1].charAt(0).toUpperCase()+lm[1].slice(1);return false;}return true;}).join(', ');
+    let si=0,flavor='';if(p&&p.sizes){const k=p.sizes.findIndex(s=>new RegExp('\\b'+s.label+'\\b','i').test(det));if(k>=0)si=k;}
+    if(p&&p.flavors){flavor=p.flavors.find(f=>det.toLowerCase().includes(f.toLowerCase()))||p.flavors[0];}
+    r.items.push({p,name,det,leche,qty,si,flavor,unit:Math.round(tot/qty*100)/100});});
+  return r;
+}
+$('waRead').onclick=()=>{
+  WAP=parseWA($('waTxt').value);
+  if(!WAP.items.length){$('waPrev').innerHTML='<p class="note">No encontré productos. Copie el mensaje completo, desde "¡Hola Aroma a Café!" hasta el total.</p>';$('waOk').disabled=true;return;}
+  $('waPrev').innerHTML='<div class="incl"><b>👤 '+esc(WAP.cliente||'Sin nombre')+'</b> · ⏰ '+esc(WAP.recoge||'—')+' · 💳 '+esc(WAP.pago||'—')+(WAP.notas?'<br>📝 '+esc(WAP.notas):'')+'</div><div class="lines">'+
+    WAP.items.map(i=>'<div><span>'+i.qty+'× '+esc(i.name)+(i.det?' <span class="muted">('+esc(i.det)+')</span>':'')+(i.leche?' <span class="muted">· leche '+esc(i.leche.toLowerCase())+'</span>':'')+(i.p?'':' <span class="tag off">No está en el catálogo</span>')+'</span><b>'+money(i.unit*i.qty)+'</b></div>').join('')+
+    '<div><b>Total</b><b>'+money(WAP.items.reduce((s,i)=>s+i.unit*i.qty,0))+'</b></div></div>';
+  $('waOk').disabled=false;
+};
+$('waOk').onclick=()=>{
+  if(!WAP)return;const n=mxMin();let rm=null;const tm=(WAP.recoge||'').match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
+  if(tm){let h=+tm[1]%12;if(/pm/i.test(tm[3]))h+=12;rm=h*60+(+tm[2]);}else if(/15 min|antes posible/i.test(WAP.recoge))rm=n+15;else if(/30 min/i.test(WAP.recoge))rm=n+30;else if(/1 hora/i.test(WAP.recoge))rm=n+60;
+  const o=createOrder({tipo:'wa',cliente:WAP.cliente||'WhatsApp',recoge:WAP.recoge,recogeMin:rm,pagoPrev:WAP.pago,nota:WAP.notas});
+  WAP.items.forEach(i=>{const p=i.p||{id:'x-'+uid(),name:i.name,cat:'otros'};o.items.push({uid:uid(),pid:p.id,nombre:p.name,icono:emoji(p),detalle:i.det,tamano:p.sizes?p.sizes[i.si].label:'',leche:i.leche,notas:'',qty:i.qty,precioU:i.unit,total:i.unit*i.qty,estado:'nuevo',si:i.si,flavor:i.flavor,grams:0});});
+  saveOpen();closeM('mWA');renderPed();toast('Pedido de '+o.cliente+' creado');
+};
+
+/* ================= COBRAR ================= */
+/* ---------- PROMOCIONES ---------- */
+const PROMO_DEF=[
+  {id:'primera',nombre:'50% primera compra',tipo:'pct',valor:50,aplica:'bebidas',activa:true,hasta:'',pin:false,sellos:false},
+  {id:'lealtad',nombre:'Tarjeta de lealtad · bebida gratis',tipo:'pct',valor:100,aplica:'bebidas',activa:true,hasta:'',pin:false,sellos:true}];
+let PROMOS=S.get('promos',null);if(!PROMOS){PROMOS=PROMO_DEF;S.set('promos',PROMOS);}
+const NODRINK=['croissants','postres','grano','combos'];
+function isDrinkItem(i){const p=prod(i.pid);return !!p&&!NODRINK.includes(p.cat);}
+function isFoodItem(i){const p=prod(i.pid);return !!p&&['croissants','postres'].includes(p.cat);}
+function todayISO(){const d=new Date(Date.now()-new Date().getTimezoneOffset()*60000);return d.toISOString().slice(0,10);}
+function promoVig(p){return p.activa&&(!p.hasta||todayISO()<=p.hasta);}
+function promoFits(p,i){return p.aplica==='todo'?true:p.aplica==='alimentos'?isFoodItem(i):isDrinkItem(i);}
+function promoOff(p,precio){return Math.round(Math.min(precio,p.tipo==='monto'?p.valor:precio*p.valor/100)*100)/100;}
+function promoDesc(p){return (p.tipo==='monto'?'−'+money(p.valor):p.valor+'%')+' · '+({bebidas:'bebidas',alimentos:'postres y croissants',todo:'todo el menú'}[p.aplica]||'');}
+/* unidades del pedido (una por pieza) */
+function units(o){const U=[];o.items.forEach(i=>{for(let k=0;k<i.qty;k++)U.push({key:i.uid+'#'+k,it:i,k,n:i.qty});});return U;}
+let CBU={},CBCOST={},promoAuth=false;
+function promoTotal(o){let t=0;units(o).forEach(u=>{const p=PROMOS.find(x=>x.id===CBU[u.key]);if(p)t+=promoOff(p,u.it.precioU);});return Math.round(t*100)/100;}
+function promoGroups(o){const G={};units(o).forEach(u=>{const p=PROMOS.find(x=>x.id===CBU[u.key]);if(!p)return;const g=G[p.id]=G[p.id]||{id:p.id,nombre:p.nombre,n:0,monto:0,productos:[]};g.n++;g.monto=Math.round((g.monto+promoOff(p,u.it.precioU))*100)/100;g.productos.push(u.it.nombre);});return Object.values(G);}
+function renderPromo(){const o=cur();const act=PROMOS.filter(promoVig);
+  const U=units(o).filter(u=>act.some(p=>promoFits(p,u.it)));
+  $('cbPromoG').hidden=!act.length||!U.length;
+  $('cbPromo').innerHTML=U.map(u=>{const i=u.it,sel=PROMOS.find(x=>x.id===CBU[u.key]);
+    const off=sel?promoOff(sel,i.precioU):0,cost=CBCOST[i.uid];
+    const warn=sel&&cost!=null&&off<i.precioU&&(i.precioU-off)<cost?'<span class="prm-w">⚠ Con la promo cobra '+money(i.precioU-off)+' y el costo es '+money(cost)+': se pierde dinero</span>':'';
+    return '<div class="prm-row"><div class="pn">'+esc(i.icono||'')+' '+esc(i.nombre)+(u.n>1?' <span class="muted">('+(u.k+1)+' de '+u.n+')</span>':'')+'<small>'+esc([i.detalle||i.tamano,money(i.precioU)].filter(Boolean).join(' · '))+'</small></div>'+
+      act.filter(p=>promoFits(p,i)).map(p=>'<button class="prm-b'+(sel===p?' on':'')+'" data-u="'+u.key+'" data-p="'+p.id+'">'+esc(p.nombre)+'</button>').join('')+
+      '<span class="prm-d">'+(off?'−'+money(off):'')+'</span>'+warn+'</div>';}).join('');
+  const G=promoGroups(o),n=G.reduce((s,g)=>s+g.n,0);
+  $('cbPromoSum').textContent=n?'Promoción en '+n+' producto(s) = '+n+' persona(s) · −'+money(promoTotal(o)):'';}
+$('cbPromo').addEventListener('click',e=>{const b=e.target.closest('.prm-b');if(!b)return;
+  CBU[b.dataset.u]=CBU[b.dataset.u]===b.dataset.p?undefined:b.dataset.p;if(!CBU[b.dataset.u])delete CBU[b.dataset.u];
+  promoAuth=false;renderPromo();cbUpd();});
+let CB={pay:'Efectivo',desc:'none'};
+const APPVER='v4',APPDATE='15/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
+const PAYS=[['Efectivo','💵 Efectivo'],['Tarjeta','💳 Tarjeta'],['Transferencia','📱 Transferencia / DiMo']];
+const DESCS=[['none','Ninguno'],['cortesia','Cortesía (100%)'],['otro','Otro monto']];
+function firstDrink(o){return o.items.find(i=>{const p=prod(i.pid);return p&&!['croissants','postres','grano','combos'].includes(p.cat);});}
+function extraDesc(o){const rest=Math.max(0,oTotal(o)-promoTotal(o));
+  if(CB.desc==='cortesia')return rest;if(CB.desc==='otro')return Math.min(rest,+$('cbDescAmt').value||0);return 0;}
+function descAmt(o){return Math.round((promoTotal(o)+extraDesc(o))*100)/100;}
+function openPay(){const o=cur();if(!o||!o.items.length)return;
+  CB={pay:o.pagoPrev==='Transferencia'?'Transferencia':'Efectivo',desc:'none'};CBU={};promoAuth=false;
+  CBCOST={};o.items.forEach(i=>{try{const a={},miss=[];consumoItem(i,o.tipo,a,1,miss);const r=costOf(a);if(!r.inc&&!miss.length&&r.c>0)CBCOST[i.uid]=Math.round(r.c*100)/100;}catch(e){}});
+  renderPromo();
+  $('cbSub').textContent=oLabel(o);
+  $('cbLines').innerHTML=o.items.map(i=>'<div><span>'+i.qty+'× '+esc(i.nombre)+(i.detalle?' <span class="muted">('+esc(i.detalle)+')</span>':'')+'</span><span class="money">'+money(i.total)+'</span></div>').join('')+'<div><b>Subtotal</b><b class="money">'+money(oTotal(o))+'</b></div>';
+  $('cbDesc').innerHTML=DESCS.map(([v,l])=>'<button class="op'+(v===CB.desc?' on':'')+'" data-v="'+v+'">'+l+'</button>').join('');
+  $('cbPay').innerHTML=PAYS.map(([v,l])=>'<button class="op'+(v===CB.pay?' on':'')+'" data-v="'+v+'">'+l+'</button>').join('');
+  $('cbDescAmt').value='';$('cbDescWhy').value='';$('cbRec').value='';$('cbDimoOk').checked=false;
+  cbUpd();openM('mPay');}
+function cbTotal(){const o=cur();return Math.max(0,oTotal(o)-descAmt(o));}
+function cbUpd(){const o=cur(),t=cbTotal(),d=descAmt(o);
+  $('cbDescOtro').hidden=CB.desc!=='otro';
+  $('cbTot').textContent=money(t)+(d?'  (−'+money(d)+')':'');
+  $('cbCash').hidden=CB.pay!=='Efectivo';$('cbDimo').hidden=CB.pay!=='Transferencia';$('cbDimoAmt').textContent=money(t);
+  const bills=[t,50,100,200,500].filter((v,k,a)=>v>=t&&a.indexOf(v)===k);
+  $('cbBills').innerHTML=bills.map((b,k)=>'<button class="ch" data-bill="'+b+'">'+(k===0?'Exacto '+money(b):money(b))+'</button>').join('');
+  const rec=+$('cbRec').value;const c=$('cbCambio');
+  if(CB.pay==='Efectivo'&&$('cbRec').value!==''){const ch=rec-t;c.textContent=ch>=0?'Cambio: '+money(ch):'Faltan '+money(-ch);c.className='cambio'+(ch<0?' neg':'');}else c.textContent='';
+}
+$('cbDesc').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;CB.desc=b.dataset.v;$('cbDesc').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x===b));cbUpd();});
+$('cbPay').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;CB.pay=b.dataset.v;$('cbPay').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x===b));cbUpd();});
+$('cbBills').addEventListener('click',e=>{const b=e.target.closest('[data-bill]');if(!b)return;$('cbRec').value=b.dataset.bill;cbUpd();});
+['cbRec','cbDescAmt'].forEach(id=>$(id).addEventListener('input',cbUpd));
+let descAuth=false;
+$('cbOk').onclick=()=>{
+  const o=cur();const t=cbTotal();
+  if((CB.desc==='cortesia'||CB.desc==='otro')&&extraDesc(o)>0&&!isOwner()&&!descAuth)return owner('Autorizar descuento de '+money(extraDesc(o)),()=>{descAuth=true;$('cbOk').click();});
+  const needPin=promoGroups(o).filter(g=>{const p=PROMOS.find(x=>x.id===g.id);return p&&p.pin;});
+  if(needPin.length&&!isOwner()&&!promoAuth)return owner('Autorizar '+needPin.map(g=>g.nombre).join(', '),()=>{promoAuth=true;$('cbOk').click();});
+  descAuth=false;promoAuth=false;
+  if(CB.pay==='Efectivo'&&$('cbRec').value!==''&&+$('cbRec').value<t)return toast('El monto recibido es menor al total','err');
+  if(CB.pay==='Transferencia'&&!$('cbDimoOk').checked)return toast('Marque "Transferencia verificada" cuando la vea en el banco','err');
+  const now=new Date();const d=descAmt(o);
+  const PG=promoGroups(o),xd=extraDesc(o);
+  const motivo=[...PG.map(g=>g.nombre+(g.n>1?' ×'+g.n:'')),xd?(CB.desc==='otro'?($('cbDescWhy').value.trim()||'Otro'):'Cortesía'):''].filter(Boolean).join(' · ');
+  const lp=PROMOS.find(p=>p.sellos&&promoVig(p));
+  const sellos=lp?Math.max(0,o.items.filter(isDrinkItem).reduce((s,i)=>s+i.qty,0)-units(o).filter(u=>CBU[u.key]===lp.id).length):0;
+  const cs=consumoOrden(o);applyStock(cs.acc,-1);
+  VENTAS.push({id:VCTR++,mesaId:o.tipo==='mesa'?'m'+o.mesa:o.tipo,mesaNombre:oLabel(o),tipo:o.tipo,cliente:o.cliente||'',
+    fecha:now.toLocaleDateString('es-MX'),hora:now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+    items:o.items.map(i=>({id:i.pid,nombre:i.nombre,icono:i.icono,tamano:i.tamano,leche:i.leche,detalle:i.detalle,notas:i.notas,qty:i.qty,precioU:i.precioU,total:i.total,costo:Math.round((cs.porItem[i.uid]||0)*100)/100})),
+    subtotal:oTotal(o),descuento:d,motivoDesc:d?motivo:'',promos:PG.length?PG:undefined,descExtra:xd||undefined,sellos:sellos||undefined,total:t,costo:Math.round(cs.costo*100)/100,utilidad:Math.round((t-cs.costo)*100)/100,consumo:cs.acc,costoIncompleto:cs.incompleto||undefined,pago:CB.pay,recibido:CB.pay==='Efectivo'&&$('cbRec').value!==''?+$('cbRec').value:null,estado:'ok',ts:now.getTime(),hm:mxMin(),usuario:USER?USER.nombre:'',turnoId:TURNO?TURNO.id:null});
+  S.set('ventas',VENTAS);S.set('vctr',VCTR);
+  OPEN=OPEN.filter(x=>x!==o);curId=null;saveOpen();closeM('mPay');renderPed();
+  const vNew=VENTAS[VENTAS.length-1];if(vNew.descuento)log('Descuento',vNew.motivoDesc+' '+money(vNew.descuento)+' · ticket #'+vNew.id);
+  showDone(vNew);
+};
+
+/* ================= BARRA ================= */
+let barFilter='pend';
+document.querySelector('#p-bar .seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;barFilter=b.dataset.bf;b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderBarra();});
+function renderBarra(){
+  const L=OPEN.filter(o=>o.items.some(i=>i.estado!=='nuevo')).filter(o=>barFilter==='all'||o.items.some(i=>i.estado==='barra'))
+    .sort((a,b)=>pendSince(a)-pendSince(b));
+  if(!L.length){$('bcols').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ic">☕</div><b>No hay nada por preparar</b><p>Cuando en Pedidos toque "Enviar a barra", aparecerá aquí.</p></div>';refreshBadges();return;}
+  $('bcols').innerHTML=L.map(o=>{const its=o.items.filter(i=>i.estado!=='nuevo').sort((a,b)=>(a.estado==='listo')-(b.estado==='listo')||(a.enviado||0)-(b.enviado||0));const done=its.every(i=>i.estado==='listo');const age=minsAgo(pendSince(o));
+    return '<div class="bcard'+(done?' done':'')+'"><div class="bh"><div><b>'+esc(o.tipo==='mesa'?'🪑 Mesa '+o.mesa:(o.tipo==='wa'?'💬 ':'🥡 ')+(o.cliente||'Sin nombre'))+'</b>'+(o.recoge?'<div class="muted" style="font-size:.82rem">Recoge: '+esc(o.recoge)+'</div>':'')+'</div><span class="age'+(age>=CFG.late&&!done?' late':'')+'">'+age+' min</span></div>'+
+      (o.nota?'<div class="bi"><span>📝</span><span class="t" style="font-size:.9rem">'+esc(o.nota)+'</span></div>':'')+
+      its.map(i=>'<div class="bi'+(i.estado==='listo'?' ok':'')+'"><input type="checkbox" data-ready="'+o.id+'|'+i.uid+'"'+(i.estado==='listo'?' checked':'')+'><div class="t"><b>'+i.qty+'× '+esc(i.nombre)+'</b>'+((i.enviado&&o.enviado&&i.enviado-o.enviado>30000)?' <span class="tag inbar">➕ Agregado</span>':'')+
+        (i.detalle||i.leche?'<div class="muted" style="font-size:.85rem">'+esc([i.detalle,i.leche?'Leche '+i.leche.toLowerCase():''].filter(Boolean).join(' · '))+'</div>':'')+(i.notas?'<div style="font-size:.85rem;color:var(--gold2);font-weight:700">📝 '+esc(i.notas)+'</div>':'')+'</div>'+
+        ((RECIPES[i.pid]||(prod(i.pid)||{}).receta)?'<button class="rb" data-rec="'+i.pid+'">📖 Receta</button>':'')+'</div>').join('')+
+      '<div class="bf"><button class="btn b-ok b-sm" data-all="'+o.id+'" style="flex:1"'+(done?' disabled':'')+'>✓ Todo listo</button></div></div>';}).join('');
+  refreshBadges();
+}
+$('bcols').addEventListener('change',e=>{const c=e.target.closest('[data-ready]');if(!c)return;const[oid,u]=c.dataset.ready.split('|');const o=OPEN.find(x=>x.id===oid);const i=o&&o.items.find(x=>x.uid===u);if(!i)return;i.estado=c.checked?'listo':'barra';saveOpen();renderBarra();});
+$('bcols').addEventListener('click',e=>{const a=e.target.closest('[data-all]');if(a){const o=OPEN.find(x=>x.id===a.dataset.all);o.items.forEach(i=>{if(i.estado==='barra')i.estado='listo';});saveOpen();renderBarra();toast('✓ '+oLabel(o)+' listo');return;}
+  const r=e.target.closest('[data-rec]');if(r)openRecipe(r.dataset.rec);});
+
+function pendSince(o){const p=o.items.filter(i=>i.estado==='barra');return p.length?Math.min(...p.map(i=>i.enviado||o.enviado||o.creado)):(o.enviado||o.creado);}
+/* ================= RECETAS ================= */
+function openRecipe(pid){
+  const p=prod(pid)||{name:'Receta'};const R=RECIPES[pid];
+  $('rcName').textContent=p.name;$('rcSub').textContent=R?(R.base?'Receta base de la Guía: '+R.name:'Receta de la Guía del Café'):'Receta de Aroma';
+  let h='';
+  if(p.receta)h+='<h4>Receta de Aroma</h4><div class="incl" style="white-space:pre-line">'+esc(p.receta)+'</div>';
+  if(R){
+    h+='<div class="facts">'+[['Tamaño guía',R.size],['Vaso',R.cup],['Temperatura',R.temp],['Textura',R.tex],['Hielo',R.ice],['Preparación',R.prep]].filter(x=>x[1]).map(x=>'<div><b>'+x[0]+'</b>'+esc(x[1])+'</div>').join('')+'</div>';
+    if(R.ex)h+='<h4>Extracción</h4><div class="facts">'+[['Dosis',R.ex.dose],['Rendimiento',R.ex.yield],['Relación',R.ex.ratio],['Tiempo',R.ex.time?R.ex.time.join('–')+' s':''],['Método',R.ex.method]].filter(x=>x[1]).map(x=>'<div><b>'+x[0]+'</b>'+esc(x[1])+'</div>').join('')+'</div>';
+    h+='<h4>Ingredientes</h4><ul>'+R.ing.map(x=>'<li><b>'+esc(x[0])+'</b> — '+esc(x[1])+'</li>').join('')+'</ul>';
+    h+='<h4>Pasos</h4><ol>'+R.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>';
+    h+='<p class="note">La guía usa medidas estándar. Ajuste a los tamaños de Aroma ('+(p.oz||(p.sizes?p.sizes.map(s=>s.sub).join(' / '):'su tamaño'))+') y anote la receta propia en Admin → 📝.</p>';
+  }
+  if(!h)h='<p class="muted">Sin receta guardada. Agréguela en Admin → 📝.</p>';
+  $('rcBody').innerHTML=h;openM('mRec');
+}
+
+/* ================= VENTAS ================= */
+let vf='hoy';
+$('vf').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;vf=b.dataset.f;$('vf').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderVentas();});
+function monday(d){const x=new Date(d);x.setHours(0,0,0,0);const w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);return x;}
+function inFilter(v){const now=new Date();const t0=new Date();t0.setHours(0,0,0,0);
+  if(vf==='hoy')return v.ts>=t0.getTime();if(vf==='semana')return v.ts>=monday(now).getTime();
+  if(vf==='mes'){const m=new Date(now.getFullYear(),now.getMonth(),1);return v.ts>=m.getTime();}return true;}
+function bars(el,rows,fmt){const max=Math.max(1,...rows.map(r=>r[1]));$(el).innerHTML=rows.length?rows.map(r=>'<div class="bar"><span>'+esc(r[0])+'</span><span class="bt"><i style="width:'+(r[1]/max*100)+'%"></i></span><span class="bv">'+fmt(r)+'</span></div>').join(''):'<p class="muted">Sin datos</p>';}
+function vTipo(v){return v.tipo||(v.mesaId==='m0'?'llevar':'mesa');}
+function renderVentas(){
+  const L=VENTAS.filter(inFilter);const A=L.filter(v=>v.estado==='ok');
+  const tot=A.reduce((s,v)=>s+v.total,0),n=A.length,desc=A.reduce((s,v)=>s+(v.descuento||0),0);
+  const pzs=A.reduce((s,v)=>s+v.items.reduce((a,i)=>a+i.qty,0),0);
+  const conC=A.filter(v=>v.costo!=null),sinC=A.length-conC.length;const cst=conC.reduce((s,v)=>s+v.costo,0),totC=conC.reduce((s,v)=>s+v.total,0),gan=totC-cst;
+  $('kpis').innerHTML='<div class="kpi main"><small>Total vendido</small><b class="money">'+money(tot)+'</b><span>'+n+' ticket(s)</span></div>'+
+    '<div class="kpi"><small>Ticket promedio</small><b class="money">'+money(n?tot/n:0)+'</b><span>por cliente</span></div>'+
+    '<div class="kpi"><small>Costo de producción</small><b class="money">'+money(cst)+'</b><span>'+(sinC?sinC+' ticket(s) sin costo':'insumos usados')+'</span></div>'+
+    '<div class="kpi" style="border-color:rgba(31,122,69,.35)"><small>Ganancia bruta</small><b class="money" style="color:var(--ok)">'+money(gan)+'</b><span>Margen '+(totC?Math.round(gan/totC*100):0)+'%</span></div>'+
+    '<div class="kpi"><small>Productos</small><b>'+pzs+'</b><span>piezas vendidas</span></div>'+
+    '<div class="kpi"><small>Descuentos</small><b class="money">'+money(desc)+'</b><span>'+A.filter(v=>v.descuento).length+' ticket(s)</span></div>'+
+    '<div class="kpi"><small>Anulados</small><b>'+L.filter(v=>v.estado==='anulada').length+'</b><span>tickets</span></div>';
+  const byP={};A.forEach(v=>byP[v.pago]=(byP[v.pago]||0)+v.total);
+  bars('byPay',Object.entries(byP).sort((a,b)=>b[1]-a[1]),r=>money(r[1]));
+  const TN={mesa:'🪑 Mesas',llevar:'🥡 Para llevar',wa:'💬 WhatsApp'};const byT={};A.forEach(v=>{const k=TN[vTipo(v)]||'Otro';byT[k]=(byT[k]||0)+v.total;});
+  bars('byType',Object.entries(byT).sort((a,b)=>b[1]-a[1]),r=>money(r[1]));
+  const byI={};A.forEach(v=>v.items.forEach(i=>{const k=i.nombre;byI[k]=byI[k]||[k,0,0,0];byI[k][1]+=i.qty;byI[k][2]+=i.total;byI[k][3]+=(i.costo!=null?i.total-i.costo:0);}));
+  const byPr={};A.forEach(v=>(v.promos||[]).forEach(g=>{byPr[g.nombre]=byPr[g.nombre]||[g.nombre,0,0];byPr[g.nombre][1]+=g.n;byPr[g.nombre][2]+=g.monto;}));
+  bars('byPromo',Object.values(byPr).sort((a,b)=>b[1]-a[1]),r=>r[1]+' uso(s) · −'+money(r[2]));
+  bars('topP',Object.values(byI).sort((a,b)=>b[1]-a[1]).slice(0,10),r=>r[1]+' · '+money(r[2])+(r[3]?' · gana '+money(r[3]):''));
+  const H={};for(let h=7;h<=21;h++)H[h]=0;A.forEach(v=>{const h=v.hm!=null?Math.floor(v.hm/60):new Date(v.ts).getHours();if(h in H)H[h]+=v.total;});
+  const hm=Math.max(1,...Object.values(H));
+  $('hours').innerHTML=Object.entries(H).map(([h,v])=>'<div class="h" title="'+money(v)+'"><i style="height:'+(v/hm*100)+'%"></i><small>'+(h%12||12)+(h<12?'a':'p')+'</small></div>').join('');
+  // semana
+  const mon=monday(new Date());const days=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];const today=new Date();today.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  $('wkRange').textContent=mon.toLocaleDateString('es-MX',{day:'numeric',month:'short'})+' – '+sun.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+  $('week').innerHTML=days.map((d,k)=>{const a=new Date(mon);a.setDate(a.getDate()+k);const b=new Date(a);b.setDate(b.getDate()+1);
+    const s=VENTAS.filter(v=>v.estado==='ok'&&v.ts>=a.getTime()&&v.ts<b.getTime()).reduce((x,v)=>x+v.total,0);
+    return '<div class="wd'+(a.getTime()===today.getTime()?' today':'')+'">'+d+'<b>'+money(s)+'</b></div>';}).join('');
+  $('cierres').innerHTML=CIERRES.length?'<h3 style="font-size:1rem;margin:6px 0">Semanas cerradas</h3><div class="tw"><table><thead><tr><th>Semana</th><th>Tickets</th><th>Efectivo</th><th>Tarjeta</th><th>Transferencia</th><th style="text-align:right">Total</th></tr></thead><tbody>'+
+    CIERRES.slice().reverse().map(c=>'<tr><td>'+esc(c.rango)+'</td><td>'+c.tickets+'</td><td>'+money(c.efec||0)+'</td><td>'+money(c.tarj||0)+'</td><td>'+money(c.transf||0)+'</td><td style="text-align:right;font-weight:900">'+money(c.total)+'</td></tr>').join('')+'</tbody></table></div>':'';
+  $('vrows').innerHTML=L.slice().reverse().slice(0,300).map(v=>'<tr class="'+(v.estado==='anulada'?'anul':'')+'"><td>'+v.id+'</td><td>'+esc(v.fecha)+'<br><span class="muted">'+esc(v.hora)+'</span></td><td>'+esc(v.mesaNombre||'')+'</td><td style="font-size:.85rem">'+
+    (v.usuario?'<span class="muted" style="font-size:.78rem">👤 '+esc(v.usuario)+'</span><br>':'')+v.items.map(i=>i.qty+'× '+esc(i.nombre)+(i.detalle?' ('+esc(i.detalle)+')':(i.tamano?' ('+esc(i.tamano)+')':''))).join('<br>')+(v.descuento?'<br><span class="pill">−'+money(v.descuento)+' '+esc(v.motivoDesc||'')+'</span>':'')+'</td><td>'+esc(v.pago)+'</td><td style="text-align:right;font-weight:900">'+money(v.total)+'</td><td>'+
+    '<button class="x" data-print="'+v.id+'" style="color:var(--ink2)">🖨️</button>'+(v.estado==='ok'?'<button class="x" data-anul="'+v.id+'">Anular</button>':'<span class="pill">Anulada</span>')+'</td></tr>').join('')||'<tr><td colspan="7" class="muted">Sin ventas en este periodo</td></tr>';
+}
+$('vrows').addEventListener('click',e=>{const pr=e.target.closest('[data-print]');if(pr){const v=VENTAS.find(x=>String(x.id)===pr.dataset.print);if(v)printTicket(v,true);return;}
+  const b=e.target.closest('[data-anul]');if(!b)return;const v=VENTAS.find(x=>String(x.id)===b.dataset.anul);if(!v||!confirm('¿Anular el ticket #'+v.id+' por '+money(v.total)+'?'))return;owner('Anular ticket #'+v.id,()=>{log('Anular ticket','#'+v.id+' · '+money(v.total));v.estado='anulada';if(v.consumo)applyStock(v.consumo,1);S.set('ventas',VENTAS);renderVentas();toast('Ticket anulado'+(v.consumo?' · insumos regresados al inventario':''));});});
+function closeWeek(){
+  const mon=monday(new Date()),sun=new Date(mon);sun.setDate(sun.getDate()+7);
+  const key=mon.getFullYear()+'-'+(mon.getMonth()+1)+'-'+mon.getDate();
+  if(CIERRES.find(c=>c.semanaKey===key))return toast('Esta semana ya fue cerrada','err');
+  const W=VENTAS.filter(v=>v.ts>=mon.getTime()&&v.ts<sun.getTime());const A=W.filter(v=>v.estado==='ok');
+  if(!A.length)return toast('No hay ventas esta semana','err');
+  const s=f=>A.filter(f).reduce((x,v)=>x+v.total,0);const total=s(()=>true);const end=new Date(sun);end.setDate(end.getDate()-1);
+  const rango=mon.getDate()+'/'+(mon.getMonth()+1)+' – '+end.getDate()+'/'+(end.getMonth()+1)+'/'+end.getFullYear();
+  if(!confirm('¿Cerrar la semana '+rango+' con '+money(total)+'?\nSe guarda el resumen; las ventas siguen visibles en "Todo".'))return;
+  const now=new Date();
+  CIERRES.push({id:CIERRES.length+1,semanaKey:key,rango,fechaInicio:mon.toLocaleDateString('es-MX'),fechaFin:end.toLocaleDateString('es-MX'),
+    fechaCierre:now.toLocaleDateString('es-MX')+' '+now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+    total,tickets:A.length,efec:s(v=>v.pago==='Efectivo'),transf:s(v=>v.pago==='Transferencia'),tarj:s(v=>v.pago==='Tarjeta'),anuladas:W.length-A.length,ts:now.getTime()});
+  S.set('cierres',CIERRES);renderVentas();log('Cerrar semana',rango+' · '+money(total));toast('🔒 Semana cerrada · '+money(total));autoBackup('cierre-semana');
+}
+$('closeWk').onclick=()=>owner('Cerrar la semana',closeWeek);
+$('csvBtn').onclick=()=>{
+  const L=VENTAS.filter(inFilter);const rows=[['Ticket','Fecha','Hora','Pedido','Tipo','Producto','Detalle','Leche','Cantidad','Precio','Importe','Descuento ticket','Total ticket','Pago','Estado']];
+  L.forEach(v=>v.items.forEach((i,k)=>rows.push([v.id,v.fecha,v.hora,v.mesaNombre,vTipo(v),i.nombre,i.detalle||i.tamano||'',i.leche||'',i.qty,i.precioU,i.total,k?'':(v.descuento||0),k?'':v.total,v.pago,v.estado])));
+  const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='ventas-aroma-'+vf+'-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+};
+
+/* ================= INVENTARIO ================= */
+let INS=S.get('insumos2',null);
+if(!INS){INS=INS_DEF.map(i=>Object.assign({stock:0,minimo:0},i));S.set('insumos2',INS);}
+let RECO=S.get('recetas2',{});let COMPRAS=S.get('compras2',[]);let MOVS=S.get('movs2',[]);
+const saveIns=()=>{S.set('insumos2',INS);refreshInvBadge();};
+const insById=id=>INS.find(i=>i.id===id);
+const recipeOf=pid=>RECO[pid]||REC_DEF[pid]||null;
+function cu(i){const c=(i.contenido||0)*(1-(i.merma||0));return c>0?(i.precio||0)/c:0;}
+function hu(i){return i.unidad==='g'?['kg',1000]:i.unidad==='ml'?['L',1000]:['pza',1];}
+function fq(i,base){const[h,f]=hu(i);const v=base/f;return (f>1?(Math.round(v*100)/100).toLocaleString('es-MX'):Math.round(v*10)/10)+' '+h;}
+function fqb(i,q){return (Math.round(q*100)/100)+' '+i.unidad;}
+function stState(i){if(!i.reg)return['na','Sin conteo'];if(i.stock<=0)return['out','Agotado'];if(i.minimo>0&&i.stock<=i.minimo)return['low','Bajo'];return['ok','OK'];}
+function refreshInvBadge(){const n=INS.filter(i=>i.reg&&i.minimo>0&&i.stock<=i.minimo).length;const c=$('invCnt');c.textContent=n;c.hidden=!n;}
+/* consumo de un renglón vendido (recursivo para combos) */
+function consumoItem(it,tipo,acc,mult,miss){
+  const R=recipeOf(it.pid);if(!R){miss.push(it.nombre||it.pid);return;}
+  if(R.combo){R.combo.forEach(c=>{const pid=c.flavor?FLAVOR[it.flavor]:c.pid;if(!pid){miss.push(it.nombre);return;}
+    consumoItem({pid,si:c.si||0,leche:it.leche},tipo,acc,mult*(c.qty||1),miss);});return;}
+  const add=(id,q)=>{let iid=id;if(iid==='leche-entera'&&it.leche==='Deslactosada')iid='leche-deslactosada';const ins=insById(iid);if(!ins){miss.push(id);return;}
+    if(tipo==='mesa'&&CFG.loza!==false&&ins.cat==='Desechables'&&iid!=='servilleta')return;acc[iid]=(acc[iid]||0)+q*mult;};
+  if(R.grams)add(R.grams,(it.grams||0));
+  const list=R.v[Math.min(it.si||0,R.v.length-1)]||[];list.forEach(([id,q])=>add(id,q));
+}
+function costOf(acc){let c=0,inc=false;Object.entries(acc).forEach(([id,q])=>{const i=insById(id);if(!i)return;if(!i.precio)inc=true;c+=q*cu(i);});return{c,inc};}
+function consumoOrden(o){const acc={},porItem={},miss=[];let inc=false;
+  o.items.forEach(it=>{const a={};consumoItem(it,o.tipo,a,it.qty,miss);const r=costOf(a);porItem[it.uid]=r.c;if(r.inc)inc=true;Object.entries(a).forEach(([k,q])=>acc[k]=(acc[k]||0)+q);});
+  return{acc,porItem,costo:Object.values(porItem).reduce((s,x)=>s+x,0),incompleto:inc||miss.length>0};}
+function applyStock(acc,sign){Object.entries(acc).forEach(([id,q])=>{const i=insById(id);if(i)i.stock=Math.round((i.stock+sign*q)*1000)/1000;});saveIns();}
+/* costo de un producto/tamaño (para llevar) */
+function prodCost(pid,si,flavorIdx){const p=prod(pid);const it={pid,si,leche:'Entera',flavor:p&&p.flavors?p.flavors[flavorIdx||0]:'',grams:0};const a={},miss=[];consumoItem(it,'llevar',a,1,miss);const r=costOf(a);return{c:r.c,inc:r.inc||miss.length>0,a};}
+
+let invView='exist';
+$('invSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;invView=b.dataset.v;$('invSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderInv();});
+function renderInv(){
+  const val=INS.reduce((s,i)=>s+Math.max(0,i.stock)*cu(i),0);
+  const low=INS.filter(i=>i.reg&&i.minimo>0&&i.stock<=i.minimo).length,sinP=INS.filter(i=>!i.precio&&i.id!=='manga-faja-de-carton').length;
+  const m0=new Date();m0.setDate(1);m0.setHours(0,0,0,0);const cm=COMPRAS.filter(c=>c.ts>=m0.getTime()).reduce((s,c)=>s+c.total,0);
+  $('invKpis').innerHTML='<div class="kpi main"><small>Valor del inventario</small><b class="money">'+money(val)+'</b><span>a costo de compra</span></div>'+
+    '<div class="kpi"><small>Compras del mes</small><b class="money">'+money(cm)+'</b><span>'+COMPRAS.filter(c=>c.ts>=m0.getTime()).length+' registro(s)</span></div>'+
+    '<div class="kpi"><small>Por surtir</small><b style="color:'+(low?'var(--warn)':'inherit')+'">'+low+'</b><span>en o bajo el mínimo</span></div>'+
+    '<div class="kpi"><small>Sin precio</small><b style="color:'+(sinP?'var(--red)':'inherit')+'">'+sinP+'</b><span>insumos por capturar</span></div>';
+  ({exist:invExist,compras:invCompras,costos:invCostos})[invView]();refreshInvBadge();
+}
+let invCat='',invQ='';
+function invExist(){
+  const cats=[...new Set(INS.map(i=>i.cat))];
+  const q=norm(invQ);const L=INS.filter(i=>(!invCat||i.cat===invCat)&&(!q||norm(i.nombre).includes(q)));
+  $('invBody').innerHTML=(!INS.some(i=>i.reg)?'<div class="help-box">👋 <b>Para empezar:</b> haga un <b>Conteo físico</b> con lo que tiene hoy en la cafetería. Desde ahí, cada <b>compra</b> suma y cada <b>venta cobrada</b> descuenta sola según la receta.</div>':'')+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><select id="invCatSel" style="max-width:200px"><option value="">Todas las categorías</option>'+cats.map(c=>'<option'+(c===invCat?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'+
+    '<input id="invQ" type="search" placeholder="Buscar insumo…" value="'+esc(invQ)+'" style="max-width:220px"><button class="btn b-line b-sm" id="invNew" style="margin-left:auto">+ Insumo</button></div>'+
+    '<div class="tw"><table><thead><tr><th>Insumo</th><th>Existencia</th><th>Mínimo</th><th>Costo</th><th>Valor</th><th>Estado</th><th></th></tr></thead><tbody>'+
+    L.map(i=>{const[s,l]=stState(i);const[h,f]=hu(i);return '<tr><td><b>'+esc(i.nombre)+'</b> <span class="org '+i.origen+'">'+({ticket:'Ticket',mercado:'Estimado',sin:'Sin precio'}[i.origen]||'')+'</span><br><span class="muted" style="font-size:.8rem">'+esc(i.cat)+' · '+esc(i.empaque)+'</span></td>'+
+      '<td class="money"><b>'+(i.reg?fq(i,i.stock):'—')+'</b></td><td class="muted">'+(i.minimo?fq(i,i.minimo):'—')+'</td><td class="money">'+(i.precio?money(Math.round(cu(i)*f*100)/100)+'/'+h:'<span class="st-out">—</span>')+'</td>'+
+      '<td class="money">'+money(Math.max(0,i.stock)*cu(i))+'</td><td class="st-'+s+'">'+l+'</td>'+
+      '<td style="white-space:nowrap"><button class="btn b-line b-sm" data-buy="'+i.id+'">+ Compra</button> <button class="btn b-line b-sm" data-edit="'+i.id+'">✏️</button></td></tr>';}).join('')+'</tbody></table></div>';
+}
+function invCompras(){
+  const L=COMPRAS.slice().reverse();
+  $('invBody').innerHTML='<h3>Compras registradas</h3>'+(L.length?'<div class="tw"><table><thead><tr><th>Fecha</th><th>Insumo</th><th>Cantidad</th><th>Proveedor</th><th style="text-align:right">Total</th><th></th></tr></thead><tbody>'+
+    L.map(c=>{const i=insById(c.insId)||{nombre:c.insNom,unidad:'pza'};return '<tr><td>'+esc(c.fecha)+'</td><td>'+esc(i.nombre)+'</td><td>'+c.empaques+' × '+esc(c.empaque||'')+'</td><td class="muted">'+esc(c.prov||'')+'</td><td style="text-align:right;font-weight:900">'+money(c.total)+'</td><td><button class="x" data-delbuy="'+c.id+'">Borrar</button></td></tr>';}).join('')+
+    '</tbody></table></div>':'<p class="muted">Aún no hay compras. Use "🛒 Registrar compra" cada vez que surta.</p>');
+}
+function invCostos(){
+  const rows=[];
+  CAT.forEach(p=>{if(p.ask)return;const R=recipeOf(p.id);
+    const vs=p.sizes?p.sizes.map((s,k)=>[k,s.label+(s.sub?' '+s.sub:''),s.price]):[[0,p.oz||'',p.price]];
+    vs.forEach(([k,lab,price])=>{const r=prodCost(p.id,k,0);const g=price-r.c;const mg=price?g/price*100:0;
+      rows.push('<tr><td><b>'+esc(p.name)+'</b>'+(R&&R.est?' <span class="org mercado">Receta estimada</span>':'')+(R&&R.combo?' <span class="org ticket">Combo</span>':'')+(!R?' <span class="org sin">Sin receta</span>':'')+'<br><span class="muted" style="font-size:.8rem">'+esc(lab)+'</span></td>'+
+        '<td class="money">'+money(Math.round(r.c*100)/100)+(r.inc?' <span class="org sin" title="Falta el precio de algún insumo">falta precio</span>':'')+'</td><td class="money">'+money(price)+'</td><td class="money">'+(r.inc?'—':money(Math.round(g*100)/100))+'</td>'+
+        '<td class="'+(r.inc?'muted':mg>=65?'mg-g':mg>=50?'mg-a':'mg-r')+'">'+(r.inc?'—':Math.round(mg)+'%')+'</td><td>'+(R&&!R.combo?'<button class="btn b-line b-sm" data-rec-ed="'+p.id+'">Receta</button>':'')+'</td></tr>');});});
+  $('invBody').innerHTML='<div class="help-box">Costo de insumos por producto, para llevar (con vaso y tapa). Margen: <span class="mg-g">verde ≥ 65 %</span> · <span class="mg-a">ámbar 50–64 %</span> · <span class="mg-r">rojo &lt; 50 %</span>. Las recetas <span class="org mercado">estimadas</span> son de productos nuevos: ajústelas a como las prepara.</div>'+
+    '<div class="tw"><table><thead><tr><th>Producto</th><th>Costo</th><th>Precio</th><th>Ganancia</th><th>Margen</th><th></th></tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
+}
+$('invBody').addEventListener('change',e=>{if(e.target.id==='invCatSel'){invCat=e.target.value;invExist();}});
+$('invBody').addEventListener('input',e=>{if(e.target.id==='invQ'){invQ=e.target.value;const p=e.target.selectionStart;invExist();const n=$('invQ');n.focus();n.setSelectionRange(p,p);}});
+$('invBody').addEventListener('click',e=>{
+  const b=e.target.closest('[data-buy]');if(b)return openBuy(b.dataset.buy);
+  const ed=e.target.closest('[data-edit]');if(ed)return owner('Editar insumo',()=>openIns(ed.dataset.edit));
+  if(e.target.id==='invNew')return owner('Agregar insumo',()=>openIns(null));
+  const db=e.target.closest('[data-delbuy]');if(db){const c=COMPRAS.find(x=>x.id===db.dataset.delbuy);if(!c||!confirm('¿Borrar esta compra? Se resta '+c.empaques+' empaque(s) de la existencia.'))return;
+    return owner('Borrar compra',()=>{const i=insById(c.insId);if(i)i.stock=Math.round((i.stock-c.base)*1000)/1000;COMPRAS=COMPRAS.filter(x=>x!==c);S.set('compras2',COMPRAS);saveIns();log('Borrar compra',c.insNom+' '+money(c.total));renderInv();});}
+  const re=e.target.closest('[data-rec-ed]');if(re)return owner('Editar receta',()=>openRecEd(re.dataset.recEd));
+});
+/* compras */
+$('invBuy').onclick=()=>openBuy(null);
+function openBuy(id){
+  $('buyIns').innerHTML=INS.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(i=>'<option value="'+i.id+'"'+(i.id===id?' selected':'')+'>'+esc(i.nombre)+'</option>').join('');
+  $('buyQty').value=1;$('buyProv').value='';buyFill();openM('mBuy');}
+function buyFill(){const i=insById($('buyIns').value);$('buyInfo').textContent='Empaque: '+i.empaque+' ('+fqb(i,i.contenido)+') · Último precio: '+(i.precio?money(i.precio):'sin precio')+' · Existencia: '+fq(i,i.stock);$('buyTot').value=i.precio?Math.round(i.precio*(+$('buyQty').value||1)*100)/100:'';buyCalc();}
+function buyCalc(){const i=insById($('buyIns').value),q=+$('buyQty').value||0,t=+$('buyTot').value||0;$('buyCalc').textContent=q&&t?'Precio por empaque: '+money(Math.round(t/q*100)/100)+' · Nueva existencia: '+fq(i,i.stock+q*i.contenido):'';}
+$('buyIns').addEventListener('change',buyFill);$('buyQty').addEventListener('input',()=>{const i=insById($('buyIns').value);if(i.precio)$('buyTot').value=Math.round(i.precio*(+$('buyQty').value||0)*100)/100;buyCalc();});$('buyTot').addEventListener('input',buyCalc);
+$('buyOk').onclick=()=>{const i=insById($('buyIns').value),q=+$('buyQty').value,t=+$('buyTot').value;
+  if(!q||q<=0)return toast('Escriba cuántos empaques compró','err');if(!t||t<=0)return toast('Escriba cuánto pagó','err');
+  const base=q*i.contenido;if(!i.reg){i.stock=Math.max(0,i.stock);i.reg=true;}i.stock=Math.round((i.stock+base)*1000)/1000;i.precio=Math.round(t/q*100)/100;i.origen='ticket';
+  const now=new Date();COMPRAS.push({id:uid(),ts:now.getTime(),fecha:now.toLocaleDateString('es-MX'),insId:i.id,insNom:i.nombre,empaques:q,empaque:i.empaque,base,total:t,prov:$('buyProv').value.trim()});
+  S.set('compras2',COMPRAS);saveIns();log('Compra',i.nombre+' · '+q+' × '+i.empaque+' · '+money(t));closeM('mBuy');renderInv();toast('Compra guardada: '+i.nombre+' +'+fq(i,base));};
+/* editar / nuevo insumo */
+let INSED=null;
+function openIns(id){INSED=id?insById(id):null;const i=INSED||{nombre:'',cat:'',unidad:'g',empaque:'',contenido:1000,precio:0,merma:0,minimo:0,nota:''};
+  $('insTitle').textContent=INSED?'Editar insumo':'Nuevo insumo';$('insName').value=i.nombre;$('insCat').value=i.cat;$('insUnit').value=i.unidad;$('insEmp').value=i.empaque;
+  $('insCont').value=i.contenido;$('insPrice').value=i.precio||'';$('insMerma').value=Math.round((i.merma||0)*1000)/10;
+  const[h,f]=hu(i);$('insMin').value=i.minimo?i.minimo/f:'';$('insMinL').firstChild.textContent='Mínimo para alerta ('+h+')';
+  $('insCats').innerHTML=[...new Set(INS.map(x=>x.cat))].map(c=>'<option value="'+esc(c)+'">').join('');
+  $('insNote').textContent=i.nota||'';openM('mIns');}
+$('insUnit').addEventListener('change',()=>{const[h]=hu({unidad:$('insUnit').value});$('insMinL').firstChild.textContent='Mínimo para alerta ('+h+')';});
+$('insOk').onclick=()=>{const name=$('insName').value.trim();if(!name)return toast('Escriba el nombre','err');
+  const unidad=$('insUnit').value,[h,f]=hu({unidad});const d={nombre:name,cat:$('insCat').value.trim()||'Otros',unidad,empaque:$('insEmp').value.trim()||'pieza',contenido:+$('insCont').value||1,
+    precio:+$('insPrice').value||0,merma:Math.min(.9,(+$('insMerma').value||0)/100),minimo:(+$('insMin').value||0)*f};
+  if(INSED){if(d.precio!==INSED.precio&&d.precio)d.origen='ticket';if(!d.precio)d.origen='sin';Object.assign(INSED,d);}
+  else INS.push(Object.assign({id:'i-'+uid(),stock:0,origen:d.precio?'ticket':'sin',nota:''},d));
+  saveIns();log('Insumo',name+' · '+money(d.precio)+' por '+d.empaque);closeM('mIns');renderInv();toast('Insumo guardado');};
+/* conteo físico */
+$('invCount').onclick=()=>owner('Conteo físico',()=>{$('cntQ').value='';cntRender();openM('mCount');});
+const CNT={};
+function cntRender(){const q=norm($('cntQ').value);$('cntRows').innerHTML=INS.filter(i=>!q||norm(i.nombre).includes(q)).map(i=>{const[h]=hu(i);return '<div class="cnt-row"><span><b>'+esc(i.nombre)+'</b><br><span class="muted" style="font-size:.8rem">Sistema: '+fq(i,i.stock)+'</span></span><input type="number" min="0" step="any" data-cnt="'+i.id+'" value="'+(CNT[i.id]!=null?CNT[i.id]:'')+'" placeholder="—"><span class="muted">'+h+'</span></div>';}).join('');}
+$('cntQ').addEventListener('input',cntRender);
+$('cntRows').addEventListener('input',e=>{const id=e.target.dataset.cnt;if(!id)return;if(e.target.value==='')delete CNT[id];else CNT[id]=+e.target.value;});
+$('cntOk').onclick=()=>{const ids=Object.keys(CNT);if(!ids.length)return toast('No capturó ningún conteo','err');const now=Date.now();
+  ids.forEach(id=>{const i=insById(id);const[,f]=hu(i);const nv=CNT[id]*f;MOVS.push({ts:now,insId:id,tipo:'conteo',antes:i.stock,despues:nv});i.stock=nv;i.reg=true;delete CNT[id];});
+  S.set('movs2',MOVS.slice(-2000));log('Conteo físico',ids.length+' insumos');saveIns();closeM('mCount');renderInv();toast('Conteo guardado ('+ids.length+' insumos)');};
+/* editor de recetas */
+let RE=null;
+function openRecEd(pid){const p=prod(pid);const base=recipeOf(pid);RE={pid,si:0,v:JSON.parse(JSON.stringify(base?base.v:[[]])),grams:base&&base.grams};
+  const n=p.sizes?p.sizes.length:1;while(RE.v.length<n)RE.v.push(JSON.parse(JSON.stringify(RE.v[0]||[])));
+  $('reTitle').textContent='Receta · '+p.name;$('reSub').textContent='Cantidades por bebida. La leche entera se cambia sola a deslactosada cuando el cliente la pide.';reRender();openM('mRecEd');}
+function reRender(){const p=prod(RE.pid);
+  $('reTabs').innerHTML=p.sizes?p.sizes.map((s,k)=>'<button class="ch'+(k===RE.si?' on':'')+'" data-si="'+k+'">'+esc(s.label)+(s.sub?' '+s.sub:'')+'</button>').join(''):'';
+  const opts=INS.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  $('reRows').innerHTML=(RE.v[RE.si]||[]).map(([id,q],k)=>{const i=insById(id)||{unidad:''};return '<div class="rrow"><select data-rid="'+k+'">'+opts.map(o=>'<option value="'+o.id+'"'+(o.id===id?' selected':'')+'>'+esc(o.nombre)+'</option>').join('')+'</select><input type="number" min="0" step="any" data-rq="'+k+'" value="'+q+'"><span class="u">'+i.unidad+'</span><button class="x" data-rdel="'+k+'">✕</button></div>';}).join('')||'<p class="muted">Sin insumos.</p>';
+  const a={};(RE.v[RE.si]||[]).forEach(([id,q])=>a[id]=(a[id]||0)+q);const r=costOf(a);const price=p.sizes?p.sizes[RE.si].price:p.price;
+  $('reCost').innerHTML='Costo: '+money(Math.round(r.c*100)/100)+' · Precio: '+money(price)+' · Margen: '+(price?Math.round((price-r.c)/price*100):0)+'%'+(r.inc?' <span class="org sin">falta precio de algún insumo</span>':'');}
+$('reTabs').addEventListener('click',e=>{const b=e.target.closest('[data-si]');if(b){RE.si=+b.dataset.si;reRender();}});
+$('reRows').addEventListener('change',e=>{const k=e.target.dataset.rid;if(k!=null){RE.v[RE.si][+k][0]=e.target.value;reRender();}});
+$('reRows').addEventListener('input',e=>{const k=e.target.dataset.rq;if(k!=null){RE.v[RE.si][+k][1]=+e.target.value||0;const a={};RE.v[RE.si].forEach(([id,q])=>a[id]=(a[id]||0)+q);const p=prod(RE.pid);const r=costOf(a);const price=p.sizes?p.sizes[RE.si].price:p.price;$('reCost').innerHTML='Costo: '+money(Math.round(r.c*100)/100)+' · Precio: '+money(price)+' · Margen: '+(price?Math.round((price-r.c)/price*100):0)+'%';}});
+$('reRows').addEventListener('click',e=>{const d=e.target.closest('[data-rdel]');if(d){RE.v[RE.si].splice(+d.dataset.rdel,1);reRender();}});
+$('reAdd').onclick=()=>{(RE.v[RE.si]=RE.v[RE.si]||[]).push([INS[0].id,0]);reRender();};
+$('reOk').onclick=()=>{RECO[RE.pid]={v:RE.v};log('Editar receta',prod(RE.pid).name);if(RE.grams)RECO[RE.pid].grams=RE.grams;S.set('recetas2',RECO);closeM('mRecEd');renderInv();toast('Receta guardada');};
+$('reReset').onclick=()=>{if(!confirm('¿Volver a la receta original?'))return;delete RECO[RE.pid];S.set('recetas2',RECO);closeM('mRecEd');renderInv();toast('Receta original restaurada');};
+refreshInvBadge();
+
+/* ================= USUARIOS, PIN Y BITÁCORA ================= */
+let USERS=S.get('usuarios',[]);let USER=null;let LOGS=S.get('bitacora',[]);
+const isOwner=()=>!!(USER&&USER.rol==='dueno');
+function log(a,d){LOGS.push({ts:Date.now(),u:USER?USER.nombre:'—',a,d:d||''});if(LOGS.length>1000)LOGS=LOGS.slice(-1000);S.set('bitacora',LOGS);}
+async function hashPin(pin,salt){
+  const s=salt+'|'+pin;
+  try{if(crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}}catch(e){}
+  let h=2166136261;for(let r=0;r<500;r++)for(let i=0;i<s.length;i++){h^=s.charCodeAt(i)+r;h=Math.imul(h,16777619)>>>0;}return 'f'+h.toString(16);
+}
+async function checkPin(u,pin){return (await hashPin(pin,u.salt))===u.hash;}
+function padHTML(){return [1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].map(k=>'<button type="button" data-k="'+k+'">'+k+'</button>').join('');}
+function dotsHTML(n,len){let h='';for(let i=0;i<Math.max(4,len);i++)h+='<i class="'+(i<n?'f':'')+'"></i>';return h;}
+
+/* ---- pantalla de bloqueo ---- */
+let LK={uid:null,pin:'',fails:0,until:0};
+function showLock(){USER=null;try{sessionStorage.removeItem('pos_sess');}catch(e){}updChips();$('lock').hidden=false;renderLock();}
+function renderLock(){
+  const B=$('lockBody');
+  if(!USERS.length){
+    B.innerHTML='<p>Configuración inicial: cree el usuario <b>Dueño</b>. Con su PIN se autorizan anulaciones, cortesías y cambios de precio.</p>'+
+      '<input class="tin" id="suName" placeholder="Su nombre" value="Jonathan"><input class="tin" id="suPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN de 4 a 6 números"><input class="tin" id="suPin2" type="password" inputmode="numeric" maxlength="6" placeholder="Repita el PIN">'+
+      '<div class="lerr" id="suErr"></div><button class="btn b-main" id="suOk" style="width:100%">Crear dueño y entrar</button>';
+    $('suOk').onclick=async()=>{const n=$('suName').value.trim(),p=$('suPin').value,p2=$('suPin2').value;
+      if(!n)return $('suErr').textContent='Escriba su nombre';if(!/^\d{4,6}$/.test(p))return $('suErr').textContent='El PIN debe tener de 4 a 6 números';if(p!==p2)return $('suErr').textContent='Los PIN no coinciden';
+      const salt=uid();USERS.push({id:'u'+uid(),nombre:n,rol:'dueno',salt,hash:await hashPin(p,salt),len:p.length});S.set('usuarios',USERS);login(USERS[0]);toast('Listo. Puede agregar al empleado en Admin → Usuarios.');};
+    return;}
+  if(!LK.uid||!USERS.find(u=>u.id===LK.uid))LK.uid=(USERS.find(u=>u.id===S.get('lastUser',''))||USERS[0]).id;
+  const u=USERS.find(x=>x.id===LK.uid);
+  B.innerHTML='<p>¿Quién está en caja?</p><div class="lusers">'+USERS.map(x=>'<button class="luser'+(x.id===LK.uid?' on':'')+'" data-u="'+x.id+'">'+esc(x.nombre)+'<small>'+(x.rol==='dueno'?'Dueño':'Empleado')+'</small></button>').join('')+'</div>'+
+    '<div class="dots">'+dotsHTML(LK.pin.length,u.len||4)+'</div><div class="lerr" id="lkErr"></div><div class="pad" id="lkPad">'+padHTML()+'</div>';
+}
+$('lockBody').addEventListener('click',async e=>{
+  const ub=e.target.closest('[data-u]');if(ub){LK.uid=ub.dataset.u;LK.pin='';renderLock();return;}
+  const k=e.target.closest('#lkPad [data-k]');if(!k)return;const v=k.dataset.k;const u=USERS.find(x=>x.id===LK.uid);
+  if(Date.now()<LK.until){$('lkErr').textContent='Espere '+Math.ceil((LK.until-Date.now())/1000)+' s';return;}
+  if(v==='⌫')LK.pin=LK.pin.slice(0,-1);else if(v!=='✓'&&LK.pin.length<6)LK.pin+=v;
+  renderLock();
+  if(LK.pin.length>=(u.len||4)||v==='✓'){
+    if(await checkPin(u,LK.pin)){LK.pin='';LK.fails=0;login(u);}
+    else{LK.pin='';LK.fails++;if(LK.fails>=5){LK.until=Date.now()+30000;LK.fails=0;}renderLock();$('lkErr').textContent=LK.until>Date.now()?'Demasiados intentos. Espere 30 s.':'PIN incorrecto';}
+  }
+});
+function login(u){USER=u;S.set('lastUser',u.id);try{sessionStorage.setItem('pos_sess',u.id);}catch(e){}$('lock').hidden=true;log('Entrada','');updChips();
+  if(curTab==='adm'&&!isOwner())document.querySelector('.tab[data-tab="ped"]').click();
+  if(!TURNO)setTimeout(()=>askTurno(null),300);}
+$('userChip').onclick=()=>{if(OPEN.some(o=>o.items.length)&&!confirm('Hay pedidos abiertos; se conservan. ¿Cambiar de usuario?'))return;log('Salida','');showLock();};
+
+/* ---- autorización del dueño ---- */
+let PN={pin:'',cb:null,why:''};
+function owner(why,cb){
+  if(isOwner())return cb();
+  if(!USERS.some(u=>u.rol==='dueno'))return cb();
+  PN={pin:'',cb,why};$('pinWhy').textContent=why;$('pinErr').textContent='';$('pinPad').innerHTML=padHTML();$('pinDots').innerHTML=dotsHTML(0,4);openM('mPin');
+}
+$('pinPad').addEventListener('click',async e=>{const k=e.target.closest('[data-k]');if(!k)return;const v=k.dataset.k;
+  if(v==='⌫')PN.pin=PN.pin.slice(0,-1);else if(v!=='✓'&&PN.pin.length<6)PN.pin+=v;
+  $('pinDots').innerHTML=dotsHTML(PN.pin.length,Math.max(4,PN.pin.length));$('pinErr').textContent='';
+  if(PN.pin.length<4)return;
+  for(const u of USERS.filter(x=>x.rol==='dueno')){if((u.len||4)===PN.pin.length||v==='✓'){if(await checkPin(u,PN.pin)){closeM('mPin');log('Autorización',PN.why+' · autorizó '+u.nombre);const cb=PN.cb;PN={pin:'',cb:null};cb&&cb();return;}}}
+  const maxLen=Math.max(...USERS.filter(x=>x.rol==='dueno').map(u=>u.len||4));
+  if(PN.pin.length>=maxLen||v==='✓'){PN.pin='';$('pinDots').innerHTML=dotsHTML(0,4);$('pinErr').textContent='PIN incorrecto';}
+});
+
+/* ================= TURNOS Y CORTE DE CAJA ================= */
+let TURNO=S.get('turno',null);let CORTES=S.get('cortes',[]);
+function updChips(){
+  $('userTxt').textContent=USER?USER.nombre:'—';
+  const c=$('cajaChip');if(TURNO){$('cajaTxt').textContent='Caja abierta';c.className='chip-top ok';}else{$('cajaTxt').textContent='Caja cerrada';c.className='chip-top warn';}
+}
+$('cajaChip').onclick=()=>{document.querySelector('.tab[data-tab="ven"]').click();};
+let AFTER_T=null;
+function askTurno(after){AFTER_T=after;$('fondoChips').innerHTML=[0,200,300,500,1000].map(v=>'<button class="ch" data-f="'+v+'">'+money(v)+'</button>').join('');
+  const last=CORTES[CORTES.length-1];$('fondoIn').value=last&&last.dejo!=null?last.dejo:'';openM('mTurno');setTimeout(()=>$('fondoIn').focus(),100);}
+$('fondoChips').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b)$('fondoIn').value=b.dataset.f;});
+$('turnoOk').onclick=()=>{if($('fondoIn').value==='')return toast('Escriba el fondo (puede ser 0)','err');
+  TURNO={id:'t'+uid(),abre:USER?USER.nombre:'',ts:Date.now(),fondo:+$('fondoIn').value||0,movs:[]};S.set('turno',TURNO);log('Abrir caja','Fondo '+money(TURNO.fondo));
+  closeM('mTurno');updChips();toast('💰 Caja abierta con '+money(TURNO.fondo));if(curTab==='ven')renderVentas();const a=AFTER_T;AFTER_T=null;a&&a();};
+function cajaCalc(T){
+  const V=VENTAS.filter(v=>v.turnoId===T.id&&v.estado==='ok');const by=p=>V.filter(v=>v.pago===p).reduce((s,v)=>s+v.total,0);
+  const ent=T.movs.filter(m=>m.tipo==='entrada').reduce((s,m)=>s+m.monto,0),sal=T.movs.filter(m=>m.tipo==='salida').reduce((s,m)=>s+m.monto,0);
+  const ef=by('Efectivo');return{V,ef,tar:by('Tarjeta'),tra:by('Transferencia'),ent,sal,total:V.reduce((s,v)=>s+v.total,0),esperado:T.fondo+ef+ent-sal,
+    anul:VENTAS.filter(v=>v.turnoId===T.id&&v.estado==='anulada').length,desc:V.reduce((s,v)=>s+(v.descuento||0),0)};
+}
+function hm(ts){return new Date(ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});}
+function renderCaja(){
+  const B=$('cajaBox');let h;
+  if(!TURNO){h='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">💰 Caja cerrada</h3><span class="muted">Abra la caja para empezar a cobrar.</span><button class="btn b-ok b-sm" id="cjOpen" style="margin-left:auto">Abrir caja</button></div>';}
+  else{const c=cajaCalc(TURNO);
+    h='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0">💰 Caja abierta</h3><span class="muted">Abrió '+esc(TURNO.abre)+' a las '+hm(TURNO.ts)+'</span>'+
+      '<button class="btn b-line b-sm" id="cjMov" style="margin-left:auto">± Entrada / salida</button><button class="btn b-dark b-sm" id="cjCut">🔒 Corte de caja</button></div>'+
+      '<div class="caja-grid"><div><small>Fondo</small><b class="money">'+money(TURNO.fondo)+'</b></div><div><small>Efectivo</small><b class="money">'+money(c.ef)+'</b></div><div><small>Tarjeta</small><b class="money">'+money(c.tar)+'</b></div><div><small>Transferencia</small><b class="money">'+money(c.tra)+'</b></div>'+
+      '<div><small>Entradas / salidas</small><b class="money">+'+money(c.ent)+' / −'+money(c.sal)+'</b></div><div class="hl"><small>Debe haber en caja</small><b class="money">'+money(c.esperado)+'</b></div><div><small>Ventas del turno</small><b class="money">'+money(c.total)+'</b><span class="muted" style="font-size:.8rem"> '+c.V.length+' tickets</span></div></div>'+
+      (TURNO.movs.length?'<div class="lines" style="font-size:.85rem">'+TURNO.movs.map(m=>'<div><span>'+hm(m.ts)+' · '+(m.tipo==='entrada'?'➕ ':'➖ ')+esc(m.motivo)+' <span class="muted">('+esc(m.u)+')</span></span><b>'+(m.tipo==='entrada'?'+':'−')+money(m.monto)+'</b></div>').join('')+'</div>':'');}
+  if(CORTES.length)h+='<h3 style="font-size:1rem;margin:14px 0 6px">Cortes anteriores</h3><div class="tw"><table><thead><tr><th>Fecha</th><th>Turno</th><th>Ventas</th><th>Debía haber</th><th>Contado</th><th>Diferencia</th><th></th></tr></thead><tbody>'+
+    CORTES.slice().reverse().slice(0,30).map(c=>'<tr><td>'+new Date(c.hasta).toLocaleDateString('es-MX')+'</td><td>'+hm(c.desde)+'–'+hm(c.hasta)+'<br><span class="muted" style="font-size:.8rem">'+esc(c.abre)+(c.cierra!==c.abre?' / '+esc(c.cierra):'')+'</span></td><td class="money">'+money(c.total)+'</td><td class="money">'+money(c.esperado)+'</td><td class="money">'+money(c.contado)+'</td>'+
+      '<td class="'+(Math.abs(c.diferencia)<1?'st-ok':'st-out')+'">'+(Math.abs(c.diferencia)<1?'Cuadra':(c.diferencia>0?'+':'−')+money(Math.abs(c.diferencia)))+'</td><td><button class="x" data-pc="'+c.id+'" style="color:var(--ink2)">🖨️</button></td></tr>').join('')+'</tbody></table></div>';
+  B.innerHTML=h;
+}
+$('cajaBox').addEventListener('click',e=>{
+  if(e.target.id==='cjOpen')return askTurno(null);
+  if(e.target.id==='cjMov')return openMov();
+  if(e.target.id==='cjCut')return openCorte();
+  const p=e.target.closest('[data-pc]');if(p){const c=CORTES.find(x=>x.id===p.dataset.pc);if(c)printCorte(c);}
+});
+let MV='salida';
+function openMov(){MV='salida';$('movTipo').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x.dataset.v==='salida'));$('movAmt').value='';$('movWhy').value='';movChips();openM('mMov');}
+function movChips(){$('movChips').innerHTML=(MV==='salida'?['Compra de insumos','Pago a proveedor','Retiro del dueño','Gasto del local']:['Cambio / feria','Depósito del dueño','Otro ingreso']).map(c=>'<button class="ch" data-m="'+c+'">'+c+'</button>').join('');}
+$('movTipo').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;MV=b.dataset.v;$('movTipo').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x===b));movChips();});
+$('movChips').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b)$('movWhy').value=b.dataset.m;});
+$('movOk').onclick=()=>{const m=+$('movAmt').value,w=$('movWhy').value.trim();if(!m||m<=0)return toast('Escriba el monto','err');if(!w)return toast('Escriba el motivo','err');
+  TURNO.movs.push({tipo:MV,monto:m,motivo:w,ts:Date.now(),u:USER?USER.nombre:''});S.set('turno',TURNO);log(MV==='salida'?'Salida de caja':'Entrada de caja',w+' · '+money(m));closeM('mMov');renderVentas();
+  toast((MV==='salida'?'➖ ':'➕ ')+money(m)+' · '+w+(MV==='salida'&&/insumo|proveedor/i.test(w)?' — registre también la compra en Inventario':''));};
+const DEN=[1000,500,200,100,50,20,10,5,2,1,0.5];
+function openCorte(){
+  if(OPEN.some(o=>o.items.length)&&!confirm('Hay pedidos abiertos sin cobrar. Se conservan para el siguiente turno. ¿Hacer el corte?'))return;
+  const c=cajaCalc(TURNO);
+  $('corteSub').textContent='Turno de '+TURNO.abre+' desde las '+hm(TURNO.ts);
+  $('corteRes').innerHTML='<div><small>Fondo</small><b class="money">'+money(TURNO.fondo)+'</b></div><div><small>Ventas en efectivo</small><b class="money">'+money(c.ef)+'</b></div><div><small>Entradas</small><b class="money">+'+money(c.ent)+'</b></div><div><small>Salidas</small><b class="money">−'+money(c.sal)+'</b></div><div class="hl"><small>Debe haber</small><b class="money">'+money(c.esperado)+'</b></div>'+
+    '<div><small>Tarjeta</small><b class="money">'+money(c.tar)+'</b></div><div><small>Transferencia</small><b class="money">'+money(c.tra)+'</b></div><div><small>Total vendido</small><b class="money">'+money(c.total)+'</b></div>';
+  $('denoms').innerHTML=DEN.map(d=>'<label>'+(d>=20?'💵':'🪙')+' '+money(d)+'<input type="number" min="0" data-d="'+d+'" placeholder="0"></label>').join('');
+  $('corteCnt').value='';$('corteNota').value='';$('corteDif').textContent='';openM('mCorte');}
+function corteDif(){const c=cajaCalc(TURNO);if($('corteCnt').value===''){$('corteDif').textContent='';return;}const d=Math.round((+$('corteCnt').value-c.esperado)*100)/100;const el=$('corteDif');
+  if(Math.abs(d)<1){el.textContent='✓ Cuadra';el.className='dif ok';}else{el.textContent=(d>0?'Sobran ':'Faltan ')+money(Math.abs(d));el.className='dif '+(Math.abs(d)<=20?'warn':'bad');}}
+$('denoms').addEventListener('input',()=>{let s=0,any=false;$('denoms').querySelectorAll('input').forEach(i=>{if(i.value!==''){any=true;s+=(+i.value||0)*(+i.dataset.d);}});if(any)$('corteCnt').value=Math.round(s*100)/100;corteDif();});
+$('corteCnt').addEventListener('input',corteDif);
+$('corteOk').onclick=()=>{if($('corteCnt').value==='')return toast('Escriba el efectivo contado','err');
+  const c=cajaCalc(TURNO);const cnt=+$('corteCnt').value;const den={};$('denoms').querySelectorAll('input').forEach(i=>{if(+i.value)den[i.dataset.d]=+i.value;});
+  const corte={id:'c'+uid(),turnoId:TURNO.id,abre:TURNO.abre,cierra:USER?USER.nombre:'',desde:TURNO.ts,hasta:Date.now(),fondo:TURNO.fondo,ef:c.ef,tar:c.tar,tra:c.tra,ent:c.ent,sal:c.sal,
+    total:c.total,tickets:c.V.length,anuladas:c.anul,descuentos:c.desc,esperado:c.esperado,contado:cnt,diferencia:Math.round((cnt-c.esperado)*100)/100,den,movs:TURNO.movs,nota:$('corteNota').value.trim()};
+  CORTES.push(corte);S.set('cortes',CORTES);TURNO=null;S.set('turno',null);
+  log('Corte de caja','Debía '+money(corte.esperado)+' · contado '+money(cnt)+' · dif '+money(corte.diferencia));
+  closeM('mCorte');updChips();renderVentas();
+  if(CFG.print==='siempre')printCorte(corte);
+  autoBackup('corte');toast('🔒 Turno cerrado. Se descargó el respaldo.');setTimeout(showLock,1200);};
+
+/* ================= AVISO DE COBRO ================= */
+let DONE=null;
+function showDone(v){DONE=v;$('doneTot').textContent=money(v.total);
+  $('doneCh').textContent=v.recibido!=null?'Cambio: '+money(Math.round((v.recibido-v.total)*100)/100):'';
+  $('doneSub').textContent='Ticket #'+v.id+' · '+v.pago+(v.descuento?' · descuento '+money(v.descuento):'');
+  $('doneSellos').hidden=!v.sellos;$('doneSellos').textContent=v.sellos?'🤎 Tarjeta de lealtad: ponga '+v.sellos+' sello'+(v.sellos>1?'s':''):'';
+  $('donePrint').hidden=CFG.print==='nunca';openM('mDone');setTimeout(()=>$('doneOk').focus(),80);
+  if(CFG.print==='siempre')printTicket(v);}
+$('doneOk').onclick=()=>closeM('mDone');
+$('donePrint').onclick=()=>{if(DONE)printTicket(DONE);};
+
+/* ================= IMPRESIÓN 58 mm ================= */
+function pr(html){const a=$('printArea');a.innerHTML=html;try{window.print();}catch(e){}}
+const PH='<div class="c b big">AROMA A CAFÉ</div><div class="c">Café de especialidad</div><div class="c">IG @ar.cafe.teh · WA 238 185 8982</div><hr>';
+function row(a,b){return '<div class="r"><span>'+a+'</span><span>'+b+'</span></div>';}
+function printTicket(v,re){
+  let h=PH+row('Ticket #'+v.id,esc(v.fecha))+row(esc(v.mesaNombre||''),esc(v.hora))+(v.usuario?'<div>Atendió: '+esc(v.usuario)+'</div>':'')+'<hr>';
+  v.items.forEach(i=>{h+=row(i.qty+' '+esc(i.nombre),money(i.total));const d=[i.detalle||i.tamano,i.leche?'leche '+i.leche.toLowerCase():''].filter(Boolean).join(', ');if(d)h+='<div>&nbsp;&nbsp;'+esc(d)+'</div>';});
+  h+='<hr>'+(v.descuento?row('Subtotal',money(v.subtotal))+(v.promos?v.promos.map(g=>row(esc(g.nombre)+(g.n>1?' ×'+g.n:''),'−'+money(g.monto))).join('')+(v.descExtra?row('Descuento','−'+money(v.descExtra)):''):row('Desc. '+esc(v.motivoDesc||''),'−'+money(v.descuento))):'')+'<div class="r b big"><span>TOTAL</span><span>'+money(v.total)+'</span></div>'+row('Pago',esc(v.pago));
+  if(v.recibido!=null)h+=row('Recibido',money(v.recibido))+row('Cambio',money(Math.round((v.recibido-v.total)*100)/100));
+  if(v.sellos)h+='<div class="c">Sellos de lealtad: '+v.sellos+'</div>';
+  h+='<hr><div class="c">¡Gracias por su visita! ☕</div><div class="c">Menú: jonarom2.github.io/AromaAcafe</div>'+(re?'<div class="c b">*** REIMPRESIÓN ***</div>':'')+(v.estado==='anulada'?'<div class="c b">*** ANULADO ***</div>':'');
+  pr(h);}
+function printComanda(o,items){if(!items.length)return;let h='<div class="c b big">COMANDA</div><div class="c b">'+esc(o.tipo==='mesa'?'MESA '+o.mesa:oLabel(o))+'</div>'+row(hm(Date.now()),o.recoge?'Recoge '+esc(o.recoge):'')+'<hr>';
+  items.forEach(i=>{h+='<div class="b">'+i.qty+' × '+esc(i.nombre)+'</div>';const d=[i.detalle,i.leche?'leche '+i.leche.toLowerCase():''].filter(Boolean).join(', ');if(d)h+='<div>&nbsp;&nbsp;'+esc(d)+'</div>';if(i.notas)h+='<div>&nbsp;&nbsp;» '+esc(i.notas)+'</div>';});
+  if(o.nota)h+='<hr><div>Nota: '+esc(o.nota)+'</div>';pr(h);}
+function printCorte(c){let h=PH+'<div class="c b">CORTE DE CAJA</div>'+row(new Date(c.hasta).toLocaleDateString('es-MX'),hm(c.desde)+'–'+hm(c.hasta))+'<div>Abrió: '+esc(c.abre)+' · Cerró: '+esc(c.cierra)+'</div><hr>'+
+  row('Fondo',money(c.fondo))+row('Ventas efectivo',money(c.ef))+row('Entradas','+'+money(c.ent))+row('Salidas','−'+money(c.sal))+'<div class="r b"><span>Debía haber</span><span>'+money(c.esperado)+'</span></div>'+row('Contado',money(c.contado))+
+  '<div class="r b"><span>Diferencia</span><span>'+(Math.abs(c.diferencia)<1?'Cuadra':money(c.diferencia))+'</span></div><hr>'+row('Tarjeta',money(c.tar))+row('Transferencia',money(c.tra))+'<div class="r b"><span>TOTAL VENDIDO</span><span>'+money(c.total)+'</span></div>'+row('Tickets',c.tickets)+row('Anulados',c.anuladas)+row('Descuentos',money(c.descuentos))+
+  (c.movs.length?'<hr>'+c.movs.map(m=>row((m.tipo==='entrada'?'+ ':'- ')+esc(m.motivo),money(m.monto))).join(''):'')+(c.nota?'<hr><div>Nota: '+esc(c.nota)+'</div>':'')+'<br><div class="c">Firma: ____________</div>';pr(h);}
+
+/* ================= RESPALDO Y ALMACENAMIENTO ================= */
+function allData(){const d={app:'pos-aroma',version:3,fecha:new Date().toISOString()};for(let k=0;k<localStorage.length;k++){const key=localStorage.key(k);if(key.startsWith('pos_'))d[key]=localStorage.getItem(key);}return d;}
+function download(name,obj){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();}
+function autoBackup(tag){S.set('lastBk',Date.now());download('respaldo-pos-aroma-'+new Date().toISOString().slice(0,10)+'-'+tag+'.json',allData());log('Respaldo',tag);}
+function bkBanner(){const last=S.get('lastBk',0),days=Math.floor((Date.now()-last)/86400000);
+  return VENTAS.length&&days>=3?'<div class="banner">⚠️ '+(last?'Último respaldo hace '+days+' días.':'Aún no hay respaldo.')+' Si se borran los datos del navegador, se pierde todo.<button class="btn b-dark b-sm" data-bk>⬇️ Respaldar ahora</button></div>':'';}
+document.addEventListener('click',e=>{if(e.target.closest('[data-bk]')){autoBackup('manual');toast('Respaldo descargado');if(curTab==='ven')renderVentas();if(curTab==='adm')renderAdmin();}});
+/* copia espejo en IndexedDB */
+let idb=null;
+function idbOpen(){return new Promise(r=>{try{const q=indexedDB.open('aroma-pos',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>{idb=q.result;r(idb);};q.onerror=()=>r(null);}catch(e){r(null);}});}
+function idbGet(k){return new Promise(r=>{if(!idb)return r(null);try{const q=idb.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null);}catch(e){r(null);}});}
+let mirT=null;window.mirrorSoon=()=>{clearTimeout(mirT);mirT=setTimeout(()=>{if(!idb)return;try{idb.transaction('kv','readwrite').objectStore('kv').put({ts:Date.now(),data:allData()},'snap');}catch(e){}},2500);};
+let PERSIST=null,INSTALL=null;
+function swVerFill(){try{caches.keys().then(k=>{const v=k.filter(x=>x.startsWith('aroma-pos')).join(', ')||'sin caché';const e=document.getElementById('swVer');if(e)e.textContent=v;});}catch(e){}}
+function stoInfo(){setTimeout(swVerFill,50);let b=0;for(let k=0;k<localStorage.length;k++){const key=localStorage.key(k);if(key.startsWith('pos_'))b+=(key.length+localStorage.getItem(key).length)*2;}
+  const pct=Math.min(100,b/(5*1024*1024)*100);const old=VENTAS.length?new Date(Math.min(...VENTAS.map(v=>v.ts||Date.now()))).toLocaleDateString('es-MX'):'—';
+  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  return '<div class="lines" style="font-size:.9rem"><div><span>Espacio usado</span><b>'+(b/1048576).toFixed(2)+' MB de ~5 MB</b></div></div><div class="meter"><i style="width:'+pct+'%;background:'+(pct>70?'var(--red)':'var(--caramel)')+'"></i></div>'+
+    '<div class="lines" style="font-size:.9rem"><div><span>Ventas guardadas</span><b>'+VENTAS.length+' (desde '+old+')</b></div><div><span>Almacenamiento protegido</span><b>'+(PERSIST===true?'Sí ✓':PERSIST===false?'No (el navegador lo puede limpiar)':'—')+'</b></div>'+
+    '<div><span>Copia espejo</span><b>'+(idb?'Activa ✓':'No disponible')+'</b></div><div><span>Último respaldo</span><b>'+(S.get('lastBk',0)?new Date(S.get('lastBk',0)).toLocaleString('es-MX'):'Nunca')+'</b></div><div><span>App</span><b>'+(standalone?'Instalada ✓':'En el navegador')+'</b></div><div><span>Versión del POS</span><b>'+APPVER+' · '+APPDATE+'</b></div><div><span>Versión en caché</span><b id="swVer">—</b></div><div><span>Pantalla</span><b>'+innerWidth+' × '+innerHeight+' px</b></div></div>'+
+    (pct>70?'<p class="note">El espacio está por llenarse. Use "Archivar ventas de más de 6 meses".</p>':'');}
+$('archBtn').onclick=()=>{const lim=Date.now()-182*86400000;const old=VENTAS.filter(v=>(v.ts||0)<lim);if(!old.length)return toast('No hay ventas de más de 6 meses');
+  if(!confirm('Se descargará un archivo con '+old.length+' ventas antiguas y se quitarán de la tablet. Los cierres y cortes se conservan. ¿Continuar?'))return;
+  download('archivo-ventas-aroma-hasta-'+new Date(lim).toISOString().slice(0,10)+'.json',{app:'pos-aroma',tipo:'archivo-ventas',ventas:old});
+  VENTAS=VENTAS.filter(v=>(v.ts||0)>=lim);S.set('ventas',VENTAS);log('Archivar ventas',old.length+' ventas');renderAdmin();toast(old.length+' ventas archivadas');};
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();INSTALL=e;const b=$('installBtn');if(b)b.hidden=false;});
+$('installBtn').onclick=async()=>{if(!INSTALL)return;INSTALL.prompt();const r=await INSTALL.userChoice;if(r.outcome==='accepted')log('Instalar app','');INSTALL=null;$('installBtn').hidden=true;};
+
+/* ================= ADMIN: usuarios, impresión, bitácora ================= */
+let PE=null,PRT='pct',PRA='bebidas';
+function renderPromos(){$('prList').innerHTML=PROMOS.length?PROMOS.map(p=>{const v=promoVig(p);
+  return '<div class="prl'+(v?'':' pr-off')+'"><div class="nm"><b>'+esc(p.nombre)+'</b>'+(p.sellos?' <span class="pill">🤎 lealtad</span>':'')+(p.pin?' <span class="pill">🔒 PIN</span>':'')+'<small>'+esc(promoDesc(p))+(p.hasta?' · hasta '+esc(p.hasta.split('-').reverse().join('/')):'')+(p.activa&&!v?' · vencida':'')+'</small></div>'+
+  '<button class="btn b-sm '+(p.activa?'b-ok':'b-line')+'" data-pa="'+p.id+'">'+(p.activa?'Activa':'Pausada')+'</button><button class="x" data-pe="'+p.id+'" style="color:var(--ink2)">Editar</button><button class="x" data-pd="'+p.id+'">Borrar</button></div>';}).join(''):'<p class="muted">Sin promociones.</p>';}
+$('prList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.pa){const p=PROMOS.find(x=>x.id===b.dataset.pa);p.activa=!p.activa;S.set('promos',PROMOS);log('Promoción',p.nombre+(p.activa?' activada':' pausada'));renderPromos();}
+  else if(b.dataset.pe)openPromo(PROMOS.find(x=>x.id===b.dataset.pe));
+  else if(b.dataset.pd){const p=PROMOS.find(x=>x.id===b.dataset.pd);if(!confirm('¿Borrar la promoción "'+p.nombre+'"? Las ventas pasadas la conservan.'))return;PROMOS=PROMOS.filter(x=>x!==p);S.set('promos',PROMOS);log('Borrar promoción',p.nombre);renderPromos();}});
+function prSync(){$('prTipo').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x.dataset.v===PRT));$('prAplica').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x.dataset.v===PRA));$('prValL').textContent=PRT==='pct'?'Porcentaje de descuento (%)':'Monto de descuento por producto ($)';}
+function openPromo(p){PE=p||null;$('prTitle').textContent=p?'Editar promoción':'Nueva promoción';$('prName').value=p?p.nombre:'';$('prVal').value=p?p.valor:'';PRT=p?p.tipo:'pct';PRA=p?p.aplica:'bebidas';$('prHasta').value=p?p.hasta||'':'';$('prPin').checked=!!(p&&p.pin);$('prSellos').checked=!!(p&&p.sellos);prSync();openM('mPromo');}
+$('prNew').onclick=()=>openPromo(null);
+$('prTipo').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;PRT=b.dataset.v;prSync();});
+$('prAplica').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;PRA=b.dataset.v;prSync();});
+$('prOk').onclick=()=>{const n=$('prName').value.trim(),v=+$('prVal').value;
+  if(!n)return toast('Escriba el nombre de la promoción','err');
+  if(!(v>0)||(PRT==='pct'&&v>100))return toast(PRT==='pct'?'El porcentaje va de 1 a 100':'Escriba el monto del descuento','err');
+  const d={nombre:n,tipo:PRT,valor:v,aplica:PRA,hasta:$('prHasta').value||'',pin:$('prPin').checked,sellos:$('prSellos').checked};
+  if(d.sellos)PROMOS.forEach(x=>x.sellos=false);
+  if(PE)Object.assign(PE,d);else PROMOS.push(Object.assign({id:'pr'+uid(),activa:true},d));
+  S.set('promos',PROMOS);log(PE?'Editar promoción':'Nueva promoción',n+' · '+promoDesc(d));closeM('mPromo');renderPromos();toast('Promoción guardada');};
+function renderAdminExtra(){renderPromos();
+  $('uList').innerHTML=USERS.map(u=>'<div class="lines"><div><span><b>'+esc(u.nombre)+'</b> <span class="pill">'+(u.rol==='dueno'?'Dueño':'Empleado')+'</span></span><span><button class="x" data-ue="'+u.id+'" style="color:var(--ink2)">Editar / PIN</button>'+(u.id!==(USER&&USER.id)?'<button class="x" data-ud="'+u.id+'">Borrar</button>':'')+'</span></div></div>').join('');
+  $('cfgPrint').querySelectorAll('.op').forEach(b=>b.classList.toggle('on',b.dataset.v===(CFG.print||'preguntar')));$('cfgComanda').checked=!!CFG.comanda;
+  $('stoInfo').innerHTML=stoInfo();$('installBtn').hidden=!INSTALL;
+  $('logRows').innerHTML=LOGS.slice(-200).reverse().map(l=>'<tr><td style="white-space:nowrap">'+new Date(l.ts).toLocaleString('es-MX',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</td><td>'+esc(l.u)+'</td><td><b>'+esc(l.a)+'</b> <span class="muted">'+esc(l.d)+'</span></td></tr>').join('')||'<tr><td class="muted">Sin movimientos</td></tr>';
+  const bn=bkBanner();if(bn&&!document.querySelector('#p-adm .banner'))$('p-adm').querySelector('.phead').insertAdjacentHTML('afterend',bn);
+}
+$('cfgPrint').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;CFG.print=b.dataset.v;S.set('cfg2',CFG);renderAdminExtra();toast('Impresión: '+b.textContent);});
+$('cfgComanda').addEventListener('change',e=>{CFG.comanda=e.target.checked;S.set('cfg2',CFG);});
+$('printTest').onclick=()=>printTicket({id:0,fecha:new Date().toLocaleDateString('es-MX'),hora:hm(Date.now()),mesaNombre:'Prueba',usuario:USER?USER.nombre:'',items:[{qty:1,nombre:'Latte',total:60,detalle:'12 oz',leche:'Entera'}],subtotal:60,total:60,pago:'Efectivo',recibido:100,estado:'ok'});
+let UE=null;
+function openUser(u){UE=u;$('uTitle').textContent=u?'Editar usuario':'Nuevo usuario';$('uName').value=u?u.nombre:'';$('uRol').value=u?u.rol:'empleado';$('uPin').value='';$('uPin2').value='';
+  $('uNote').textContent=u?'Deje el PIN en blanco para no cambiarlo.':'El empleado entra con su PIN; sus ventas y cortes quedan a su nombre.';openM('mUser');}
+$('uNew').onclick=()=>openUser(null);
+$('uList').addEventListener('click',e=>{const ed=e.target.closest('[data-ue]');if(ed)return openUser(USERS.find(u=>u.id===ed.dataset.ue));
+  const d=e.target.closest('[data-ud]');if(d){const u=USERS.find(x=>x.id===d.dataset.ud);if(u.rol==='dueno'&&USERS.filter(x=>x.rol==='dueno').length<2)return toast('Debe quedar al menos un dueño','err');
+    if(!confirm('¿Borrar a '+u.nombre+'?'))return;USERS=USERS.filter(x=>x!==u);S.set('usuarios',USERS);log('Borrar usuario',u.nombre);renderAdminExtra();}});
+$('uOk').onclick=async()=>{const n=$('uName').value.trim(),r=$('uRol').value,p=$('uPin').value,p2=$('uPin2').value;
+  if(!n)return toast('Escriba el nombre','err');
+  if(!UE||p){if(!/^\d{4,6}$/.test(p))return toast('El PIN debe tener de 4 a 6 números','err');if(p!==p2)return toast('Los PIN no coinciden','err');}
+  if(UE&&UE.rol==='dueno'&&r!=='dueno'&&USERS.filter(x=>x.rol==='dueno').length<2)return toast('Debe quedar al menos un dueño','err');
+  const u=UE||{id:'u'+uid()};u.nombre=n;u.rol=r;if(p){u.salt=uid();u.hash=await hashPin(p,u.salt);u.len=p.length;}
+  if(!UE)USERS.push(u);S.set('usuarios',USERS);log(UE?'Editar usuario':'Nuevo usuario',n+' ('+r+')');if(USER&&USER.id===u.id)USER=u;updChips();closeM('mUser');renderAdminExtra();toast('Usuario guardado');};
+
+/* ================= ARRANQUE ================= */
+const _renderVentas=renderVentas;
+renderVentas=function(){_renderVentas();renderCaja();$('bkBanner').innerHTML=bkBanner();};
+async function bootSecurity(){
+  await idbOpen();
+  // si el navegador se limpió pero quedó la copia espejo, ofrecer recuperarla
+  const empty=!localStorage.getItem('pos_usuarios')&&!localStorage.getItem('pos_ventas');
+  if(empty){const s=await idbGet('snap');if(s&&s.data&&(s.data.pos_ventas||s.data.pos_usuarios)&&confirm('Encontré una copia de seguridad del '+new Date(s.ts).toLocaleString('es-MX')+'. ¿Recuperar sus datos?')){
+    Object.keys(s.data).filter(k=>k.startsWith('pos_')).forEach(k=>localStorage.setItem(k,s.data[k]));location.reload();return;}}
+  try{if(navigator.storage&&navigator.storage.persist){PERSIST=await navigator.storage.persisted();if(!PERSIST)PERSIST=await navigator.storage.persist();}}catch(e){}
+  if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+    const had=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('POS actualizado a la versión más reciente ✓');});
+  }
+  let sid=null;try{sid=sessionStorage.getItem('pos_sess');}catch(e){}
+  const u=USERS.find(x=>x.id===sid);
+  if(u){USER=u;updChips();}else showLock();
+  mirrorSoon();
+}
+
+/* ================= ADMIN ================= */
+function renderAdmin(){
+  const cats=MENU_CATS.filter(c=>!c.virtual);
+  if(!$('aCat').options.length)$('aCat').innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('')+'<option value="otros">Otros</option>';
+  const fc=$('aCat').value,q=norm($('aQ').value||'');
+  const L=CAT.filter(p=>(!fc||(fc==='otros'?!cats.find(c=>c.id===p.cat):p.cat===fc))&&(!q||norm(p.name).includes(q)));
+  $('arows').innerHTML=L.map(p=>'<tr class="adm-row"><td><b>'+emoji(p)+' '+esc(p.name)+'</b>'+(p.custom?' <span class="pill">propio</span>':'')+'</td><td class="muted">'+esc(catName(p.cat))+'</td><td>'+
+    (p.ask?'<span class="muted">Precio del día</span>':p.sizes?p.sizes.map((s,k)=>'<label style="display:inline-flex;gap:4px;align-items:center;margin-right:6px;font-size:.8rem">'+esc(s.label)+' <input type="number" data-pz="'+p.id+'|'+k+'" value="'+s.price+'"></label>').join(''):'<input type="number" data-pr="'+p.id+'" value="'+p.price+'">')+
+    '</td><td><button class="sw'+(p.off?' on':'')+'" data-off="'+p.id+'" aria-label="Agotado"></button></td><td><button class="btn b-line b-sm" data-rc="'+p.id+'">📝'+(p.receta?' ✓':'')+'</button></td><td>'+(p.custom?'<button class="x" data-rm="'+p.id+'">Borrar</button>':'')+'</td></tr>').join('');
+  renderAdminExtra();
+  $('cfgMesas').value=CFG.mesas;$('cfgDimo').value=CFG.dimo;$('cfgLate').value=CFG.late;$('cfgLoza').checked=CFG.loza!==false;
+}
+$('aCat').addEventListener('change',renderAdmin);$('aQ').addEventListener('input',renderAdmin);
+$('arows').addEventListener('change',e=>{
+  const a=e.target.dataset.pr,b=e.target.dataset.pz;
+  if(a){const p=prod(a);log('Cambio de precio',p.name+': '+money(p.price)+' → '+money(+e.target.value||0));p.price=+e.target.value||0;saveCat();toast('Precio de '+p.name+' guardado');}
+  if(b){const[id,k]=b.split('|');const p=prod(id);log('Cambio de precio',p.name+' '+p.sizes[+k].label+': '+money(p.sizes[+k].price)+' → '+money(+e.target.value||0));p.sizes[+k].price=+e.target.value||0;p.price=p.sizes[0].price;saveCat();toast('Precio de '+p.name+' guardado');}
+});
+$('arows').addEventListener('click',e=>{
+  const o=e.target.closest('[data-off]');if(o){const p=prod(o.dataset.off);p.off=!p.off;log(p.off?'Marcar agotado':'Quitar agotado',p.name);saveCat();renderAdmin();toast(p.name+(p.off?' marcado como agotado':' disponible de nuevo'));return;}
+  const r=e.target.closest('[data-rc]');if(r){const p=prod(r.dataset.rc);editProd(p,true);return;}
+  const d=e.target.closest('[data-rm]');if(d){const p=prod(d.dataset.rm);if(confirm('¿Borrar '+p.name+'?')){CAT=CAT.filter(x=>x!==p);saveCat();renderAdmin();}}
+});
+let ME=null;
+function editProd(p,recOnly){ME={p,recOnly};$('meTitle').textContent=recOnly?'Receta · '+p.name:'Nuevo producto';
+  const cats=MENU_CATS.filter(c=>!c.virtual);
+  $('meBody').innerHTML=recOnly?'<p class="muted" style="font-size:.88rem;margin-bottom:8px">Escriba la receta propia de Aroma: gramos de café, ml de leche, jarabes, toppings y vaso. Se verá en Barra al tocar 📖.</p><textarea id="meRec" rows="10" placeholder="Ej.:\nEspresso doble 36 g\nLeche 240 ml a 60 °C\nJarabe de caramelo 15 ml\nVaso 12 oz">'+esc(p.receta||'')+'</textarea>':
+    '<div class="frm"><label>Nombre<input id="meName"></label><label>Categoría<select id="meCat">'+cats.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('')+'<option value="otros">Otros</option></select></label>'+
+    '<label>Precio<input id="mePrice" type="number" min="0"></label><label>Precio Grande (opcional)<input id="mePriceG" type="number" min="0" placeholder="Si tiene dos tamaños"></label></div>'+
+    '<label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:700"><input type="checkbox" id="meMilk" style="width:20px;height:20px">Lleva leche (elegir entera o deslactosada)</label>'+
+    '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:700"><input type="checkbox" id="meNc" style="width:20px;height:20px">Sin café</label>';
+  openM('mEdit');}
+$('aNew').onclick=()=>editProd({},false);
+$('meOk').onclick=()=>{
+  if(ME.recOnly){ME.p.receta=$('meRec').value.trim();saveCat();closeM('mEdit');renderAdmin();toast('Receta guardada');return;}
+  const name=$('meName').value.trim(),price=+$('mePrice').value,pg=+$('mePriceG').value;
+  if(!name||!price)return toast('Escriba nombre y precio','err');
+  const p={id:'c-'+uid(),cat:$('meCat').value,name,price,milk:$('meMilk').checked,nocafe:$('meNc').checked,custom:true};
+  if(pg)p.sizes=[{label:'Pequeño',sub:'12 oz',price},{label:'Grande',sub:'16 oz',price:pg}];
+  CAT.push(p);saveCat();closeM('mEdit');renderAdmin();toast(name+' agregado');
+};
+$('cfgSave').onclick=()=>{
+  const m=Math.max(0,Math.min(20,+$('cfgMesas').value||0));
+  const busy=OPEN.filter(o=>o.tipo==='mesa'&&o.mesa>m&&o.items.length);if(busy.length)return toast('Primero cobre o cierre la Mesa '+busy[0].mesa,'err');
+  CFG={mesas:m,dimo:$('cfgDimo').value.replace(/\D/g,'')||CFG.dimo,late:+$('cfgLate').value||10,loza:$('cfgLoza').checked,print:CFG.print||'preguntar',comanda:!!CFG.comanda};S.set('cfg2',CFG);toast('Configuración guardada');};
+$('bkDown').onclick=()=>{autoBackup('manual');toast('Respaldo descargado');};
+$('bkUp').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);
+  if(!confirm('¿Restaurar este respaldo? Reemplaza los datos actuales de esta tablet.'))return;
+  if(d.app==='pos-aroma'){Object.keys(d).filter(k=>k.startsWith('pos_')).forEach(k=>localStorage.setItem(k,d[k]));}
+  else if(d.ventas||d.prods){if(d.ventas)S.set('ventas',d.ventas);if(d.cierres)S.set('cierres',d.cierres);if(d.vctr)S.set('vctr',d.vctr);}
+  else throw 0;log('Restaurar respaldo',f.name);location.reload();}catch(x){toast('Archivo de respaldo no válido','err');}};r.readAsText(f);e.target.value='';};
+$('reseed').onclick=()=>{if(!confirm('¿Volver a cargar productos y precios del menú digital?\nSe conservan sus recetas, los agotados y los productos propios; los precios vuelven a los del menú.'))return;seedCatalog(CAT);renderAdmin();toast('Catálogo actualizado desde el menú');};
+$('wipe').onclick=()=>{if(!confirm('¿Borrar TODO el historial de ventas y cierres? No se puede deshacer.'))return;if(prompt('Escriba BORRAR para confirmar')!=='BORRAR')return;VENTAS=[];CIERRES=[];VCTR=1;S.set('ventas',[]);S.set('cierres',[]);S.set('vctr',1);log('Borrar historial','ventas y cierres');toast('Historial borrado');};
+
+/* aviso si el menú trae una versión nueva del catálogo */
+if(S.get('catver','')!==CATALOG_VERSION){S.set('catver',CATALOG_VERSION);if(S.get('catalogo2',null))setTimeout(()=>toast('Hay productos nuevos del menú: Admin → "Volver a cargar catálogo"'),1500);}
+
+renderPed();
+bootSecurity();
+</script>
+</body>
+</html>
