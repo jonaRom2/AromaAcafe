@@ -383,6 +383,12 @@ tr.anul td{opacity:.5;text-decoration:line-through;}
 .pr-list .prl .nm{flex:1 1 200px;}
 .pr-list .prl .nm small{display:block;color:var(--muted);font-size:.8rem;}
 .pr-off{opacity:.55;}
+.cafe-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#f6e6d1;border:1.5px solid var(--line2);border-radius:14px;padding:10px 12px;margin-bottom:12px;}
+.cafe-bar b{font-size:.95rem;}.cafe-bar select{max-width:320px;flex:1 1 220px;}
+.cafe-bar small{flex-basis:100%;color:var(--muted);font-size:.8rem;}
+.ctypes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.ctypes .ch{min-height:40px;}
+.wa-btn{background:#1f8f4e!important;color:#fff!important;border-color:#1f8f4e!important;}
 .note{background:var(--warnbg);color:#6b4410;border-radius:12px;padding:10px 12px;font-size:.88rem;margin-top:10px;}
 .cobro-tot{display:flex;justify-content:space-between;align-items:baseline;background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;margin:10px 0;}
 .cobro-tot b{font-size:1.9rem;}
@@ -530,9 +536,11 @@ body.tk-vis #goTicket{display:none!important;}
   <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="meOk">Guardar</button></div></div></div>
 
 <button class="btn b-dark" id="goTicket" hidden>🧾 Ver pedido</button>
-<div class="mod" id="mBuy"><div class="mbox"><div class="mh"><div><h2>Registrar compra</h2><div class="sub">Suma a la existencia y actualiza el costo del insumo.</div></div><button class="cl" data-close>×</button></div>
+<div class="mod" id="mBuy"><div class="mbox"><div class="mh"><div><h2 id="buyTitle">Registrar compra</h2><div class="sub">Suma a la existencia y actualiza el costo del insumo.</div></div><button class="cl" data-close>×</button></div>
   <div class="mb"><div class="og"><h4>Insumo</h4><select id="buyIns"></select><p class="muted" id="buyInfo" style="font-size:.85rem;margin-top:6px"></p></div>
-    <div class="frm"><label>Empaques comprados<input id="buyQty" type="number" min="0" step="any" value="1"></label><label>Total pagado ($)<input id="buyTot" type="number" min="0" step="any"></label><label>Proveedor (opcional)<input id="buyProv"></label></div>
+    <div class="og" id="buyCafeG" hidden><h4>Tipo de café</h4><div class="ctypes" id="buyCafe"></div>
+      <div class="ctypes" style="margin-top:8px"><span class="muted" style="font-size:.85rem;align-self:center">Nuevo tipo:</span><button class="ch" data-nt="Arábica">+ Arábica</button><button class="ch" data-nt="Robusta">+ Robusta</button><button class="ch" data-nt="Mezcla">+ Mezcla</button><button class="ch" data-nt="Especialidad">+ Especialidad</button><input id="buyCafeNew" placeholder="Otro (ej. Chiapas, Nimbus)" style="max-width:200px"><button class="btn b-line b-sm" id="buyCafeAdd">Agregar</button></div></div>
+    <div class="frm"><label>Empaques comprados<input id="buyQty" type="number" min="0" step="any" value="1"></label><label id="buyContL">Contenido de cada empaque<input id="buyCont" type="number" min="0" step="any"></label><label>Total pagado ($)<input id="buyTot" type="number" min="0" step="any"></label><label>Proveedor (opcional)<input id="buyProv"></label></div>
     <p class="cambio" id="buyCalc" style="font-size:.95rem"></p></div>
   <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="buyOk">Guardar compra</button></div></div></div>
 
@@ -544,7 +552,9 @@ body.tk-vis #goTicket{display:none!important;}
     <label>Contenido del empaque (en unidad base)<input id="insCont" type="number" min="0" step="any"></label>
     <label>Precio por empaque ($)<input id="insPrice" type="number" min="0" step="any"></label>
     <label>Merma %<input id="insMerma" type="number" min="0" max="90" step="any"></label>
-    <label id="insMinL">Mínimo para alerta<input id="insMin" type="number" min="0" step="any"></label></div>
+    <label id="insMinL">Mínimo para alerta<input id="insMin" type="number" min="0" step="any"></label>
+    <label id="insStockL">Existencia actual<input id="insStock" type="number" min="0" step="any" placeholder="Sin conteo"></label></div>
+    <p class="muted" style="font-size:.82rem;margin-top:8px">💡 Si registró una compra en el insumo equivocado, mejor corríjala en <b>Compras → Editar</b>: así la existencia y el precio pasan al insumo correcto.</p>
     <datalist id="insCats"></datalist><p class="muted" id="insNote" style="font-size:.85rem;margin-top:10px"></p></div>
   <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="insOk">Guardar</button></div></div></div>
 
@@ -586,7 +596,7 @@ body.tk-vis #goTicket{display:none!important;}
 
 <div class="mod" id="mDone"><div class="mbox" style="max-width:420px"><div class="mb" style="padding-top:24px">
   <div style="text-align:center;font-size:2.4rem">✅</div><div class="done-big money" id="doneTot"></div><div class="done-ch" id="doneCh"></div><p class="muted" style="text-align:center;margin-top:6px" id="doneSub"></p><div class="sellos" id="doneSellos" hidden></div></div>
-  <div class="mf"><button class="btn b-line" id="donePrint">🖨️ Ticket</button><button class="btn b-ok" id="doneOk">Listo</button></div></div></div>
+  <div class="mf"><button class="btn b-line" id="donePrint">🖨️ Imprimir</button><button class="btn wa-btn" id="doneWa">📲 WhatsApp</button><button class="btn b-ok" id="doneOk">Listo</button></div></div></div>
 
 <div class="mod" id="mPromo"><div class="mbox" style="max-width:480px"><div class="mh"><div><h2 id="prTitle">Promoción</h2></div><button class="cl" data-close>×</button></div>
   <div class="mb">
@@ -599,6 +609,11 @@ body.tk-vis #goTicket{display:none!important;}
     <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:10px"><input type="checkbox" id="prPin" style="width:20px;height:20px">Pedir PIN del dueño al aplicarla</label>
   </div>
   <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="prOk">Guardar</button></div></div></div>
+
+<div class="mod" id="mWaT"><div class="mbox" style="max-width:420px"><div class="mh"><div><h2>Enviar ticket por WhatsApp</h2><div class="sub" id="wtSub"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><div class="og"><h4>WhatsApp del cliente (10 dígitos)</h4><input id="wtTel" type="tel" inputmode="numeric" maxlength="14" placeholder="238 123 4567" style="font-size:1.3rem;letter-spacing:.04em"></div>
+    <p class="muted" style="font-size:.85rem">Se abre WhatsApp con el ticket ya escrito; solo toque <b>Enviar</b>. Si deja el número vacío, podrá elegir el contacto dentro de WhatsApp.</p></div>
+  <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn wa-btn" id="wtOk">📲 Abrir WhatsApp</button></div></div></div>
 
 <div class="mod" id="mLogout"><div class="mbox" style="max-width:400px"><div class="mb" style="padding-top:24px;text-align:center">
   <div style="font-size:2.2rem">👤</div><h2 style="margin-top:6px">¿Cerrar la sesión de <span id="loName"></span>?</h2><p class="muted" id="loTxt" style="margin-top:8px"></p></div>
@@ -762,11 +777,11 @@ $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!
 let MP=null;
 const NOTE_CHIPS=['Sin azúcar','Poco azúcar','Poco hielo','Sin hielo','Extra caliente','Tibio','Sin crema batida','Para llevar'];
 function openProd(p){
-  MP={p,qty:1,size:0,milk:'Entera',flavor:p.flavors?p.flavors[0]:null,notes:[],grano:'House Blend'};
+  MP={p,qty:1,size:0,milk:'Entera',flavor:p.flavors?p.flavors[0]:null,notes:[],grano:cafeUsoId()};
   $('mpName').textContent=p.name;$('mpSub').textContent=[catName(p.cat),p.oz,p.tag].filter(Boolean).join(' · ');
   let h='';
   if(p.includes)h+='<div class="incl"><b>Incluye:</b> '+p.includes.map(esc).join(' · ')+'</div>';
-  if(p.ask){h+='<div class="og"><h4>Café del día</h4><div class="opts" data-g="grano">'+['House Blend','Coatepec','Robusta','Otro'].map((v,k)=>'<button class="op'+(k?'':' on')+'" data-v="'+v+'">'+v+'</button>').join('')+'</div></div>'+
+  if(p.ask){h+='<div class="og"><h4>Tipo de café</h4><div class="opts" data-g="grano">'+cafeTypes().map(c=>'<button class="op'+(c.id===MP.grano?' on':'')+'" data-v="'+c.id+'">'+esc(cafeShort(c))+'<small>'+(c.reg?fq(c,c.stock):'sin conteo')+'</small></button>').join('')+'</div></div>'+
     '<div class="frm"><label>Gramos<input id="mpGr" type="number" min="0" value="250"></label><label>Precio $<input id="mpPrice" type="number" min="0" placeholder="$"></label></div>';}
   if(p.sizes)h+='<div class="og"><h4>Tamaño</h4><div class="opts" data-g="size">'+p.sizes.map((s,k)=>'<button class="op'+(k?'':' on')+'" data-v="'+k+'">'+esc(s.label)+'<small>'+(s.sub||'')+' · '+money(s.price)+'</small></button>').join('')+'</div></div>';
   if(p.flavors)h+='<div class="og"><h4>'+esc(p.flavorTitle||'Sabor')+'</h4><div class="opts" data-g="flavor">'+p.flavors.map((f,k)=>'<button class="op'+(k?'':' on')+'" data-v="'+esc(f)+'">'+esc(f)+'</button>').join('')+'</div></div>';
@@ -798,16 +813,16 @@ $('mpAdd').onclick=()=>{
   const det=[];let tam='';
   if(p.sizes){const s=p.sizes[MP.size];tam=s.label;det.push(s.label+(s.sub?' '+s.sub:''));}
   if(p.flavors)det.push(MP.flavor);
-  let grams=0;if(p.ask){grams=+$('mpGr').value||0;det.push(MP.grano);if(grams)det.push(grams+' g');}
+  let grams=0,cafeId='';if(p.ask){grams=+$('mpGr').value||0;cafeId=MP.grano;const ci=insById(cafeId);det.push(ci?cafeShort(ci):'Café');if(grams)det.push(grams+' g');}
   const notes=MP.notes.slice();const nt=$('mpNote').value.trim();if(nt)notes.push(nt);
-  addItem(p,{qty:MP.qty,precioU:unit,detalle:det.join(', '),tamano:tam,leche:p.milk?MP.milk:'',notas:notes.join(', '),si:p.sizes?MP.size:0,flavor:p.flavors?MP.flavor:'',grams});
+  addItem(p,{qty:MP.qty,precioU:unit,detalle:det.join(', '),tamano:tam,leche:p.milk?MP.milk:'',notas:notes.join(', '),si:p.sizes?MP.size:0,flavor:p.flavors?MP.flavor:'',grams,cafeId});
   closeM('mProd');
 };
 function addItem(p,o){
   let ord=cur();
   if(!ord){ord=createOrder({tipo:'llevar',cliente:'Mostrador '+(OPEN.filter(x=>x.tipo==='llevar').length+1)});toast('Se creó un pedido para llevar');}
   const precioU=o.precioU!=null?o.precioU:(p.sizes?p.sizes[0].price:p.price);
-  const it={uid:uid(),pid:p.id,nombre:p.name,icono:emoji(p),detalle:o.detalle||'',tamano:o.tamano||'',leche:o.leche||'',notas:o.notas||'',qty:o.qty||1,precioU,total:precioU*(o.qty||1),estado:'nuevo',si:o.si||0,flavor:o.flavor||'',grams:o.grams||0};
+  const it={uid:uid(),pid:p.id,nombre:p.name,icono:emoji(p),detalle:o.detalle||'',tamano:o.tamano||'',leche:o.leche||'',notas:o.notas||'',qty:o.qty||1,precioU,total:precioU*(o.qty||1),estado:'nuevo',si:o.si||0,flavor:o.flavor||'',grams:o.grams||0,cafeId:o.cafeId||''};
   const same=ord.items.find(i=>i.estado==='nuevo'&&i.pid===it.pid&&i.detalle===it.detalle&&i.leche===it.leche&&i.notas===it.notas&&i.precioU===it.precioU);
   if(same){same.qty+=it.qty;same.total=same.qty*same.precioU;}else ord.items.push(it);
   TKID=ord.id;TKX=false;saveOpen();renderTicket();renderOrders();const tb=$('tkTog');if(tb){tb.classList.remove('bump');void tb.offsetWidth;tb.classList.add('bump');}
@@ -933,7 +948,7 @@ $('cbPromo').addEventListener('click',e=>{const b=e.target.closest('.prm-b');if(
   CBU[b.dataset.u]=CBU[b.dataset.u]===b.dataset.p?undefined:b.dataset.p;if(!CBU[b.dataset.u])delete CBU[b.dataset.u];
   promoAuth=false;renderPromo();cbUpd();});
 let CB={pay:'Efectivo',desc:'none'};
-const APPVER='v5',APPDATE='15/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
+const APPVER='v6',APPDATE='16/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
 const PAYS=[['Efectivo','💵 Efectivo'],['Tarjeta','💳 Tarjeta'],['Transferencia','📱 Transferencia / DiMo']];
 const DESCS=[['none','Ninguno'],['cortesia','Cortesía (100%)'],['otro','Otro monto']];
 function firstDrink(o){return o.items.find(i=>{const p=prod(i.pid);return p&&!['croissants','postres','grano','combos'].includes(p.cat);});}
@@ -1070,9 +1085,10 @@ function renderVentas(){
     CIERRES.slice().reverse().map(c=>'<tr><td>'+esc(c.rango)+'</td><td>'+c.tickets+'</td><td>'+money(c.efec||0)+'</td><td>'+money(c.tarj||0)+'</td><td>'+money(c.transf||0)+'</td><td style="text-align:right;font-weight:900">'+money(c.total)+'</td></tr>').join('')+'</tbody></table></div>':'';
   $('vrows').innerHTML=L.slice().reverse().slice(0,300).map(v=>'<tr class="'+(v.estado==='anulada'?'anul':'')+'"><td>'+v.id+'</td><td>'+esc(v.fecha)+'<br><span class="muted">'+esc(v.hora)+'</span></td><td>'+esc(v.mesaNombre||'')+'</td><td style="font-size:.85rem">'+
     (v.usuario?'<span class="muted" style="font-size:.78rem">👤 '+esc(v.usuario)+'</span><br>':'')+v.items.map(i=>i.qty+'× '+esc(i.nombre)+(i.detalle?' ('+esc(i.detalle)+')':(i.tamano?' ('+esc(i.tamano)+')':''))).join('<br>')+(v.descuento?'<br><span class="pill">−'+money(v.descuento)+' '+esc(v.motivoDesc||'')+'</span>':'')+'</td><td>'+esc(v.pago)+'</td><td style="text-align:right;font-weight:900">'+money(v.total)+'</td><td>'+
-    '<button class="x" data-print="'+v.id+'" style="color:var(--ink2)">🖨️</button>'+(v.estado==='ok'?'<button class="x" data-anul="'+v.id+'">Anular</button>':'<span class="pill">Anulada</span>')+'</td></tr>').join('')||'<tr><td colspan="7" class="muted">Sin ventas en este periodo</td></tr>';
+    '<button class="x" data-print="'+v.id+'" style="color:var(--ink2)">🖨️</button><button class="x" data-wa="'+v.id+'" style="color:#1f8f4e">📲</button>'+(v.estado==='ok'?'<button class="x" data-anul="'+v.id+'">Anular</button>':'<span class="pill">Anulada</span>')+'</td></tr>').join('')||'<tr><td colspan="7" class="muted">Sin ventas en este periodo</td></tr>';
 }
-$('vrows').addEventListener('click',e=>{const pr=e.target.closest('[data-print]');if(pr){const v=VENTAS.find(x=>String(x.id)===pr.dataset.print);if(v)printTicket(v,true);return;}
+$('vrows').addEventListener('click',e=>{const wb=e.target.closest('[data-wa]');if(wb){const v=VENTAS.find(x=>String(x.id)===wb.dataset.wa);if(v)openWaT(v);return;}
+  const pr=e.target.closest('[data-print]');if(pr){const v=VENTAS.find(x=>String(x.id)===pr.dataset.print);if(v)printTicket(v,true);return;}
   const b=e.target.closest('[data-anul]');if(!b)return;const v=VENTAS.find(x=>String(x.id)===b.dataset.anul);if(!v||!confirm('¿Anular el ticket #'+v.id+' por '+money(v.total)+'?'))return;owner('Anular ticket #'+v.id,()=>{log('Anular ticket','#'+v.id+' · '+money(v.total));v.estado='anulada';if(v.consumo)applyStock(v.consumo,1);S.set('ventas',VENTAS);renderVentas();toast('Ticket anulado'+(v.consumo?' · insumos regresados al inventario':''));});});
 function closeWeek(){
   const mon=monday(new Date()),sun=new Date(mon);sun.setDate(sun.getDate()+7);
@@ -1100,6 +1116,11 @@ $('csvBtn').onclick=()=>{
 /* ================= INVENTARIO ================= */
 let INS=S.get('insumos2',null);
 if(!INS){INS=INS_DEF.map(i=>Object.assign({stock:0,minimo:0},i));S.set('insumos2',INS);}
+/* tipos de café: insumos de la categoría Café (en gramos) */
+(function(){const c=INS.find(i=>i.id==='cafe-en-grano');if(c&&c.nombre==='Café en grano'){c.nombre='Café en grano · House Blend';S.set('insumos2',INS);}})();
+function cafeTypes(){return INS.filter(i=>i.cat==='Café'&&i.unidad==='g');}
+function cafeShort(i){return i.nombre.replace(/^Café en grano\s*·\s*/,'').replace(/^Café\s+/,'')||i.nombre;}
+function cafeUsoId(){const id=S.get('cafeUso','cafe-en-grano');return cafeTypes().some(i=>i.id===id)?id:(cafeTypes()[0]||{id:'cafe-en-grano'}).id;}
 let RECO=S.get('recetas2',{});let COMPRAS=S.get('compras2',[]);let MOVS=S.get('movs2',[]);
 const saveIns=()=>{S.set('insumos2',INS);refreshInvBadge();};
 const insById=id=>INS.find(i=>i.id===id);
@@ -1115,9 +1136,9 @@ function consumoItem(it,tipo,acc,mult,miss){
   const R=recipeOf(it.pid);if(!R){miss.push(it.nombre||it.pid);return;}
   if(R.combo){R.combo.forEach(c=>{const pid=c.flavor?FLAVOR[it.flavor]:c.pid;if(!pid){miss.push(it.nombre);return;}
     consumoItem({pid,si:c.si||0,leche:it.leche},tipo,acc,mult*(c.qty||1),miss);});return;}
-  const add=(id,q)=>{let iid=id;if(iid==='leche-entera'&&it.leche==='Deslactosada')iid='leche-deslactosada';const ins=insById(iid);if(!ins){miss.push(id);return;}
+  const add=(id,q,raw)=>{let iid=id;if(iid==='leche-entera'&&it.leche==='Deslactosada')iid='leche-deslactosada';if(!raw&&iid==='cafe-en-grano')iid=cafeUsoId();const ins=insById(iid);if(!ins){miss.push(id);return;}
     if(tipo==='mesa'&&CFG.loza!==false&&ins.cat==='Desechables'&&iid!=='servilleta')return;acc[iid]=(acc[iid]||0)+q*mult;};
-  if(R.grams)add(R.grams,(it.grams||0));
+  if(R.grams){if(it.cafeId&&insById(it.cafeId))add(it.cafeId,(it.grams||0),true);else add(R.grams,(it.grams||0));}
   const list=R.v[Math.min(it.si||0,R.v.length-1)]||[];list.forEach(([id,q])=>add(id,q));
 }
 function costOf(acc){let c=0,inc=false;Object.entries(acc).forEach(([id,q])=>{const i=insById(id);if(!i)return;if(!i.precio)inc=true;c+=q*cu(i);});return{c,inc};}
@@ -1144,7 +1165,10 @@ let invCat='',invQ='';
 function invExist(){
   const cats=[...new Set(INS.map(i=>i.cat))];
   const q=norm(invQ);const L=INS.filter(i=>(!invCat||i.cat===invCat)&&(!q||norm(i.nombre).includes(q)));
-  $('invBody').innerHTML=(!INS.some(i=>i.reg)?'<div class="help-box">👋 <b>Para empezar:</b> haga un <b>Conteo físico</b> con lo que tiene hoy en la cafetería. Desde ahí, cada <b>compra</b> suma y cada <b>venta cobrada</b> descuenta sola según la receta.</div>':'')+
+  const CT=cafeTypes(),cu0=cafeUsoId();
+  const cafeBar='<div class="cafe-bar"><b>☕ Café en uso para las bebidas:</b><select id="cafeUsoSel">'+CT.map(c=>'<option value="'+c.id+'"'+(c.id===cu0?' selected':'')+'>'+esc(cafeShort(c))+' · '+(c.precio?money(Math.round(cu(c)*1000*100)/100)+'/kg':'sin precio')+' · '+(c.reg?fq(c,c.stock):'sin conteo')+'</option>').join('')+'</select>'+
+    '<small>Las bebidas descuentan y calculan su costo con este café. Cambie aquí cuando abra otra bolsa. Para agregar un tipo nuevo: 🛒 Registrar compra → Café en grano → Nuevo tipo.</small></div>';
+  $('invBody').innerHTML=cafeBar+(!INS.some(i=>i.reg)?'<div class="help-box">👋 <b>Para empezar:</b> haga un <b>Conteo físico</b> con lo que tiene hoy en la cafetería. Desde ahí, cada <b>compra</b> suma y cada <b>venta cobrada</b> descuenta sola según la receta.</div>':'')+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><select id="invCatSel" style="max-width:200px"><option value="">Todas las categorías</option>'+cats.map(c=>'<option'+(c===invCat?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'+
     '<input id="invQ" type="search" placeholder="Buscar insumo…" value="'+esc(invQ)+'" style="max-width:220px"><button class="btn b-line b-sm" id="invNew" style="margin-left:auto">+ Insumo</button></div>'+
     '<div class="tw"><table><thead><tr><th>Insumo</th><th>Existencia</th><th>Mínimo</th><th>Costo</th><th>Valor</th><th>Estado</th><th></th></tr></thead><tbody>'+
@@ -1156,7 +1180,7 @@ function invExist(){
 function invCompras(){
   const L=COMPRAS.slice().reverse();
   $('invBody').innerHTML='<h3>Compras registradas</h3>'+(L.length?'<div class="tw"><table><thead><tr><th>Fecha</th><th>Insumo</th><th>Cantidad</th><th>Proveedor</th><th style="text-align:right">Total</th><th></th></tr></thead><tbody>'+
-    L.map(c=>{const i=insById(c.insId)||{nombre:c.insNom,unidad:'pza'};return '<tr><td>'+esc(c.fecha)+'</td><td>'+esc(i.nombre)+'</td><td>'+c.empaques+' × '+esc(c.empaque||'')+'</td><td class="muted">'+esc(c.prov||'')+'</td><td style="text-align:right;font-weight:900">'+money(c.total)+'</td><td><button class="x" data-delbuy="'+c.id+'">Borrar</button></td></tr>';}).join('')+
+    L.map(c=>{const i=insById(c.insId)||{nombre:c.insNom,unidad:'pza'};return '<tr><td>'+esc(c.fecha)+'</td><td>'+esc(i.nombre)+'</td><td>'+c.empaques+' × '+esc(c.empaque||'')+'</td><td class="muted">'+esc(c.prov||'')+'</td><td style="text-align:right;font-weight:900">'+money(c.total)+'</td><td style="white-space:nowrap"><button class="x" data-edbuy="'+c.id+'" style="color:var(--ink2)">Editar</button> <button class="x" data-delbuy="'+c.id+'">Borrar</button></td></tr>';}).join('')+
     '</tbody></table></div>':'<p class="muted">Aún no hay compras. Use "🛒 Registrar compra" cada vez que surta.</p>');
 }
 function invCostos(){
@@ -1167,32 +1191,60 @@ function invCostos(){
       rows.push('<tr><td><b>'+esc(p.name)+'</b>'+(R&&R.est?' <span class="org mercado">Receta estimada</span>':'')+(R&&R.combo?' <span class="org ticket">Combo</span>':'')+(!R?' <span class="org sin">Sin receta</span>':'')+'<br><span class="muted" style="font-size:.8rem">'+esc(lab)+'</span></td>'+
         '<td class="money">'+money(Math.round(r.c*100)/100)+(r.inc?' <span class="org sin" title="Falta el precio de algún insumo">falta precio</span>':'')+'</td><td class="money">'+money(price)+'</td><td class="money">'+(r.inc?'—':money(Math.round(g*100)/100))+'</td>'+
         '<td class="'+(r.inc?'muted':mg>=65?'mg-g':mg>=50?'mg-a':'mg-r')+'">'+(r.inc?'—':Math.round(mg)+'%')+'</td><td>'+(R&&!R.combo?'<button class="btn b-line b-sm" data-rec-ed="'+p.id+'">Receta</button>':'')+'</td></tr>');});});
-  $('invBody').innerHTML='<div class="help-box">Costo de insumos por producto, para llevar (con vaso y tapa). Margen: <span class="mg-g">verde ≥ 65 %</span> · <span class="mg-a">ámbar 50–64 %</span> · <span class="mg-r">rojo &lt; 50 %</span>. Las recetas <span class="org mercado">estimadas</span> son de productos nuevos: ajústelas a como las prepara.</div>'+
+  $('invBody').innerHTML='<div class="help-box">Costo de insumos por producto, para llevar (con vaso y tapa), calculado con el café <b>'+esc(cafeShort(insById(cafeUsoId())||{nombre:'—'}))+'</b>. Margen: <span class="mg-g">verde ≥ 65 %</span> · <span class="mg-a">ámbar 50–64 %</span> · <span class="mg-r">rojo &lt; 50 %</span>. Las recetas <span class="org mercado">estimadas</span> son de productos nuevos: ajústelas a como las prepara.</div>'+
     '<div class="tw"><table><thead><tr><th>Producto</th><th>Costo</th><th>Precio</th><th>Ganancia</th><th>Margen</th><th></th></tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
 }
-$('invBody').addEventListener('change',e=>{if(e.target.id==='invCatSel'){invCat=e.target.value;invExist();}});
+$('invBody').addEventListener('change',e=>{if(e.target.id==='invCatSel'){invCat=e.target.value;invExist();}
+  if(e.target.id==='cafeUsoSel'){S.set('cafeUso',e.target.value);const c=insById(e.target.value);log('Café en uso',c.nombre);toast('Las bebidas ahora usan: '+cafeShort(c));renderInv();}});
 $('invBody').addEventListener('input',e=>{if(e.target.id==='invQ'){invQ=e.target.value;const p=e.target.selectionStart;invExist();const n=$('invQ');n.focus();n.setSelectionRange(p,p);}});
 $('invBody').addEventListener('click',e=>{
   const b=e.target.closest('[data-buy]');if(b)return openBuy(b.dataset.buy);
   const ed=e.target.closest('[data-edit]');if(ed)return owner('Editar insumo',()=>openIns(ed.dataset.edit));
   if(e.target.id==='invNew')return owner('Agregar insumo',()=>openIns(null));
+  const eb=e.target.closest('[data-edbuy]');if(eb){const c=COMPRAS.find(x=>x.id===eb.dataset.edbuy);if(c)owner('Editar compra',()=>openBuy(c.insId,c));return;}
   const db=e.target.closest('[data-delbuy]');if(db){const c=COMPRAS.find(x=>x.id===db.dataset.delbuy);if(!c||!confirm('¿Borrar esta compra? Se resta '+c.empaques+' empaque(s) de la existencia.'))return;
-    return owner('Borrar compra',()=>{const i=insById(c.insId);if(i)i.stock=Math.round((i.stock-c.base)*1000)/1000;COMPRAS=COMPRAS.filter(x=>x!==c);S.set('compras2',COMPRAS);saveIns();log('Borrar compra',c.insNom+' '+money(c.total));renderInv();});}
+    return owner('Borrar compra',()=>{revertBuy(c);COMPRAS=COMPRAS.filter(x=>x!==c);S.set('compras2',COMPRAS);saveIns();log('Borrar compra',c.insNom+' '+money(c.total));renderInv();});}
   const re=e.target.closest('[data-rec-ed]');if(re)return owner('Editar receta',()=>openRecEd(re.dataset.recEd));
 });
 /* compras */
 $('invBuy').onclick=()=>openBuy(null);
-function openBuy(id){
-  $('buyIns').innerHTML=INS.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(i=>'<option value="'+i.id+'"'+(i.id===id?' selected':'')+'>'+esc(i.nombre)+'</option>').join('');
-  $('buyQty').value=1;$('buyProv').value='';buyFill();openM('mBuy');}
-function buyFill(){const i=insById($('buyIns').value);$('buyInfo').textContent='Empaque: '+i.empaque+' ('+fqb(i,i.contenido)+') · Último precio: '+(i.precio?money(i.precio):'sin precio')+' · Existencia: '+fq(i,i.stock);$('buyTot').value=i.precio?Math.round(i.precio*(+$('buyQty').value||1)*100)/100:'';buyCalc();}
-function buyCalc(){const i=insById($('buyIns').value),q=+$('buyQty').value||0,t=+$('buyTot').value||0;$('buyCalc').textContent=q&&t?'Precio por empaque: '+money(Math.round(t/q*100)/100)+' · Nueva existencia: '+fq(i,i.stock+q*i.contenido):'';}
-$('buyIns').addEventListener('change',buyFill);$('buyQty').addEventListener('input',()=>{const i=insById($('buyIns').value);if(i.precio)$('buyTot').value=Math.round(i.precio*(+$('buyQty').value||0)*100)/100;buyCalc();});$('buyTot').addEventListener('input',buyCalc);
-$('buyOk').onclick=()=>{const i=insById($('buyIns').value),q=+$('buyQty').value,t=+$('buyTot').value;
+let BUYED=null;
+function buyOpts(id){$('buyIns').innerHTML=INS.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(i=>'<option value="'+i.id+'"'+(i.id===id?' selected':'')+'>'+esc(i.nombre)+'</option>').join('');}
+function openBuy(id,ed){BUYED=ed||null;buyOpts(id||(ed&&ed.insId));
+  $('buyTitle').textContent=ed?'Editar compra del '+ed.fecha:'Registrar compra';$('buyOk').textContent=ed?'Guardar cambios':'Guardar compra';
+  $('buyQty').value=ed?ed.empaques:1;$('buyProv').value=ed?ed.prov||'':'';buyFill(!!ed);if(ed){$('buyTot').value=ed.total;if(ed.contenido)$('buyCont').value=ed.contenido;buyCalc();}openM('mBuy');}
+/* stock disponible sin contar la compra que se edita */
+function buyBase(i){return i.stock-(BUYED&&BUYED.insId===i.id?BUYED.base:0);}
+function buyFill(keep){const i=insById($('buyIns').value);const isC=cafeTypes().includes(i);
+  $('buyInfo').textContent='Empaque: '+i.empaque+' · Último precio: '+(i.precio?money(i.precio):'sin precio')+' · Existencia: '+(i.reg?fq(i,buyBase(i)):'sin conteo');
+  $('buyCont').value=i.contenido;$('buyContL').firstChild.textContent='Contenido de cada empaque ('+i.unidad+')';
+  $('buyCafeG').hidden=!isC;if(isC)$('buyCafe').innerHTML=cafeTypes().map(c=>'<button class="ch'+(c===i?' on':'')+'" data-ct="'+c.id+'">'+esc(cafeShort(c))+'<small style="display:block;font-size:.72rem;opacity:.75">'+(c.precio?money(c.precio)+' / '+fqb(c,c.contenido):'sin precio')+'</small></button>').join('');
+  if(!keep)$('buyTot').value=i.precio?Math.round(i.precio*(+$('buyQty').value||1)*100)/100:'';buyCalc();}
+function buyCalc(){const i=insById($('buyIns').value),q=+$('buyQty').value||0,t=+$('buyTot').value||0,c=+$('buyCont').value||i.contenido;$('buyCalc').textContent=q&&t?'Precio por empaque: '+money(Math.round(t/q*100)/100)+' · Nueva existencia: '+fq(i,Math.max(0,buyBase(i))+q*c):'';}
+$('buyIns').addEventListener('change',()=>buyFill(!!BUYED));$('buyQty').addEventListener('input',()=>{const i=insById($('buyIns').value);if(i.precio&&!BUYED)$('buyTot').value=Math.round(i.precio*(+$('buyQty').value||0)*100)/100;buyCalc();});$('buyTot').addEventListener('input',buyCalc);$('buyCont').addEventListener('input',buyCalc);
+$('buyCafe').addEventListener('click',e=>{const b=e.target.closest('[data-ct]');if(!b)return;$('buyIns').value=b.dataset.ct;buyFill(!!BUYED);});
+function newCafe(tipo){tipo=(tipo||'').trim();if(!tipo)return toast('Escriba el tipo de café','err');
+  let c=cafeTypes().find(x=>norm(cafeShort(x))===norm(tipo));
+  if(!c){const b=insById('cafe-en-grano')||cafeTypes()[0]||{merma:.05,minimo:0};c={id:'i-'+uid(),nombre:'Café en grano · '+tipo,cat:'Café',unidad:'g',empaque:'bolsa 1 kg',contenido:1000,precio:0,merma:b.merma||0,minimo:b.minimo||0,stock:0,origen:'sin',nota:'Tipo de café'};INS.push(c);saveIns();log('Nuevo tipo de café',c.nombre);toast('Tipo agregado: '+tipo);}
+  buyOpts(c.id);buyFill(!!BUYED);}
+$('buyCafeG').addEventListener('click',e=>{const b=e.target.closest('[data-nt]');if(b)newCafe(b.dataset.nt);});
+$('buyCafeAdd').onclick=()=>{newCafe($('buyCafeNew').value);$('buyCafeNew').value='';};
+/* deshace el efecto de una compra en su insumo (existencia y precio) */
+function revertBuy(c){const i=insById(c.insId);if(!i)return;i.stock=Math.round((i.stock-c.base)*1000)/1000;
+  const pp=Math.round(c.total/c.empaques*100)/100;if(Math.abs((i.precio||0)-pp)>0.01)return;
+  if(c.prevPrecio!==undefined){i.precio=c.prevPrecio;i.origen=c.prevOrigen||(c.prevPrecio?'ticket':'sin');if(c.prevCont)i.contenido=c.prevCont;return;}
+  const prev=COMPRAS.filter(x=>x!==c&&x.insId===i.id).sort((a,b)=>b.ts-a.ts)[0];if(prev)i.precio=Math.round(prev.total/prev.empaques*100)/100;}
+$('buyOk').onclick=()=>{let i=insById($('buyIns').value);const q=+$('buyQty').value,t=+$('buyTot').value,cont=+$('buyCont').value||i.contenido;
   if(!q||q<=0)return toast('Escriba cuántos empaques compró','err');if(!t||t<=0)return toast('Escriba cuánto pagó','err');
-  const base=q*i.contenido;if(!i.reg){i.stock=Math.max(0,i.stock);i.reg=true;}i.stock=Math.round((i.stock+base)*1000)/1000;i.precio=Math.round(t/q*100)/100;i.origen='ticket';
-  const now=new Date();COMPRAS.push({id:uid(),ts:now.getTime(),fecha:now.toLocaleDateString('es-MX'),insId:i.id,insNom:i.nombre,empaques:q,empaque:i.empaque,base,total:t,prov:$('buyProv').value.trim()});
-  S.set('compras2',COMPRAS);saveIns();log('Compra',i.nombre+' · '+q+' × '+i.empaque+' · '+money(t));closeM('mBuy');renderInv();toast('Compra guardada: '+i.nombre+' +'+fq(i,base));};
+  const old=BUYED?insById(BUYED.insId):null;if(BUYED)revertBuy(BUYED);
+  const prevPrecio=i.precio||0,prevOrigen=i.origen,prevCont=i.contenido;
+  if(cont!==i.contenido){i.contenido=cont;const w=(i.empaque||'empaque').split(' ')[0];i.empaque=w+' '+fq(i,cont);}
+  const base=q*cont;if(!i.reg){i.stock=Math.max(0,i.stock);i.reg=true;}i.stock=Math.round((i.stock+base)*1000)/1000;i.precio=Math.round(t/q*100)/100;i.origen='ticket';
+  const d={insId:i.id,insNom:i.nombre,empaques:q,empaque:i.empaque,contenido:cont,base,total:t,prov:$('buyProv').value.trim(),prevPrecio,prevOrigen,prevCont};
+  if(BUYED){Object.assign(BUYED,d);log('Editar compra',(old&&old!==i?old.nombre+' → ':'')+i.nombre+' · '+q+' × '+i.empaque+' · '+money(t));}
+  else{const now=new Date();COMPRAS.push(Object.assign({id:uid(),ts:now.getTime(),fecha:now.toLocaleDateString('es-MX')},d));log('Compra',i.nombre+' · '+q+' × '+i.empaque+' · '+money(t));}
+  S.set('compras2',COMPRAS);saveIns();closeM('mBuy');renderInv();
+  toast(BUYED?(old&&old!==i?'Compra movida de '+old.nombre+' a '+i.nombre:'Compra corregida: '+i.nombre):'Compra guardada: '+i.nombre+' +'+fq(i,base));BUYED=null;};
 /* editar / nuevo insumo */
 let INSED=null;
 function openIns(id){INSED=id?insById(id):null;const i=INSED||{nombre:'',cat:'',unidad:'g',empaque:'',contenido:1000,precio:0,merma:0,minimo:0,nota:''};
@@ -1200,13 +1252,16 @@ function openIns(id){INSED=id?insById(id):null;const i=INSED||{nombre:'',cat:'',
   $('insCont').value=i.contenido;$('insPrice').value=i.precio||'';$('insMerma').value=Math.round((i.merma||0)*1000)/10;
   const[h,f]=hu(i);$('insMin').value=i.minimo?i.minimo/f:'';$('insMinL').firstChild.textContent='Mínimo para alerta ('+h+')';
   $('insCats').innerHTML=[...new Set(INS.map(x=>x.cat))].map(c=>'<option value="'+esc(c)+'">').join('');
+  $('insStock').value=INSED&&INSED.reg?Math.round(INSED.stock/f*1000)/1000:'';$('insStockL').firstChild.textContent='Existencia actual ('+h+')';
   $('insNote').textContent=i.nota||'';openM('mIns');}
-$('insUnit').addEventListener('change',()=>{const[h]=hu({unidad:$('insUnit').value});$('insMinL').firstChild.textContent='Mínimo para alerta ('+h+')';});
+$('insUnit').addEventListener('change',()=>{const[h]=hu({unidad:$('insUnit').value});$('insMinL').firstChild.textContent='Mínimo para alerta ('+h+')';$('insStockL').firstChild.textContent='Existencia actual ('+h+')';});
 $('insOk').onclick=()=>{const name=$('insName').value.trim();if(!name)return toast('Escriba el nombre','err');
   const unidad=$('insUnit').value,[h,f]=hu({unidad});const d={nombre:name,cat:$('insCat').value.trim()||'Otros',unidad,empaque:$('insEmp').value.trim()||'pieza',contenido:+$('insCont').value||1,
     precio:+$('insPrice').value||0,merma:Math.min(.9,(+$('insMerma').value||0)/100),minimo:(+$('insMin').value||0)*f};
-  if(INSED){if(d.precio!==INSED.precio&&d.precio)d.origen='ticket';if(!d.precio)d.origen='sin';Object.assign(INSED,d);}
-  else INS.push(Object.assign({id:'i-'+uid(),stock:0,origen:d.precio?'ticket':'sin',nota:''},d));
+  const sv=$('insStock').value.trim(),ns=sv===''?null:Math.max(0,+sv)*f;
+  if(INSED){if(d.precio!==INSED.precio&&d.precio)d.origen='ticket';if(!d.precio)d.origen='sin';Object.assign(INSED,d);
+    if(ns!=null&&(!INSED.reg||Math.abs(ns-INSED.stock)>0.0005)){MOVS.push({ts:Date.now(),insId:INSED.id,tipo:'ajuste',antes:INSED.reg?INSED.stock:null,despues:ns});S.set('movs2',MOVS.slice(-2000));log('Ajuste de existencia',name+': '+(INSED.reg?fq(INSED,INSED.stock):'sin conteo')+' → '+fq(INSED,ns));INSED.stock=ns;INSED.reg=true;}}
+  else INS.push(Object.assign({id:'i-'+uid(),stock:ns||0,reg:ns!=null,origen:d.precio?'ticket':'sin',nota:''},d));
   saveIns();log('Insumo',name+' · '+money(d.precio)+' por '+d.empaque);closeM('mIns');renderInv();toast('Insumo guardado');};
 /* conteo físico */
 $('invCount').onclick=()=>owner('Conteo físico',()=>{$('cntQ').value='';cntRender();openM('mCount');});
@@ -1383,6 +1438,24 @@ function showDone(v){DONE=v;$('doneTot').textContent=money(v.total);
   if(CFG.print==='siempre')printTicket(v);}
 $('doneOk').onclick=()=>closeM('mDone');
 $('donePrint').onclick=()=>{if(DONE)printTicket(DONE);};
+$('doneWa').onclick=()=>{if(DONE)openWaT(DONE);};
+function ticketText(v){const L=[];const m=x=>money(x);
+  L.push('☕ *Aroma a Café*','Café de especialidad','','🧾 *Ticket #'+v.id+'*',v.fecha+' · '+v.hora+(v.mesaNombre?' · '+v.mesaNombre:''),'');
+  v.items.forEach(i=>{const d=[i.detalle||i.tamano,i.leche?'leche '+i.leche.toLowerCase():''].filter(Boolean).join(', ');L.push(i.qty+' × '+i.nombre+(d?' ('+d+')':'')+' — '+m(i.total));});
+  L.push('');
+  if(v.descuento){L.push('Subtotal: '+m(v.subtotal));if(v.promos){v.promos.forEach(g=>L.push('🎁 '+g.nombre+(g.n>1?' ×'+g.n:'')+': −'+m(g.monto)));if(v.descExtra)L.push('Descuento: −'+m(v.descExtra));}else L.push('Descuento'+(v.motivoDesc?' ('+v.motivoDesc+')':'')+': −'+m(v.descuento));}
+  L.push('*Total: '+m(v.total)+'*','Pago: '+v.pago+(v.recibido!=null?' · Recibido '+m(v.recibido)+' · Cambio '+m(Math.round((v.recibido-v.total)*100)/100):''));
+  if(v.sellos)L.push('','🤎 Sellos de lealtad de esta compra: '+v.sellos);
+  if(v.estado==='anulada')L.push('','*** TICKET ANULADO ***');
+  L.push('','¡Gracias por su visita! Le esperamos pronto ✨','Menú y pedidos: jonarom2.github.io/AromaAcafe','Instagram @ar.cafe.teh · WhatsApp 238 185 8982');
+  return L.join('\n');}
+let WAT=null;
+function openWaT(v){WAT=v;$('wtSub').textContent='Ticket #'+v.id+' · '+money(v.total);$('wtTel').value=v.tel||'';openM('mWaT');setTimeout(()=>$('wtTel').focus(),80);}
+$('wtOk').onclick=()=>{let t=$('wtTel').value.replace(/\D/g,'');if(t.length===12&&t.startsWith('52'))t=t.slice(2);if(t.length===13&&t.startsWith('521'))t=t.slice(3);
+  if(t&&t.length!==10)return toast('El número debe tener 10 dígitos','err');
+  if(t&&WAT){WAT.tel=t;S.set('ventas',VENTAS);}
+  const url='https://wa.me/'+(t?'52'+t:'')+'?text='+encodeURIComponent(ticketText(WAT));
+  log('Ticket por WhatsApp','#'+WAT.id+(t?' · '+t:''));closeM('mWaT');window.open(url,'_blank');};
 
 /* ================= IMPRESIÓN 58 mm ================= */
 function pr(html){const a=$('printArea');a.innerHTML=html;try{window.print();}catch(e){}}
