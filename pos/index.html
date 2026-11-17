@@ -431,6 +431,18 @@ tr.anul td{opacity:.5;text-decoration:line-through;}
 .chip-top.bad{background:#b3261e;color:#fff;animation:pulseB 1.2s infinite;}
 .cierre-box{text-align:center;}.cierre-box .big{font-size:2.6rem;}
 .cierre-box .pos{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+.telw{display:flex;align-items:stretch;}
+.telw .cc{display:flex;align-items:center;padding:0 12px;background:var(--ink);color:#fff;font-weight:900;border-radius:12px 0 0 12px;font-size:1.05rem;}
+.telw input{border-radius:0 12px 12px 0!important;font-size:1.25rem!important;letter-spacing:.05em;flex:1;min-width:0;}
+.cli-i{margin-top:8px;font-size:.9rem;border-radius:10px;padding:8px 10px;background:var(--card2);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.cli-i b{font-weight:900;}.cli-i.gift{background:#e3f3e8;color:#1f6f3d;font-weight:700;}
+.cli-i input{max-width:220px;padding:6px 10px;}
+.dots{display:inline-flex;gap:3px;vertical-align:middle;}.dots i{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--caramel);display:inline-block;}.dots i.f{background:var(--caramel);}
+.step{display:flex;gap:10px;align-items:flex-start;margin-top:12px;}
+.step .n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.step .bd{flex:1;}.step .bd .btn{width:100%;}.step .bd p{font-size:.8rem;color:var(--muted);margin-top:4px;}
+.cl-r{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px dashed var(--line);}
+.cl-r .nm{flex:1 1 200px;}.cl-r .nm small{display:block;color:var(--muted);font-size:.8rem;}
 .wa-btn{background:#1f8f4e!important;color:#fff!important;border-color:#1f8f4e!important;}
 .note{background:var(--warnbg);color:#6b4410;border-radius:12px;padding:10px 12px;font-size:.88rem;margin-top:10px;}
 .cobro-tot{display:flex;justify-content:space-between;align-items:baseline;background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;margin:10px 0;}
@@ -487,7 +499,7 @@ body.tk-vis #goTicket{display:none!important;}
 <section class="panel scroll" id="p-ven"><div class="page"><div class="page-in">
   <div class="phead"><h1>Ventas</h1>
     <div class="seg" id="vf"><button data-f="hoy" class="on">Hoy</button><button data-f="semana">Semana</button><button data-f="mes">Mes</button><button data-f="todo">Todo</button></div>
-    <button class="btn b-line b-sm" id="verBtn">🔍 Verificar comprobante</button><button class="btn b-line b-sm" id="csvBtn">⬇️ Exportar CSV</button>
+    <button class="btn b-line b-sm" id="cliBtn">👥 Clientes</button><button class="btn b-line b-sm" id="verBtn">🔍 Verificar comprobante</button><button class="btn b-line b-sm" id="csvBtn">⬇️ Exportar CSV</button>
   </div>
   <div id="bkBanner"></div><div class="box" id="cajaBox" style="margin-bottom:14px"></div>
   <div class="kpis" id="kpis"></div>
@@ -568,6 +580,8 @@ body.tk-vis #goTicket{display:none!important;}
 
 <div class="mod" id="mPay"><div class="mbox"><div class="mh"><div><h2>Cobrar</h2><div class="sub" id="cbSub"></div></div><button class="cl" data-close>×</button></div>
   <div class="mb"><div class="lines" id="cbLines"></div>
+    <div class="og" style="margin-top:14px"><h4>👤 WhatsApp del cliente <span class="muted" style="font-weight:400">· opcional, para sus sellos y su comprobante</span></h4>
+      <div class="telw"><span class="cc">+52</span><input id="cbTel" type="tel" inputmode="numeric" maxlength="12" placeholder="238 123 4567" autocomplete="off"></div><div id="cbCli"></div></div>
     <div class="og" id="cbPromoG" style="margin-top:14px"><div class="prm-h"><h4>🎁 Promociones</h4><small>1 producto por persona</small></div><div id="cbPromo"></div><div class="prm-sum" id="cbPromoSum"></div></div>
     <div class="og" style="margin-top:14px"><h4>Otro descuento</h4><div class="opts" id="cbDesc"></div><div id="cbDescOtro" hidden style="margin-top:8px;display:grid;grid-template-columns:120px 1fr;gap:8px"><input id="cbDescAmt" type="number" min="0" placeholder="$"><input id="cbDescWhy" placeholder="Motivo"></div></div>
     <div class="cobro-tot"><span>TOTAL</span><b id="cbTot">$0</b></div>
@@ -668,16 +682,23 @@ body.tk-vis #goTicket{display:none!important;}
     <div class="og"><h4>Aplica a</h4><div class="opts" id="prAplica"><button class="op" data-v="bebidas">☕ Bebidas</button><button class="op" data-v="alimentos">🍰 Postres y croissants</button><button class="op" data-v="todo">Todo el menú</button></div></div>
     <div class="og"><h4>Válida hasta <span class="muted" style="font-weight:400">(opcional)</span></h4><input id="prHasta" type="date"></div>
     <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:6px"><input type="checkbox" id="prSellos" style="width:20px;height:20px">Es la tarjeta de lealtad (mostrar sellos al cobrar)</label>
+    <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:6px">Sellos para la bebida gratis <input type="number" id="prMeta" min="1" step="1" style="width:80px" placeholder="10"></label>
     <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:10px"><input type="checkbox" id="prPin" style="width:20px;height:20px">Pedir PIN del dueño al aplicarla</label>
   </div>
   <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="prOk">Guardar</button></div></div></div>
 
-<div class="mod" id="mWaT"><div class="mbox" style="max-width:460px"><div class="mh"><div><h2>Enviar comprobante</h2><div class="sub" id="wtSub"></div></div><button class="cl" data-close>×</button></div>
-  <div class="mb"><img class="wt-prev" id="wtImg" alt="Comprobante"><p class="muted" id="wtWait" style="text-align:center">Preparando imagen…</p>
-    <button class="btn wa-btn full" id="wtShare" style="width:100%">🖼️ Enviar imagen por WhatsApp</button>
-    <p class="muted" style="font-size:.82rem;margin-top:6px">Se abre el menú de compartir: elija <b>WhatsApp Business</b> y luego el contacto del cliente.</p>
-    <div class="wt-alt"><div class="og"><h4>¿Prefiere mandarlo como texto? WhatsApp del cliente (10 dígitos)</h4><input id="wtTel" type="tel" inputmode="numeric" maxlength="14" placeholder="238 123 4567" style="font-size:1.2rem;letter-spacing:.04em"></div>
-    <button class="btn b-line" id="wtOk">💬 Enviar como texto</button></div></div>
+<div class="mod" id="mWaT"><div class="mbox" style="max-width:480px"><div class="mh"><div><h2>Enviar comprobante</h2><div class="sub" id="wtSub"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb">
+    <div class="og"><h4>WhatsApp del cliente</h4><div class="telw"><span class="cc">+52</span><input id="wtTel" type="tel" inputmode="numeric" maxlength="12" placeholder="238 123 4567" autocomplete="off"></div><div id="wtCli"></div></div>
+    <div class="step"><span class="n">1</span><div class="bd"><button class="btn wa-btn" id="wtChat">💬 Abrir el chat del cliente</button><p>Abre WhatsApp directo en ese número, aunque no esté en sus contactos, con un saludo listo. Toque <b>Enviar</b>.</p></div></div>
+    <div class="step"><span class="n">2</span><div class="bd"><button class="btn b-dark" id="wtShare">🖼️ Enviar la imagen del comprobante</button><p>Regrese aquí y toque este botón. En WhatsApp elija el chat del cliente: aparece <b>primero</b> en los recientes.</p></div></div>
+    <img class="wt-prev" id="wtImg" alt="Comprobante" style="margin-top:14px"><p class="muted" id="wtWait" style="text-align:center">Preparando imagen…</p>
+    <p style="text-align:center;margin-top:6px"><button class="btn b-line b-sm" id="wtOk">Enviar el ticket solo como texto</button></p>
+  </div>
+  <div class="mf"><button class="btn b-line" data-close>Cerrar</button></div></div></div>
+
+<div class="mod" id="mClis"><div class="mbox wide"><div class="mh"><div><h2>👥 Clientes</h2><div class="sub">Sellos de lealtad por número de WhatsApp</div></div><button class="cl" data-close>×</button></div>
+  <div class="mb"><input id="clQ" type="search" placeholder="Buscar por nombre o número…" style="margin-bottom:10px"><div id="clList"></div></div>
   <div class="mf"><button class="btn b-line" data-close>Cerrar</button></div></div></div>
 
 <div class="mod" id="mProv"><div class="mbox" style="max-width:460px"><div class="mh"><div><h2 id="pvTitle">Proveedor</h2></div><button class="cl" data-close>×</button></div>
@@ -1042,7 +1063,9 @@ function renderPromo(){const o=cur();const act=PROMOS.filter(promoVig);
   $('cbPromoG').hidden=!act.length||!U.length;
   $('cbPromo').innerHTML=U.map(u=>{const i=u.it,sel=PROMOS.find(x=>x.id===CBU[u.key]);
     const off=sel?promoOff(sel,i.precioU):0,cost=CBCOST[i.uid];
-    const warn=sel&&cost!=null&&off<i.precioU&&(i.precioU-off)<cost?'<span class="prm-w">⚠ Con la promo cobra '+money(i.precioU-off)+' y el costo es '+money(cost)+': se pierde dinero</span>':'';
+    let warn=sel&&cost!=null&&off<i.precioU&&(i.precioU-off)<cost?'<span class="prm-w">⚠ Con la promo cobra '+money(i.precioU-off)+' y el costo es '+money(cost)+': se pierde dinero</span>':'';
+    if(sel&&CBCLI&&!CBCLI.nuevo){if(/primera/i.test(sel.nombre)&&CBCLI.visitas>0)warn+='<span class="prm-w">⚠ Este número ya compró '+CBCLI.visitas+' vez/veces: no es su primera compra</span>';
+      if(sel.sellos&&CBCLI.sellos<meta())warn+='<span class="prm-w">⚠ Tiene '+CBCLI.sellos+' de '+meta()+' sellos registrados. Aplíquela solo si trae su tarjeta física completa.</span>';}
     return '<div class="prm-row"><div class="pn">'+esc(i.icono||'')+' '+esc(i.nombre)+(u.n>1?' <span class="muted">('+(u.k+1)+' de '+u.n+')</span>':'')+'<small>'+esc([i.detalle||i.tamano,money(i.precioU)].filter(Boolean).join(' · '))+'</small></div>'+
       act.filter(p=>promoFits(p,i)).map(p=>'<button class="prm-b'+(sel===p?' on':'')+'" data-u="'+u.key+'" data-p="'+p.id+'">'+esc(p.nombre)+'</button>').join('')+
       '<span class="prm-d">'+(off?'−'+money(off):'')+'</span>'+warn+'</div>';}).join('');
@@ -1051,8 +1074,38 @@ function renderPromo(){const o=cur();const act=PROMOS.filter(promoVig);
 $('cbPromo').addEventListener('click',e=>{const b=e.target.closest('.prm-b');if(!b)return;
   CBU[b.dataset.u]=CBU[b.dataset.u]===b.dataset.p?undefined:b.dataset.p;if(!CBU[b.dataset.u])delete CBU[b.dataset.u];
   promoAuth=false;renderPromo();cbUpd();});
+/* ---------- CLIENTES (sellos por WhatsApp) ---------- */
+let CLIS=S.get('clientes',{});const saveClis=()=>S.set('clientes',CLIS);
+function cleanTel(v){let t=String(v||'').replace(/\D/g,'');if(t.length===13&&t.startsWith('521'))t=t.slice(3);else if(t.length===12&&t.startsWith('52'))t=t.slice(2);return t;}
+function fmtTel(t){t=cleanTel(t);return t.length===10?t.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3'):t;}
+function telInput(el){const t=String(el.value).replace(/\D/g,'').slice(0,10);const f=t.replace(/(\d{3})(\d{0,3})(\d{0,4}).*/,(m,a,b,c)=>[a,b,c].filter(Boolean).join(' '));if(el.value!==f)el.value=f;return t;}
+function loyal(){return PROMOS.find(p=>p.sellos&&promoVig(p))||PROMOS.find(p=>p.sellos);}
+function meta(){const l=loyal();return l&&l.meta||10;}
+function dots(n,m){n=Math.max(0,n);const k=Math.min(n,m);return '<span class="dots">'+Array.from({length:m},(_,j)=>'<i'+(j<k?' class="f"':'')+'></i>').join('')+'</span>';}
+function stx(t,m){return t>=m?m+' de '+m+(t>m?' +'+(t-m):''):t+' de '+m;}
+function genName(n){return !n||/^(Mostrador|Mesa|Para llevar|Sin nombre)\b/i.test(n);}
+function cliApply(v,tel,nombre){if(!tel||v.tel)return;const l=loyal(),m=meta();const red=v.promos?(v.promos.find(g=>l&&g.id===l.id)||{n:0}).n:0;
+  const c=CLIS[tel]=CLIS[tel]||{tel,nombre:'',sellos:0,canjes:0,visitas:0,gasto:0,primera:v.ts};
+  if(nombre&&!genName(nombre))c.nombre=nombre;c.visitas++;c.gasto=Math.round((c.gasto+v.total)*100)/100;c.ultima=v.ts;
+  v.selloAntes=c.sellos;c.sellos=Math.max(0,c.sellos-red*m+(v.sellos||0));c.canjes+=red;
+  v.tel=tel;v.selloTot=c.sellos;v.selloMeta=m;v.selloCanje=red||undefined;saveClis();S.set('ventas',VENTAS);log('Cliente',fmtTel(tel)+' · '+c.sellos+'/'+m+' sellos');}
+function cliRevert(v){const c=v.tel&&CLIS[v.tel];if(!c||v.selloAntes==null)return;const m=v.selloMeta||meta();
+  c.sellos=Math.max(0,c.sellos-(v.sellos||0)+(v.selloCanje||0)*m);c.canjes=Math.max(0,c.canjes-(v.selloCanje||0));c.visitas=Math.max(0,c.visitas-1);c.gasto=Math.round((c.gasto-v.total)*100)/100;saveClis();}
+let CBCLI=null;
+function cbCliRender(){const t=telInput($('cbTel')),o=cur();CBCLI=null;
+  if(o)o.tel=t.length===10?t:'';
+  if(t.length<10){$('cbCli').innerHTML=t.length?'<div class="cli-i">Faltan '+(10-t.length)+' dígitos</div>':'';renderPromo();return;}
+  const c=CLIS[t],m=meta();CBCLI=c||{tel:t,nuevo:true};
+  if(!c)$('cbCli').innerHTML='<div class="cli-i">🆕 Cliente nuevo · se registra al cobrar. Nombre: <input id="cbCliNom" placeholder="Opcional" value="'+esc(o&&!genName(o.cliente)?o.cliente:'')+'"></div>';
+  else{const gift=c.sellos>=m;$('cbCli').innerHTML='<div class="cli-i'+(gift?' gift':'')+'"><b>'+esc(c.nombre||'Cliente')+'</b> '+dots(c.sellos,m)+' <span>'+stx(c.sellos,m)+' sellos · '+c.visitas+' visita(s)'+(c.ultima?' · última '+new Date(c.ultima).toLocaleDateString('es-MX'):'')+'</span>'+
+    (gift?'<span>🎁 ¡Tiene una bebida gratis!</span><button class="btn b-ok b-sm" id="cbGift">Aplicar bebida gratis</button>':'')+'</div>';
+    if(o&&genName(o.cliente)&&c.nombre){o.cliente=c.nombre;saveOpen();}}
+  renderPromo();}
+$('cbTel').addEventListener('input',cbCliRender);
+$('cbCli').addEventListener('click',e=>{if(e.target.id!=='cbGift')return;const l=loyal(),o=cur();if(!l||!o)return;
+  const u=units(o).filter(u=>!CBU[u.key]&&promoFits(l,u.it)).sort((a,b)=>b.it.precioU-a.it.precioU)[0];if(!u)return toast('No hay bebida para aplicar','err');CBU[u.key]=l.id;renderPromo();cbUpd();toast('🎁 Bebida gratis aplicada: '+u.it.nombre);});
 let CB={pay:'Efectivo',desc:'none'};
-const APPVER='v9',APPDATE='16/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
+const APPVER='v10',APPDATE='16/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
 const PAYS=[['Efectivo','💵 Efectivo'],['Tarjeta','💳 Tarjeta'],['Transferencia','📱 Transferencia / DiMo']];
 const DESCS=[['none','Ninguno'],['cortesia','Cortesía (100%)'],['otro','Otro monto']];
 function firstDrink(o){return o.items.find(i=>{const p=prod(i.pid);return p&&!['croissants','postres','grano','combos'].includes(p.cat);});}
@@ -1069,7 +1122,7 @@ function openPay(){const o=cur();if(!o||!o.items.length)return;
   $('cbDesc').innerHTML=DESCS.map(([v,l])=>'<button class="op'+(v===CB.desc?' on':'')+'" data-v="'+v+'">'+l+'</button>').join('');
   $('cbPay').innerHTML=PAYS.map(([v,l])=>'<button class="op'+(v===CB.pay?' on':'')+'" data-v="'+v+'">'+l+'</button>').join('');
   $('cbDescAmt').value='';$('cbDescWhy').value='';$('cbRec').value='';$('cbDimoOk').checked=false;
-  CB.tip='0';$('cbTipAmt').value='';renderTips();
+  CB.tip='0';$('cbTipAmt').value='';renderTips();$('cbTel').value=o.tel?fmtTel(o.tel):'';cbCliRender();
   cbUpd();openM('mPay');}
 function cbTotal(){const o=cur();return Math.max(0,oTotal(o)-descAmt(o));}
 const TIPS=[['0','Sin propina'],['10','10 %'],['15','15 %'],['cambio','Dejar el cambio'],['otro','Otro monto']];
@@ -1122,7 +1175,9 @@ $('cbOk').onclick=()=>{
     subtotal:oTotal(o),descuento:d,motivoDesc:d?motivo:'',promos:PG.length?PG:undefined,descExtra:xd||undefined,sellos:sellos||undefined,total:t,costo:Math.round(cs.costo*100)/100,utilidad:Math.round((t-cs.costo)*100)/100,consumo:cs.acc,costoIncompleto:cs.incompleto||undefined,pago:CB.pay,propina:tip||undefined,recibido:CB.pay==='Efectivo'&&$('cbRec').value!==''?+$('cbRec').value:null,estado:'ok',ts:now.getTime(),hm:mxMin(),usuario:USER?USER.nombre:'',turnoId:TURNO?TURNO.id:null});
   S.set('ventas',VENTAS);S.set('vctr',VCTR);
   OPEN=OPEN.filter(x=>x!==o);curId=null;saveOpen();closeM('mPay');renderPed();
-  const vNew=VENTAS[VENTAS.length-1];if(vNew.propina)log('Propina',money(vNew.propina)+' · '+vNew.pago+' · ticket #'+vNew.id);if(vNew.descuento)log('Descuento',vNew.motivoDesc+' '+money(vNew.descuento)+' · ticket #'+vNew.id);
+  const vNew=VENTAS[VENTAS.length-1];
+  const tel=cleanTel($('cbTel').value);if(tel.length===10){const nm=document.getElementById('cbCliNom');cliApply(vNew,tel,nm&&nm.value.trim()?nm.value.trim():o.cliente);}
+  if(vNew.propina)log('Propina',money(vNew.propina)+' · '+vNew.pago+' · ticket #'+vNew.id);if(vNew.descuento)log('Descuento',vNew.motivoDesc+' '+money(vNew.descuento)+' · ticket #'+vNew.id);
   showDone(vNew);
 };
 
@@ -1212,7 +1267,7 @@ function renderVentas(){
 }
 $('vrows').addEventListener('click',e=>{const wb=e.target.closest('[data-wa]');if(wb){const v=VENTAS.find(x=>String(x.id)===wb.dataset.wa);if(v)openWaT(v);return;}
   const pr=e.target.closest('[data-print]');if(pr){const v=VENTAS.find(x=>String(x.id)===pr.dataset.print);if(v)printTicket(v,true);return;}
-  const b=e.target.closest('[data-anul]');if(!b)return;const v=VENTAS.find(x=>String(x.id)===b.dataset.anul);if(!v||!confirm('¿Anular el ticket #'+v.id+' por '+money(v.total)+'?'))return;owner('Anular ticket #'+v.id,()=>{log('Anular ticket','#'+v.id+' · '+money(v.total));v.estado='anulada';if(v.consumo)applyStock(v.consumo,1);S.set('ventas',VENTAS);renderVentas();toast('Ticket anulado'+(v.consumo?' · insumos regresados al inventario':''));});});
+  const b=e.target.closest('[data-anul]');if(!b)return;const v=VENTAS.find(x=>String(x.id)===b.dataset.anul);if(!v||!confirm('¿Anular el ticket #'+v.id+' por '+money(v.total)+'?'))return;owner('Anular ticket #'+v.id,()=>{log('Anular ticket','#'+v.id+' · '+money(v.total));v.estado='anulada';cliRevert(v);if(v.consumo)applyStock(v.consumo,1);S.set('ventas',VENTAS);renderVentas();toast('Ticket anulado'+(v.consumo?' · insumos regresados al inventario':''));});});
 function closeWeek(){
   const mon=monday(new Date()),sun=new Date(mon);sun.setDate(sun.getDate()+7);
   const key=mon.getFullYear()+'-'+(mon.getMonth()+1)+'-'+mon.getDate();
@@ -1799,7 +1854,8 @@ let DONE=null;
 function showDone(v){DONE=v;$('doneTot').textContent=money(v.total);
   $('doneCh').textContent=v.recibido!=null?'Cambio: '+money(Math.round((v.recibido-v.total-(v.propina||0))*100)/100):'';
   $('doneSub').textContent='Ticket #'+v.id+' · '+v.pago+(v.descuento?' · descuento '+money(v.descuento):'')+(v.propina?' · propina '+money(v.propina)+(v.pago==='Tarjeta'?' (cobrar '+money(v.total+v.propina)+' en terminal)':''):'');
-  $('doneSellos').hidden=!v.sellos;$('doneSellos').textContent=v.sellos?'🤎 Tarjeta de lealtad: ponga '+v.sellos+' sello'+(v.sellos>1?'s':''):'';
+  const dc=v.tel&&CLIS[v.tel];$('doneSellos').hidden=!v.sellos&&!v.selloCanje;
+  $('doneSellos').innerHTML=dc?'🤎 '+esc(dc.nombre||fmtTel(v.tel))+': '+stx(v.selloTot,v.selloMeta)+' sellos '+dots(v.selloTot,v.selloMeta)+(v.selloTot>=v.selloMeta?'<br>🎁 ¡Ya tiene su bebida gratis para la próxima!':''):(v.sellos?'🤎 Tarjeta de lealtad: ponga '+v.sellos+' sello'+(v.sellos>1?'s':''):'');
   $('donePrint').hidden=CFG.print==='nunca';openM('mDone');setTimeout(()=>$('doneOk').focus(),80);
   if(CFG.print==='siempre')printTicket(v);}
 $('doneOk').onclick=()=>closeM('mDone');
@@ -1812,7 +1868,8 @@ function ticketText(v){const L=[];const m=x=>money(x);
   if(v.descuento){L.push('Subtotal: '+m(v.subtotal));if(v.promos){v.promos.forEach(g=>L.push('🎁 '+g.nombre+(g.n>1?' ×'+g.n:'')+': −'+m(g.monto)));if(v.descExtra)L.push('Descuento: −'+m(v.descExtra));}else L.push('Descuento'+(v.motivoDesc?' ('+v.motivoDesc+')':'')+': −'+m(v.descuento));}
   L.push('*Total: '+m(v.total)+'*');if(v.propina)L.push('Propina (voluntaria): '+m(v.propina)+' · ¡Muchas gracias! 🤎','Total pagado: '+m(v.total+v.propina));
   L.push('Pago: '+v.pago+(v.recibido!=null?' · Recibido '+m(v.recibido)+' · Cambio '+m(Math.round((v.recibido-v.total-(v.propina||0))*100)/100):''));
-  if(v.sellos)L.push('','🤎 Sellos de lealtad de esta compra: '+v.sellos);
+  if(v.selloMeta)L.push('','🤎 Sellos de lealtad: *'+stx(v.selloTot,v.selloMeta)+'*'+(v.sellos?' (+'+v.sellos+' hoy)':'')+(v.selloTot>=v.selloMeta?' · 🎁 ¡Su próxima bebida es gratis!':' · le faltan '+(v.selloMeta-v.selloTot)+' para su bebida gratis'));
+  else if(v.sellos)L.push('','🤎 Sellos de lealtad de esta compra: '+v.sellos);
   if(v.estado==='anulada')L.push('','*** TICKET ANULADO ***');
   L.push('','¡Gracias por su visita! Le esperamos pronto ✨','Menú y pedidos: jonarom2.github.io/AromaAcafe','Instagram @ar.cafe.teh · WhatsApp 238 185 8982');
   return L.join('\n');}
@@ -1862,7 +1919,10 @@ async function ticketCanvas(v){
   add(24,pair('Forma de pago',v.pago,'400 14px '+SAN));
   if(v.propina){add(20,pair('Propina (voluntaria) · ¡gracias!',money(v.propina),'400 14px '+SAN));add(22,pair('Total pagado',money(v.total+v.propina),'900 15px '+SAN));}
   if(v.recibido!=null){add(20,pair('Recibido',money(v.recibido),'400 13px '+SAN,MUT));add(20,pair('Cambio',money(Math.round((v.recibido-v.total-(v.propina||0))*100)/100),'400 13px '+SAN,MUT));}
-  if(v.sellos)add(30,txt('🤎 Sellos de lealtad de esta compra: '+v.sellos,'700 14px '+SAN,GOLD2,'center'));
+  if(v.selloMeta){add(30,txt('🤎 Sellos de lealtad: '+stx(v.selloTot,v.selloMeta)+(v.sellos?'  (+'+v.sellos+' hoy)':''),'700 14px '+SAN,GOLD2,'center'));
+    add(26,(c,y)=>{const m=v.selloMeta,r=7,gap=6,w=m*(r*2)+(m-1)*gap;let x=W/2-w/2+r;for(let k=0;k<m;k++){c.beginPath();c.arc(x,y-8,r,0,Math.PI*2);c.lineWidth=1.6;c.strokeStyle=GOLD;c.stroke();if(k<v.selloTot){c.fillStyle=GOLD;c.fill();}x+=r*2+gap;}});
+    add(20,txt(v.selloTot>=v.selloMeta?'🎁 ¡Su próxima bebida es gratis!':'Le faltan '+(v.selloMeta-v.selloTot)+' para su bebida gratis','400 12px '+SAN,MUT,'center'));}
+  else if(v.sellos)add(30,txt('🤎 Sellos de lealtad de esta compra: '+v.sellos,'700 14px '+SAN,GOLD2,'center'));
   add(16,dash);
   add(48,(c,y)=>{/* barras de seguridad derivadas del código */let x=PX+40;const top=y-40,end=W-PX-40;c.fillStyle=INK;let k=0;
     while(x<end){const d=parseInt(hash[k%hash.length],16);const bw=1+(d&3)*.8;c.fillRect(x,top,bw,34);x+=bw+1.2+((d>>2)&3)*.9;k++;}});
@@ -1893,14 +1953,35 @@ async function ticketCanvas(v){
   if(v.estado==='anulada'){c.save();c.translate(W/2,H/2);c.rotate(-Math.PI/9);c.strokeStyle='rgba(190,40,30,.85)';c.lineWidth=5;c.strokeRect(-150,-40,300,80);c.font='900 52px '+SAN;c.fillStyle='rgba(190,40,30,.85)';c.textAlign='center';c.fillText('ANULADO',0,18);c.restore();}
   c.restore();
   return {cv,code};}
-async function openWaT(v){WAT=v;WAT_FILE=null;$('wtSub').textContent='Ticket '+folio(v.id)+' · '+money(v.total+(v.propina||0));$('wtTel').value=v.tel||'';
+function wtCliRender(){const t=telInput($('wtTel'));const c=t.length===10&&CLIS[t];$('wtCli').innerHTML=t.length===10?'<div class="cli-i">'+(c?'<b>'+esc(c.nombre||'Cliente')+'</b> '+dots(c.sellos,meta())+' '+stx(c.sellos,meta())+' sellos':'🆕 Número nuevo'+(WAT&&!WAT.tel?' · se le suman los sellos de esta compra':''))+'</div>':(t.length?'<div class="cli-i">Faltan '+(10-t.length)+' dígitos</div>':'');}
+$('wtTel').addEventListener('input',wtCliRender);
+function wtTel(){const t=cleanTel($('wtTel').value);if(t.length!==10){toast('Escriba los 10 dígitos del número','err');$('wtTel').focus();return null;}
+  if(WAT&&!WAT.tel){cliApply(WAT,t,WAT.cliente);}return t;}
+function greet(v){const c=v.tel&&CLIS[v.tel],n=c&&c.nombre?' '+c.nombre.split(' ')[0]:'';
+  return 'Hola'+n+' 👋 Muchas gracias por su compra en *Aroma a Café* ☕\nLe enviamos su comprobante: folio '+folio(v.id)+' · total '+money(v.total+(v.propina||0))+'.'+(v.selloMeta?'\n🤎 Lleva *'+stx(v.selloTot,v.selloMeta)+'* sellos'+(v.selloTot>=v.selloMeta?': ¡su próxima bebida es gratis! 🎁':'; le faltan '+(v.selloMeta-v.selloTot)+' para su bebida gratis.'):'')+'\n¡Le esperamos pronto! ✨';}
+$('wtChat').onclick=()=>{const t=wtTel();if(!t)return;log('Comprobante: abrir chat',folio(WAT.id)+' · '+fmtTel(t));window.open('https://wa.me/52'+t+'?text='+encodeURIComponent(greet(WAT)),'_blank');};
+async function openWaT(v){WAT=v;WAT_FILE=null;$('wtSub').textContent='Ticket '+folio(v.id)+' · '+money(v.total+(v.propina||0));$('wtTel').value=v.tel?fmtTel(v.tel):'';wtCliRender();
   $('wtImg').removeAttribute('src');$('wtImg').hidden=true;$('wtWait').hidden=false;$('wtShare').disabled=true;openM('mWaT');
   try{let {cv}=await ticketCanvas(v);let url;try{url=cv.toDataURL('image/png');}catch(e){LOGO=null;cv=(await ticketCanvas(v)).cv;url=cv.toDataURL('image/png');}$('wtImg').src=url;$('wtImg').hidden=false;$('wtWait').hidden=true;
-    cv.toBlob(b=>{WAT_FILE=new File([b],'comprobante-aroma-'+String(v.id).padStart(6,'0')+'.png',{type:'image/png'});$('wtShare').disabled=false;},'image/png');}
+    cv.toBlob(b=>{WAT_FILE=new File([b],'comprobante-aroma-'+String(v.id).padStart(6,'0')+'.jpg',{type:'image/jpeg'});$('wtShare').disabled=false;},'image/jpeg',0.9);}
   catch(e){$('wtWait').textContent='No se pudo crear la imagen: '+e.message;}}
-$('wtShare').onclick=async()=>{if(!WAT_FILE)return;const data={files:[WAT_FILE],title:'Comprobante Aroma a Café',text:'Comprobante de su compra en Aroma a Café ☕ ¡Gracias por su visita!'};
+$('wtShare').onclick=async()=>{if(!WAT_FILE)return;const data={files:[WAT_FILE]};
   if(navigator.canShare&&navigator.canShare({files:[WAT_FILE]})){try{await navigator.share(data);log('Comprobante en imagen',folio(WAT.id));}catch(e){if(e.name!=='AbortError')toast('No se pudo compartir: '+e.message,'err');}}
   else{const a=document.createElement('a');a.href=URL.createObjectURL(WAT_FILE);a.download=WAT_FILE.name;document.body.appendChild(a);a.click();a.remove();toast('Se descargó la imagen; adjúntela en WhatsApp');}};
+/* clientes */
+let CLED=null;
+function clRender(){const q=norm($('clQ').value),qd=$('clQ').value.replace(/\D/g,''),m=meta();
+  const L=Object.values(CLIS).filter(c=>!q||norm(c.nombre||'').includes(q)||(qd&&c.tel.includes(qd))).sort((a,b)=>(b.ultima||0)-(a.ultima||0));
+  $('clList').innerHTML=L.length?'<p class="muted" style="font-size:.85rem;margin-bottom:6px">'+L.length+' cliente(s) · '+L.filter(c=>c.sellos>=m).length+' con bebida gratis disponible</p>'+L.slice(0,200).map(c=>CLED===c.tel?
+    '<div class="cl-r"><div class="nm"><input id="clNom" value="'+esc(c.nombre||'')+'" placeholder="Nombre"><small>+52 '+fmtTel(c.tel)+'</small></div><label style="font-weight:700">Sellos <input id="clSel" type="number" min="0" step="1" value="'+c.sellos+'" style="width:80px"></label><button class="btn b-main b-sm" data-cls="'+c.tel+'">Guardar</button><button class="btn b-line b-sm" data-clx="1">Cancelar</button></div>':
+    '<div class="cl-r"><div class="nm"><b>'+esc(c.nombre||'Sin nombre')+'</b><small>+52 '+fmtTel(c.tel)+' · '+c.visitas+' visita(s) · '+money(c.gasto)+(c.ultima?' · última '+new Date(c.ultima).toLocaleDateString('es-MX'):'')+(c.canjes?' · '+c.canjes+' canje(s)':'')+'</small></div>'+
+    '<span>'+dots(c.sellos,m)+' <b>'+c.sellos+'/'+m+'</b>'+(c.sellos>=m?' 🎁':'')+'</span><a class="btn b-line b-sm" href="https://wa.me/52'+c.tel+'" target="_blank" rel="noopener">💬</a><button class="btn b-line b-sm" data-cle="'+c.tel+'">✏️</button></div>').join(''):
+    '<p class="muted">'+(Object.keys(CLIS).length?'Sin resultados.':'Aún no hay clientes. Se registran al escribir su WhatsApp al cobrar.')+'</p>';}
+$('cliBtn').onclick=()=>{CLED=null;$('clQ').value='';clRender();openM('mClis');};
+$('clQ').addEventListener('input',clRender);
+$('clList').addEventListener('click',e=>{const ed=e.target.closest('[data-cle]');if(ed){owner('Editar cliente',()=>{CLED=ed.dataset.cle;clRender();});return;}
+  if(e.target.closest('[data-clx]')){CLED=null;clRender();return;}
+  const sv=e.target.closest('[data-cls]');if(sv){const c=CLIS[sv.dataset.cls];const ns=Math.max(0,Math.round(+$('clSel').value||0));if(ns!==c.sellos)log('Ajuste de sellos',fmtTel(c.tel)+': '+c.sellos+' → '+ns);c.sellos=ns;c.nombre=$('clNom').value.trim();saveClis();CLED=null;clRender();toast('Cliente guardado');}});
 /* verificar */
 $('verBtn').onclick=()=>{$('verFolio').value='';$('verCode').value='';$('verRes').innerHTML='';openM('mVer');setTimeout(()=>$('verFolio').focus(),80);};
 $('verOk').onclick=async()=>{const id=+$('verFolio').value,cd=$('verCode').value.trim().toUpperCase().replace(/[^0-9A-F]/g,'');const out=$('verRes');
@@ -1909,9 +1990,7 @@ $('verOk').onclick=async()=>{const id=+$('verFolio').value,cd=$('verCode').value
   const ok=(await vCode(v)).replace('-','')===cd.slice(0,8);
   out.className='ver-res '+(ok&&v.estado==='ok'?'ok':'bad');
   out.innerHTML=ok?(v.estado==='ok'?'✅ Comprobante auténtico':'⚠️ Comprobante auténtico, pero el ticket fue ANULADO')+'<br><span style="font-weight:400">'+folio(v.id)+' · '+esc(v.fecha)+' '+esc(v.hora)+' · Total '+money(v.total)+(v.propina?' + propina '+money(v.propina):'')+' · '+esc(v.pago)+'<br>'+v.items.map(i=>i.qty+'× '+esc(i.nombre)).join(', ')+'</span>':'❌ El código no corresponde al folio '+folio(id)+'. El comprobante pudo ser alterado.';};
-$('wtOk').onclick=()=>{let t=$('wtTel').value.replace(/\D/g,'');if(t.length===12&&t.startsWith('52'))t=t.slice(2);if(t.length===13&&t.startsWith('521'))t=t.slice(3);
-  if(t&&t.length!==10)return toast('El número debe tener 10 dígitos','err');
-  if(t&&WAT){WAT.tel=t;S.set('ventas',VENTAS);}
+$('wtOk').onclick=()=>{const t=wtTel();if(!t)return;
   const url='https://wa.me/'+(t?'52'+t:'')+'?text='+encodeURIComponent(ticketText(WAT));
   log('Ticket por WhatsApp','#'+WAT.id+(t?' · '+t:''));closeM('mWaT');window.open(url,'_blank');};
 
@@ -1925,7 +2004,7 @@ function printTicket(v,re){
   h+='<hr>'+(v.descuento?row('Subtotal',money(v.subtotal))+(v.promos?v.promos.map(g=>row(esc(g.nombre)+(g.n>1?' ×'+g.n:''),'−'+money(g.monto))).join('')+(v.descExtra?row('Descuento','−'+money(v.descExtra)):''):row('Desc. '+esc(v.motivoDesc||''),'−'+money(v.descuento))):'')+'<div class="r b big"><span>TOTAL</span><span>'+money(v.total)+'</span></div>'+row('Pago',esc(v.pago));
   if(v.propina)h+=row('Propina (voluntaria)',money(v.propina))+'<div class="r b"><span>Total pagado</span><span>'+money(v.total+v.propina)+'</span></div>';
   if(v.recibido!=null)h+=row('Recibido',money(v.recibido))+row('Cambio',money(Math.round((v.recibido-v.total-(v.propina||0))*100)/100));
-  if(v.sellos)h+='<div class="c">Sellos de lealtad: '+v.sellos+'</div>';
+  if(v.selloMeta)h+='<div class="c">Sellos de lealtad: '+stx(v.selloTot,v.selloMeta)+'</div>';else if(v.sellos)h+='<div class="c">Sellos de lealtad: '+v.sellos+'</div>';
   h+='<hr><div class="c">¡Gracias por su visita! ☕</div><div class="c">Menú: jonarom2.github.io/AromaAcafe</div>'+(re?'<div class="c b">*** REIMPRESIÓN ***</div>':'')+(v.estado==='anulada'?'<div class="c b">*** ANULADO ***</div>':'');
   pr(h);}
 function printComanda(o,items){if(!items.length)return;let h='<div class="c b big">COMANDA</div><div class="c b">'+esc(o.tipo==='mesa'?'MESA '+o.mesa:oLabel(o))+'</div>'+row(hm(Date.now()),o.recoge?'Recoge '+esc(o.recoge):'')+'<hr>';
@@ -1974,14 +2053,14 @@ $('prList').addEventListener('click',e=>{const b=e.target.closest('button');if(!
   else if(b.dataset.pe)openPromo(PROMOS.find(x=>x.id===b.dataset.pe));
   else if(b.dataset.pd){const p=PROMOS.find(x=>x.id===b.dataset.pd);if(!confirm('¿Borrar la promoción "'+p.nombre+'"? Las ventas pasadas la conservan.'))return;PROMOS=PROMOS.filter(x=>x!==p);S.set('promos',PROMOS);log('Borrar promoción',p.nombre);renderPromos();}});
 function prSync(){$('prTipo').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x.dataset.v===PRT));$('prAplica').querySelectorAll('.op').forEach(x=>x.classList.toggle('on',x.dataset.v===PRA));$('prValL').textContent=PRT==='pct'?'Porcentaje de descuento (%)':'Monto de descuento por producto ($)';}
-function openPromo(p){PE=p||null;$('prTitle').textContent=p?'Editar promoción':'Nueva promoción';$('prName').value=p?p.nombre:'';$('prVal').value=p?p.valor:'';PRT=p?p.tipo:'pct';PRA=p?p.aplica:'bebidas';$('prHasta').value=p?p.hasta||'':'';$('prPin').checked=!!(p&&p.pin);$('prSellos').checked=!!(p&&p.sellos);prSync();openM('mPromo');}
+function openPromo(p){PE=p||null;$('prTitle').textContent=p?'Editar promoción':'Nueva promoción';$('prName').value=p?p.nombre:'';$('prVal').value=p?p.valor:'';PRT=p?p.tipo:'pct';PRA=p?p.aplica:'bebidas';$('prHasta').value=p?p.hasta||'':'';$('prPin').checked=!!(p&&p.pin);$('prSellos').checked=!!(p&&p.sellos);$('prMeta').value=p&&p.meta||10;prSync();openM('mPromo');}
 $('prNew').onclick=()=>openPromo(null);
 $('prTipo').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;PRT=b.dataset.v;prSync();});
 $('prAplica').addEventListener('click',e=>{const b=e.target.closest('.op');if(!b)return;PRA=b.dataset.v;prSync();});
 $('prOk').onclick=()=>{const n=$('prName').value.trim(),v=+$('prVal').value;
   if(!n)return toast('Escriba el nombre de la promoción','err');
   if(!(v>0)||(PRT==='pct'&&v>100))return toast(PRT==='pct'?'El porcentaje va de 1 a 100':'Escriba el monto del descuento','err');
-  const d={nombre:n,tipo:PRT,valor:v,aplica:PRA,hasta:$('prHasta').value||'',pin:$('prPin').checked,sellos:$('prSellos').checked};
+  const d={nombre:n,tipo:PRT,valor:v,aplica:PRA,hasta:$('prHasta').value||'',pin:$('prPin').checked,sellos:$('prSellos').checked,meta:Math.max(1,+$('prMeta').value||10)};
   if(d.sellos)PROMOS.forEach(x=>x.sellos=false);
   if(PE)Object.assign(PE,d);else PROMOS.push(Object.assign({id:'pr'+uid(),activa:true},d));
   S.set('promos',PROMOS);log(PE?'Editar promoción':'Nueva promoción',n+' · '+promoDesc(d));closeM('mPromo');renderPromos();toast('Promoción guardada');};
