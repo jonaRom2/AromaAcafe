@@ -1128,7 +1128,7 @@ $('cbTel').addEventListener('input',cbCliRender);
 $('cbCli').addEventListener('click',e=>{if(e.target.id!=='cbGift')return;const l=loyal(),o=cur();if(!l||!o)return;
   const u=units(o).filter(u=>!CBU[u.key]&&promoFits(l,u.it)).sort((a,b)=>b.it.precioU-a.it.precioU)[0];if(!u)return toast('No hay bebida para aplicar','err');CBU[u.key]=l.id;renderPromo();cbUpd();toast('🎁 Bebida gratis aplicada: '+u.it.nombre);});
 let CB={pay:'Efectivo',desc:'none'};
-const APPVER='v10',APPDATE='16/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
+const APPVER='v13',APPDATE='19/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
 const PAYS=[['Efectivo','💵 Efectivo'],['Tarjeta','💳 Tarjeta'],['Transferencia','📱 Transferencia / DiMo']];
 const DESCS=[['none','Ninguno'],['cortesia','Cortesía (100%)'],['otro','Otro monto']];
 function firstDrink(o){return o.items.find(i=>{const p=prod(i.pid);return p&&!['croissants','postres','grano','combos'].includes(p.cat);});}
@@ -2123,8 +2123,13 @@ async function bootSecurity(){
   try{if(navigator.storage&&navigator.storage.persist){PERSIST=await navigator.storage.persisted();if(!PERSIST)PERSIST=await navigator.storage.persist();}}catch(e){}
   if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
     const had=!!navigator.serviceWorker.controller;
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)toast('POS actualizado a la versión más reciente ✓');});
+    navigator.serviceWorker.register('sw.js').then(r=>{try{r.update();}catch(e){}
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)r.update().catch(()=>{});});}).catch(()=>{});
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had)return;
+      /* si la versión nueva llega al abrir, recarga sola para mostrarla; si ya se está trabajando, solo avisa */
+      if(performance.now()<20000&&!document.querySelector('.mod.on')){try{sessionStorage.setItem('posUpd','1');}catch(e){}location.reload();}
+      else toast('Hay una versión nueva del POS: cierre y vuelva a abrir para verla');});
+    try{if(sessionStorage.getItem('posUpd')){sessionStorage.removeItem('posUpd');setTimeout(()=>toast('POS actualizado a la versión '+APPVER+' ✓'),800);}}catch(e){}
   }
   let sid=null;try{sid=sessionStorage.getItem('pos_sess');if(!sid){const ls=JSON.parse(localStorage.getItem('aroma_sess')||'null');if(ls&&Date.now()-ls.ts<16*3600e3)sid=ls.id;}}catch(e){}
   const u=USERS.find(x=>x.id===sid);
