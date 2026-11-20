@@ -695,7 +695,7 @@ body.tk-vis #goTicket{display:none!important;}
     <div class="og"><h4>Aplica a</h4><div class="opts" id="prAplica"><button class="op" data-v="bebidas">☕ Bebidas</button><button class="op" data-v="alimentos">🍰 Postres y croissants</button><button class="op" data-v="todo">Todo el menú</button></div></div>
     <div class="og"><h4>Válida hasta <span class="muted" style="font-weight:400">(opcional)</span></h4><input id="prHasta" type="date"></div>
     <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:6px"><input type="checkbox" id="prSellos" style="width:20px;height:20px">Es la tarjeta de lealtad (mostrar sellos al cobrar)</label>
-    <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:6px">Sellos para la bebida gratis <input type="number" id="prMeta" min="1" step="1" style="width:80px" placeholder="10"></label>
+    <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:6px">Visitas (sellos) para la bebida gratis · 1 sello por visita <input type="number" id="prMeta" min="1" step="1" style="width:80px" placeholder="10"></label>
     <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:10px"><input type="checkbox" id="prPin" style="width:20px;height:20px">Pedir PIN del dueño al aplicarla</label>
   </div>
   <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="prOk">Guardar</button></div></div></div>
@@ -703,8 +703,11 @@ body.tk-vis #goTicket{display:none!important;}
 <div class="mod" id="mWaT"><div class="mbox" style="max-width:480px"><div class="mh"><div><h2>Enviar comprobante</h2><div class="sub" id="wtSub"></div></div><button class="cl" data-close>×</button></div>
   <div class="mb">
     <div class="og"><h4>WhatsApp del cliente</h4><div class="telw"><span class="cc">+52</span><input id="wtTel" type="tel" inputmode="numeric" maxlength="12" placeholder="238 123 4567" autocomplete="off"></div><div id="wtCli"></div></div>
-    <div class="step"><span class="n">1</span><div class="bd"><button class="btn wa-btn" id="wtChat">💬 Abrir el chat del cliente</button><p>Abre WhatsApp directo en ese número, aunque no esté en sus contactos, con un saludo listo. Toque <b>Enviar</b>.</p></div></div>
-    <div class="step"><span class="n">2</span><div class="bd"><button class="btn b-dark" id="wtShare">🖼️ Enviar la imagen del comprobante</button><p>Regrese aquí y toque este botón. En WhatsApp elija el chat del cliente: aparece <b>primero</b> en los recientes.</p></div></div>
+    <button class="btn wa-btn full" id="wtCopy" style="width:100%;font-size:1.05rem;padding:14px">📋 Copiar comprobante y abrir chat</button>
+    <p class="muted" style="font-size:.86rem;margin:6px 2px 12px">Guarda el número, copia la imagen del comprobante y abre WhatsApp en el chat del cliente con un saludo listo. Ahí <b>mantenga presionado</b> el cuadro de mensaje, toque <b>Pegar</b> y envíe.</p>
+    <details class="wt-more"><summary class="muted" style="cursor:pointer;font-size:.88rem;font-weight:700">Otras formas de enviarlo</summary>
+    <div class="step" style="margin-top:8px"><span class="n">1</span><div class="bd"><button class="btn b-line" id="wtChat">💬 Solo abrir el chat del cliente</button><p>Abre WhatsApp en ese número, aunque no esté en sus contactos, con un saludo listo.</p></div></div>
+    <div class="step"><span class="n">2</span><div class="bd"><button class="btn b-dark" id="wtShare">🖼️ Compartir la imagen del comprobante</button><p>En WhatsApp elija el chat del cliente: aparece <b>primero</b> en los recientes.</p></div></div></details>
     <img class="wt-prev" id="wtImg" alt="Comprobante" style="margin-top:14px"><p class="muted" id="wtWait" style="text-align:center">Preparando imagen…</p>
     <p style="text-align:center;margin-top:6px"><button class="btn b-line b-sm" id="wtOk">Enviar el ticket solo como texto</button></p>
   </div>
@@ -1095,6 +1098,7 @@ function renderPromo(){const o=cur();const act=PROMOS.filter(promoVig);
   const G=promoGroups(o),n=G.reduce((s,g)=>s+g.n,0);
   $('cbPromoSum').textContent=n?'Promoción en '+n+' producto(s) = '+n+' persona(s) · −'+money(promoTotal(o)):'';}
 $('cbPromo').addEventListener('click',e=>{const b=e.target.closest('.prm-b');if(!b)return;
+  const lp=loyal();if(lp&&b.dataset.p===lp.id&&CBU[b.dataset.u]!==lp.id&&Object.values(CBU).includes(lp.id))return toast('La tarjeta de lealtad es personal: una bebida gratis por visita','err');
   CBU[b.dataset.u]=CBU[b.dataset.u]===b.dataset.p?undefined:b.dataset.p;if(!CBU[b.dataset.u])delete CBU[b.dataset.u];
   promoAuth=false;renderPromo();cbUpd();});
 /* ---------- CLIENTES (sellos por WhatsApp) ---------- */
@@ -1107,13 +1111,15 @@ function meta(){const l=loyal();return l&&l.meta||10;}
 function dots(n,m){n=Math.max(0,n);const k=Math.min(n,m);return '<span class="dots">'+Array.from({length:m},(_,j)=>'<i'+(j<k?' class="f"':'')+'></i>').join('')+'</span>';}
 function stx(t,m){return t>=m?m+' de '+m+(t>m?' +'+(t-m):''):t+' de '+m;}
 function genName(n){return !n||/^(Mostrador|Mesa|Para llevar|Sin nombre)\b/i.test(n);}
+function dayOf(ts){const d=new Date((ts||Date.now())-new Date().getTimezoneOffset()*60000);return d.toISOString().slice(0,10);}
 function cliApply(v,tel,nombre){if(!tel||v.tel)return;const l=loyal(),m=meta();const red=v.promos?(v.promos.find(g=>l&&g.id===l.id)||{n:0}).n:0;
   const c=CLIS[tel]=CLIS[tel]||{tel,nombre:'',sellos:0,canjes:0,visitas:0,gasto:0,primera:v.ts};
+  const dia=dayOf(v.ts);if(v.sellos&&c.selloDia===dia){v.sellos=0;v.selloYaHoy=true;}if(v.sellos)c.selloDia=dia;
   if(nombre&&!genName(nombre))c.nombre=nombre;c.visitas++;c.gasto=Math.round((c.gasto+v.total)*100)/100;c.ultima=v.ts;
   v.selloAntes=c.sellos;c.sellos=Math.max(0,c.sellos-red*m+(v.sellos||0));c.canjes+=red;
   v.tel=tel;v.selloTot=c.sellos;v.selloMeta=m;v.selloCanje=red||undefined;saveClis();S.set('ventas',VENTAS);log('Cliente',fmtTel(tel)+' · '+c.sellos+'/'+m+' sellos');}
 function cliRevert(v){const c=v.tel&&CLIS[v.tel];if(!c||v.selloAntes==null)return;const m=v.selloMeta||meta();
-  c.sellos=Math.max(0,c.sellos-(v.sellos||0)+(v.selloCanje||0)*m);c.canjes=Math.max(0,c.canjes-(v.selloCanje||0));c.visitas=Math.max(0,c.visitas-1);c.gasto=Math.round((c.gasto-v.total)*100)/100;saveClis();}
+  c.sellos=Math.max(0,c.sellos-(v.sellos||0)+(v.selloCanje||0)*m);if(v.sellos&&c.selloDia===dayOf(v.ts))delete c.selloDia;c.canjes=Math.max(0,c.canjes-(v.selloCanje||0));c.visitas=Math.max(0,c.visitas-1);c.gasto=Math.round((c.gasto-v.total)*100)/100;saveClis();}
 let CBCLI=null;
 function cbCliRender(){const t=telInput($('cbTel')),o=cur();CBCLI=null;
   if(o)o.tel=t.length===10?t:'';
@@ -1126,9 +1132,10 @@ function cbCliRender(){const t=telInput($('cbTel')),o=cur();CBCLI=null;
   renderPromo();}
 $('cbTel').addEventListener('input',cbCliRender);
 $('cbCli').addEventListener('click',e=>{if(e.target.id!=='cbGift')return;const l=loyal(),o=cur();if(!l||!o)return;
+  if(Object.values(CBU).includes(l.id))return toast('Ya se aplicó la bebida gratis de la tarjeta','err');
   const u=units(o).filter(u=>!CBU[u.key]&&promoFits(l,u.it)).sort((a,b)=>b.it.precioU-a.it.precioU)[0];if(!u)return toast('No hay bebida para aplicar','err');CBU[u.key]=l.id;renderPromo();cbUpd();toast('🎁 Bebida gratis aplicada: '+u.it.nombre);});
 let CB={pay:'Efectivo',desc:'none'};
-const APPVER='v13',APPDATE='19/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
+const APPVER='v14',APPDATE='19/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
 const PAYS=[['Efectivo','💵 Efectivo'],['Tarjeta','💳 Tarjeta'],['Transferencia','📱 Transferencia / DiMo']];
 const DESCS=[['none','Ninguno'],['cortesia','Cortesía (100%)'],['otro','Otro monto']];
 function firstDrink(o){return o.items.find(i=>{const p=prod(i.pid);return p&&!['croissants','postres','grano','combos'].includes(p.cat);});}
@@ -1190,7 +1197,8 @@ $('cbOk').onclick=()=>{
   const PG=promoGroups(o),xd=extraDesc(o);
   const motivo=[...PG.map(g=>g.nombre+(g.n>1?' ×'+g.n:'')),xd?(CB.desc==='otro'?($('cbDescWhy').value.trim()||'Otro'):'Cortesía'):''].filter(Boolean).join(' · ');
   const lp=PROMOS.find(p=>p.sellos&&promoVig(p));
-  const sellos=lp?Math.max(0,o.items.filter(isDrinkItem).reduce((s,i)=>s+i.qty,0)-units(o).filter(u=>CBU[u.key]===lp.id).length):0;
+  /* la tarjeta es personal y por visita: 1 sello por compra; la visita en que canjea su bebida gratis no suma */
+  const sellos=lp&&!units(o).some(u=>CBU[u.key]===lp.id)?1:0;
   const cs=consumoOrden(o);applyStock(cs.acc,-1);
   VENTAS.push({id:VCTR++,mesaId:o.tipo==='mesa'?'m'+o.mesa:o.tipo,mesaNombre:oLabel(o),tipo:o.tipo,cliente:o.cliente||'',
     fecha:now.toLocaleDateString('es-MX'),hora:now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
@@ -1877,8 +1885,8 @@ let DONE=null;
 function showDone(v){DONE=v;$('doneTot').textContent=money(v.total);
   $('doneCh').textContent=v.recibido!=null?'Cambio: '+money(Math.round((v.recibido-v.total-(v.propina||0))*100)/100):'';
   $('doneSub').textContent='Ticket #'+v.id+' · '+v.pago+(v.descuento?' · descuento '+money(v.descuento):'')+(v.propina?' · propina '+money(v.propina)+(v.pago==='Tarjeta'?' (cobrar '+money(v.total+v.propina)+' en terminal)':''):'');
-  const dc=v.tel&&CLIS[v.tel];$('doneSellos').hidden=!v.sellos&&!v.selloCanje;
-  $('doneSellos').innerHTML=dc?'🤎 '+esc(dc.nombre||fmtTel(v.tel))+': '+stx(v.selloTot,v.selloMeta)+' sellos '+dots(v.selloTot,v.selloMeta)+(v.selloTot>=v.selloMeta?'<br>🎁 ¡Ya tiene su bebida gratis para la próxima!':''):(v.sellos?'🤎 Tarjeta de lealtad: ponga '+v.sellos+' sello'+(v.sellos>1?'s':''):'');
+  const dc=v.tel&&CLIS[v.tel];$('doneSellos').hidden=!v.sellos&&!v.selloCanje&&!dc;
+  $('doneSellos').innerHTML=dc?'🤎 '+esc(dc.nombre||fmtTel(v.tel))+': '+stx(v.selloTot,v.selloMeta)+' sellos '+dots(v.selloTot,v.selloMeta)+(v.selloTot>=v.selloMeta?'<br>🎁 ¡Ya tiene su bebida gratis para la próxima!':''):(v.sellos?'🤎 Tarjeta de lealtad: ponga 1 sello (uno por visita)':'');
   $('donePrint').hidden=CFG.print==='nunca';openM('mDone');setTimeout(()=>$('doneOk').focus(),80);
   if(CFG.print==='siempre')printTicket(v);}
 $('doneOk').onclick=()=>closeM('mDone');
@@ -1891,12 +1899,12 @@ function ticketText(v){const L=[];const m=x=>money(x);
   if(v.descuento){L.push('Subtotal: '+m(v.subtotal));if(v.promos){v.promos.forEach(g=>L.push('🎁 '+g.nombre+(g.n>1?' ×'+g.n:'')+': −'+m(g.monto)));if(v.descExtra)L.push('Descuento: −'+m(v.descExtra));}else L.push('Descuento'+(v.motivoDesc?' ('+v.motivoDesc+')':'')+': −'+m(v.descuento));}
   L.push('*Total: '+m(v.total)+'*');if(v.propina)L.push('Propina (voluntaria): '+m(v.propina)+' · ¡Muchas gracias! 🤎','Total pagado: '+m(v.total+v.propina));
   L.push('Pago: '+v.pago+(v.recibido!=null?' · Recibido '+m(v.recibido)+' · Cambio '+m(Math.round((v.recibido-v.total-(v.propina||0))*100)/100):''));
-  if(v.selloMeta)L.push('','🤎 Sellos de lealtad: *'+stx(v.selloTot,v.selloMeta)+'*'+(v.sellos?' (+'+v.sellos+' hoy)':'')+(v.selloTot>=v.selloMeta?' · 🎁 ¡Su próxima bebida es gratis!':' · le faltan '+(v.selloMeta-v.selloTot)+' para su bebida gratis'));
+  if(v.selloMeta)L.push('','🤎 Sellos de lealtad: *'+stx(v.selloTot,v.selloMeta)+'*'+(v.sellos?' (+1 por esta visita)':'')+(v.selloTot>=v.selloMeta?' · 🎁 ¡Su próxima bebida es gratis!':' · le faltan '+(v.selloMeta-v.selloTot)+' para su bebida gratis'));
   else if(v.sellos)L.push('','🤎 Sellos de lealtad de esta compra: '+v.sellos);
   if(v.estado==='anulada')L.push('','*** TICKET ANULADO ***');
   L.push('','¡Gracias por su visita! Le esperamos pronto ✨','Menú y pedidos: jonarom2.github.io/AromaAcafe','Instagram @ar.cafe.teh · WhatsApp 238 185 8982');
   return L.join('\n');}
-let WAT=null,WAT_FILE=null;
+let WAT=null,WAT_FILE=null,WAT_PNG=null;
 /* ---- comprobante en imagen ---- */
 let LOGO=null;(function(){const im=new Image();im.onload=()=>{LOGO=im;};im.src='../logo.jpg';})();
 function secKey(){let k=S.get('seckey',null);if(!k){try{k=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){k=String(Math.random()).slice(2)+Date.now();}S.set('seckey',k);}return k;}
@@ -1976,19 +1984,27 @@ async function ticketCanvas(v){
   if(v.estado==='anulada'){c.save();c.translate(W/2,H/2);c.rotate(-Math.PI/9);c.strokeStyle='rgba(190,40,30,.85)';c.lineWidth=5;c.strokeRect(-150,-40,300,80);c.font='900 52px '+SAN;c.fillStyle='rgba(190,40,30,.85)';c.textAlign='center';c.fillText('ANULADO',0,18);c.restore();}
   c.restore();
   return {cv,code};}
-function wtCliRender(){const t=telInput($('wtTel'));const c=t.length===10&&CLIS[t];$('wtCli').innerHTML=t.length===10?'<div class="cli-i">'+(c?'<b>'+esc(c.nombre||'Cliente')+'</b> '+dots(c.sellos,meta())+' '+stx(c.sellos,meta())+' sellos':'🆕 Número nuevo'+(WAT&&!WAT.tel?' · se le suman los sellos de esta compra':''))+'</div>':(t.length?'<div class="cli-i">Faltan '+(10-t.length)+' dígitos</div>':'');}
+function wtCliRender(){const t=telInput($('wtTel'));const c=t.length===10&&CLIS[t];$('wtCli').innerHTML=t.length===10?'<div class="cli-i">'+(c?'<b>'+esc(c.nombre||'Cliente')+'</b> '+dots(c.sellos,meta())+' '+stx(c.sellos,meta())+' sellos':'🆕 Número nuevo'+(WAT&&!WAT.tel?' · se registra con el sello de esta visita':''))+'</div>':(t.length?'<div class="cli-i">Faltan '+(10-t.length)+' dígitos</div>':'');}
 $('wtTel').addEventListener('input',wtCliRender);
 function wtTel(){const t=cleanTel($('wtTel').value);if(t.length!==10){toast('Escriba los 10 dígitos del número','err');$('wtTel').focus();return null;}
   if(WAT&&!WAT.tel){cliApply(WAT,t,WAT.cliente);}return t;}
 function greet(v){const c=v.tel&&CLIS[v.tel],n=c&&c.nombre?' '+c.nombre.split(' ')[0]:'';
   return 'Hola'+n+' 👋 Muchas gracias por su compra en *Aroma a Café* ☕\nLe enviamos su comprobante: folio '+folio(v.id)+' · total '+money(v.total+(v.propina||0))+'.'+(v.selloMeta?'\n🤎 Lleva *'+stx(v.selloTot,v.selloMeta)+'* sellos'+(v.selloTot>=v.selloMeta?': ¡su próxima bebida es gratis! 🎁':'; le faltan '+(v.selloMeta-v.selloTot)+' para su bebida gratis.'):'')+'\n¡Le esperamos pronto! ✨';}
+$('wtCopy').onclick=async()=>{const t=wtTel();if(!t)return;let img=false;
+  try{if(WAT_PNG&&window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){await navigator.clipboard.write([new ClipboardItem({'image/png':WAT_PNG})]);img=true;}}catch(e){}
+  if(!img){try{await navigator.clipboard.writeText(ticketText(WAT));}catch(e){}}
+  log('Comprobante: copiar y abrir chat',folio(WAT.id)+' · '+fmtTel(t)+(img?' · imagen':' · texto'));
+  toast(img?'📋 Comprobante copiado. En WhatsApp mantenga presionado el cuadro de mensaje y toque Pegar':'📋 Ticket copiado como texto. En WhatsApp mantenga presionado y toque Pegar');
+  setTimeout(()=>window.open('https://wa.me/52'+t+'?text='+encodeURIComponent(greet(WAT)),'_blank'),350);};
 $('wtChat').onclick=()=>{const t=wtTel();if(!t)return;log('Comprobante: abrir chat',folio(WAT.id)+' · '+fmtTel(t));window.open('https://wa.me/52'+t+'?text='+encodeURIComponent(greet(WAT)),'_blank');};
-async function openWaT(v){WAT=v;WAT_FILE=null;$('wtSub').textContent='Ticket '+folio(v.id)+' · '+money(v.total+(v.propina||0));$('wtTel').value=v.tel?fmtTel(v.tel):'';wtCliRender();
+async function openWaT(v){WAT=v;WAT_FILE=null;WAT_PNG=null;$('wtSub').textContent='Ticket '+folio(v.id)+' · '+money(v.total+(v.propina||0));$('wtTel').value=v.tel?fmtTel(v.tel):'';wtCliRender();
   $('wtImg').removeAttribute('src');$('wtImg').hidden=true;$('wtWait').hidden=false;$('wtShare').disabled=true;openM('mWaT');
   try{let {cv}=await ticketCanvas(v);let url;try{url=cv.toDataURL('image/png');}catch(e){LOGO=null;cv=(await ticketCanvas(v)).cv;url=cv.toDataURL('image/png');}$('wtImg').src=url;$('wtImg').hidden=false;$('wtWait').hidden=true;
+    cv.toBlob(b=>{WAT_PNG=b;},'image/png');
     cv.toBlob(b=>{WAT_FILE=new File([b],'comprobante-aroma-'+String(v.id).padStart(6,'0')+'.jpg',{type:'image/jpeg'});$('wtShare').disabled=false;},'image/jpeg',0.9);}
   catch(e){$('wtWait').textContent='No se pudo crear la imagen: '+e.message;}}
-$('wtShare').onclick=async()=>{if(!WAT_FILE)return;const data={files:[WAT_FILE]};
+function wtKeep(){const t=cleanTel($('wtTel').value);if(t.length===10&&WAT&&!WAT.tel){cliApply(WAT,t,WAT.cliente);wtCliRender();}return t.length===10?t:'';}
+$('wtShare').onclick=async()=>{if(!WAT_FILE)return;wtKeep();const data={files:[WAT_FILE]};
   if(navigator.canShare&&navigator.canShare({files:[WAT_FILE]})){try{await navigator.share(data);log('Comprobante en imagen',folio(WAT.id));}catch(e){if(e.name!=='AbortError')toast('No se pudo compartir: '+e.message,'err');}}
   else{const a=document.createElement('a');a.href=URL.createObjectURL(WAT_FILE);a.download=WAT_FILE.name;document.body.appendChild(a);a.click();a.remove();toast('Se descargó la imagen; adjúntela en WhatsApp');}};
 /* clientes */
