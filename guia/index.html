@@ -1504,13 +1504,19 @@ a.wide-card { color: inherit; text-decoration: none; }
   function renderSettingsClient() {
     var seg = function (key, opts) { return '<div class="seg" role="group">' + opts.map(function (o) { return '<button type="button" data-set="' + key + ":" + o[0] + '" aria-pressed="' + (S[key] === o[0]) + '">' + esc(o[1]) + "</button>"; }).join("") + "</div>"; };
     var h = '<div class="setgroup"><h3>Apariencia</h3><div class="setcard"><div class="setrow col"><div class="txt"><b>Tema</b><small>Automático sigue el tema de su teléfono.</small></div>' + seg("theme", [["system", "Auto"], ["light", "Claro"], ["dark", "Oscuro"]]) + '</div><div class="setrow col"><div class="txt"><b>Tamaño de texto</b></div>' + seg("text", [["normal", "Normal"], ["grande", "Grande"]]) + "</div></div></div>";
+    if (window.__offline) {
+      var ok = window.__offline === "ok";
+      h += '<div class="setgroup"><h3>Uso sin internet</h3><div class="setcard"><div class="setrow"><span class="txt"><b>' + (ok ? "Lista para usarse sin internet ✓" : window.__offline === "no" ? "Este navegador no permite el uso sin internet" : "Preparando la guía…") + '</b><small>' +
+        (ok ? "La guía está guardada en este teléfono. Funciona aunque no haya señal." : window.__offline === "no" ? "Pruebe abriéndola en Chrome (Android) o Safari (iPhone)." : "Manténgala abierta unos segundos con internet. Si ya la instaló en su pantalla de inicio, ábrala una vez desde el ícono con internet.") +
+        '</small></span><span style="font-size:22px">' + (ok ? "✅" : "⏳") + "</span></div></div></div>";
+    }
     h += '<div class="setgroup"><h3>Mi pasaporte</h3><div class="setcard"><div class="setrow col"><div class="txt"><b>Respaldo</b><small>Sus registros viven solo en este teléfono. Copie el respaldo y guárdelo en sus notas o envíeselo por WhatsApp.</small></div>' +
       '<div class="confirm"><button class="btn tonal" type="button" data-pcopy>Copiar respaldo</button><button class="btn tonal" type="button" data-prestore>Restaurar</button></div>' +
       (showRestore ? '<div class="field"><label for="rtext">Pegue aquí su respaldo</label><textarea id="rtext"></textarea><button class="btn primary" type="button" data-pdo>Restaurar respaldo</button></div>' : "") +
       '<textarea id="ptext" readonly hidden style="width:100%;min-height:80px"></textarea></div>' +
       '<div class="setrow col"><div class="txt"><b>Borrar pasaporte</b><small>' + PASS.length + " cafés registrados</small></div>" +
       (passReset ? '<div class="confirm"><button class="btn danger" type="button" data-preset2="yes">Sí, borrar todo</button><button class="btn tonal" type="button" data-preset2="no">Cancelar</button></div>' : '<button class="btn tonal" type="button" data-preset2="ask"' + (PASS.length ? "" : ' disabled style="opacity:.5"') + ">Borrar todo</button>") + "</div></div></div>";
-    h += '<div class="setgroup"><h3>Aroma a Café</h3><div class="setcard"><div class="about"><span class="logo" role="img" aria-label="Aroma a Café"></span><small>Café de especialidad y postres · Tehuacán, Puebla</small><small>Instagram @ar.cafe.teh · WhatsApp 238 185 8982</small><a class="btn outline" href="https://jonarom2.github.io/AromaAcafe/" target="_blank" rel="noopener" style="text-decoration:none;margin-top:8px">Ver el menú</a><small style="margin-top:6px">Guía del café · versión 1.0 · Mapas: MapSVG, CC BY 4.0</small></div></div></div>';
+    h += '<div class="setgroup"><h3>Aroma a Café</h3><div class="setcard"><div class="about"><span class="logo" role="img" aria-label="Aroma a Café"></span><small>Café de especialidad y postres · Tehuacán, Puebla</small><small>Instagram @ar.cafe.teh · WhatsApp 238 185 8982</small><a class="btn outline" href="https://jonarom2.github.io/AromaAcafe/" target="_blank" rel="noopener" style="text-decoration:none;margin-top:8px">Ver el menú</a><small style="margin-top:6px">Guía del café · versión 1.1 · Mapas: MapSVG, CC BY 4.0</small></div></div></div>';
     $("#settings").innerHTML = h;
   }
 
@@ -1895,6 +1901,7 @@ a.wide-card { color: inherit; text-decoration: none; }
   document.addEventListener("keydown", function (e) {
     if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("pin")) { e.preventDefault(); selectRegion(e.target.getAttribute("data-reg")); return; }
   });
+  document.addEventListener("aroma-offline", function () { if (CL && current() === "ajustes") renderSettingsClient(); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && current() && TABS.indexOf(current()) < 0) back(); });
   $("#q").addEventListener("input", function (e) { query = e.target.value; $("#qclear").hidden = !query; renderList(); });
   window.addEventListener("hashchange", route);
@@ -1915,6 +1922,19 @@ a.wide-card { color: inherit; text-decoration: none; }
 /* Instalación y actualizaciones (PWA) */
 (function () {
   if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+  function setOffline(st) { window.__offline = st; try { document.dispatchEvent(new Event("aroma-offline")); } catch (e) {} }
+  function checkOffline() {
+    if (!window.caches) return setOffline("no");
+    caches.keys().then(function (keys) {
+      var k = keys.filter(function (x) { return x.indexOf("guia-") === 0; });
+      if (!k.length) return setOffline("pending");
+      return caches.open(k[k.length - 1]).then(function (c) { return c.match("./index.html"); }).then(function (hit) { setOffline(hit ? "ok" : "pending"); });
+    }).catch(function () { setOffline("no"); });
+  }
+  setOffline("pending");
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+  navigator.serviceWorker.ready.then(checkOffline);
+  setTimeout(checkOffline, 4000);
   navigator.serviceWorker.register("sw.js").then(function (reg) {
     function offer(w) {
       var t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status");
