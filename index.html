@@ -360,6 +360,21 @@ h1[tabindex]:focus{outline:none;}
 .tin:focus{border-color:var(--caramel);outline:none;box-shadow:0 0 0 3px rgba(168,98,30,.2);}
 .tin.bad{border-color:var(--red);box-shadow:0 0 0 3px rgba(154,47,47,.15);}
 .err{display:none;color:var(--red);font-weight:700;margin-top:8px;}
+.opts.four{grid-template-columns:repeat(4,1fr);}
+@media (max-width:420px){.opts.four{grid-template-columns:repeat(2,1fr);}}
+.sent{background:var(--card);border:2px solid var(--wa);border-radius:18px;padding:16px 18px;margin-top:14px;}
+.sent h3{margin-bottom:6px;}.sent .row2{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}.sent .row2 .btn{flex:1 1 180px;}
+.stw{max-width:640px;margin:0 auto;}
+.stc{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 18px;margin-top:16px;box-shadow:var(--shadow);}
+.stc ul{margin:10px 0 0 18px;}.stc li{margin:4px 0;}
+.tl{list-style:none;margin:16px 0 0!important;padding:0;}
+.tl li{display:flex;gap:12px;align-items:center;padding:10px 0;font-size:1.05rem;color:var(--muted);}
+.tl li .d{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;}
+.tl li.on{color:var(--ink);font-weight:700;}.tl li.on .d{background:var(--wa);border-color:var(--wa);color:#fff;}
+.tl li.now .d{animation:pulse 1.4s infinite;}
+.big-ok{text-align:center;font-size:1.35rem;font-weight:800;margin-top:14px;padding:16px;border-radius:16px;background:rgba(26,138,74,.12);color:var(--wa);}
+.big-bad{text-align:center;font-size:1.15rem;font-weight:800;margin-top:14px;padding:16px;border-radius:16px;background:rgba(154,47,47,.10);color:var(--red);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(26,138,74,.35)}50%{box-shadow:0 0 0 10px rgba(26,138,74,0)}}
 .err.show{display:block;}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
 @media (min-width:560px){.slots{grid-template-columns:repeat(4,1fr);}}
@@ -453,6 +468,10 @@ const prodById=id=>PRODUCTS.find(p=>p.id===id);
 const GROUPS=['Bebidas','Combos','Alimentos','Para llevar a casa'];
 const prodsOf=id=>id==='sin-cafe'?PRODUCTS.filter(p=>p.nocafe):PRODUCTS.filter(p=>p.cat===id);
 const money=n=>'$'+n;
+/* pedidos directos al punto de venta (mismo canal que escucha el POS) */
+const WEB_TOPIC='aromacafe-teh-pedidos-k7x2m9q4',WEB_URL='https://ntfy.sh/',MESAS=4;
+function isHot(p){if(!p)return false;if(p.cat==='calientes'||p.id==='matcha-latte')return true;
+  if(p.cat==='combos'&&p.includes){const t=p.includes.join(' ').toLowerCase();return /(americano|latte|capuchino|olla|chocolate|moka|caliente)/.test(t)&&!/frapp/.test(t);}return false;}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fallbackImg(el,key){el.onerror=null;el.src=ILL[key]||ILL.cup;el.className='is-ill';}
 function pic(o,alt){
@@ -631,6 +650,10 @@ function renderProd(id){
     steps+=step('Elija el tipo de leche',false,'<div class="opts">'+['Entera','Deslactosada'].map((m,k)=>
       '<label class="oc"><input type="radio" name="milk" value="'+m+'"'+(k===0?' checked':'')+'><span class="box"><span style="font-size:1.5rem">🥛</span><b>'+m+'</b></span><span class="chk">✓</span></label>').join('')+'</div>');
   }
+  if(isHot(p)){
+    steps+=step('¿Qué tan caliente la quiere?',false,'<div class="opts three">'+[['Normal','☕','Normal'],['Extra caliente','🔥','Extra caliente'],['Tibia','🌤️','Tibia']].map(([v,ic,l],k)=>
+      '<label class="oc"><input type="radio" name="temp" value="'+v+'"'+(k===0?' checked':'')+'><span class="box"><span style="font-size:1.5rem">'+ic+'</span><b>'+l+'</b></span><span class="chk">✓</span></label>').join('')+'</div>');
+  }
   if(p.pair){
     const pp=prodById(p.pair.id);
     steps+=step('¿Le gustaría acompañarlo?',true,'<div class="opts one"><label class="oc row"><input type="checkbox" name="pair"><span class="box"><span class="circ" style="width:56px;height:56px">'+pic(pp,pp.name)+'</span><span><b>'+esc(pp.name)+'</b><br><small>Agregar uno a su pedido</small></span><span class="pp" style="margin-left:auto">+'+money(pp.price)+'</span></span><span class="chk">✓</span></label></div>');
@@ -661,9 +684,11 @@ function renderProd(id){
     if(p.sizes){const s=p.sizes[+fd.get('size')];unit=s.price;parts.push(s.label+(s.sub?' '+s.sub:''));}
     if(p.flavors) parts.push((p.flavorTitle==='Elija su postre'?'':'Sabor ')+fd.get('flavor'));
     if(p.milk) parts.push('Leche '+String(fd.get('milk')).toLowerCase());
+    const temp=isHot(p)&&fd.get('temp')&&fd.get('temp')!=='Normal'?String(fd.get('temp')):'';
+    if(temp) parts.push(temp);
     const pair=p.pair&&fd.get('pair')?prodById(p.pair.id):null;
     const total=unit*qty+(pair?pair.price:0);
-    return {unit,parts,pair,total};
+    return {unit,parts,pair,total,temp,si:p.sizes?+fd.get('size'):0,milk:p.milk?String(fd.get('milk')):'',flavor:p.flavors?String(fd.get('flavor')):''};
   }
   function refresh(){
     const r=calc();
@@ -677,7 +702,7 @@ function renderProd(id){
   document.getElementById('addBtn').onclick=()=>{
     const r=calc();
     const nm=p.cartName||p.name;
-    addLine({pid:p.id,name:nm,detail:r.parts.join(', '),price:r.unit,qty:qty});
+    addLine({pid:p.id,name:nm,detail:r.parts.join(', '),price:r.unit,qty:qty,si:r.si,milk:r.milk,flavor:r.flavor,temp:r.temp});
     let txt=qty+' × '+nm+(r.parts.length?' ('+r.parts.join(', ')+')':'');
     if(r.pair){addLine({pid:r.pair.id,name:r.pair.name,detail:'',price:r.pair.price,qty:1});txt+=' y 1 × '+r.pair.name;}
     openModal(txt);
@@ -704,7 +729,7 @@ function renderCart(){
   if(!cart.length){
     body='<div class="empty"><div class="ic">🛒</div><h2>Su pedido está vacío</h2><p>Elija una bebida o postre del menú y presione <b>Agregar al pedido</b>.</p><a class="btn btn-main" href="#/">Ver el menú</a></div>';
   }else{
-    body='<div class="pick"><span style="font-size:1.4rem">🏪</span><span>Pedido para <b>recoger en mostrador</b></span></div>'+
+    body=(lastWeb()?'<div class="pick"><span style="font-size:1.4rem">🧾</span><span>Tiene un pedido enviado. <a href="#/estado"><b>Ver cómo va</b></a></span></div>':'')+
     cart.map((l,k)=>{
       const p=prodById(l.pid)||{ill:'cup'};
       return '<div class="cline"><span class="circ">'+pic(p,'')+'</span><div class="ct"><div class="nm">'+esc(l.name)+'</div>'+(l.detail?'<div class="dt">'+esc(l.detail)+'</div>':'')+
@@ -717,9 +742,10 @@ function renderCart(){
     orderSteps()+
     '<div class="notes"><label for="notes">Notas para su pedido <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><textarea id="notes" placeholder="Ejemplo: sin azúcar, con poco hielo…"></textarea></div>'+
     '<div class="total"><span>TOTAL</span><b>'+money(cartTotal())+'</b></div>'+
-    '<button class="btn btn-wa" type="button" onclick="sendOrder()"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.07-.13-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88m8.41-18.3A11.81 11.81 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41"/></svg> Enviar pedido por WhatsApp</button>'+
-    '<p class="err" id="sendErr" role="alert">Falta escribir su nombre (paso 1).</p>'+
-    '<div class="help"><h3>¿Cómo se envía?</h3><ol><li>Presione el botón verde <b>Enviar pedido por WhatsApp</b>.</li><li>Se abrirá WhatsApp con su pedido ya escrito.</li><li>Solo presione <b>Enviar ➤</b>. Le confirmaremos por ese mismo chat.</li></ol></div>';
+    (ORD.where==='mesa'?'<button class="btn btn-wa" id="sendBtn" type="button" onclick="sendOrder()">☕ Enviar mi pedido a barra</button>':'<button class="btn btn-wa" id="sendBtn" type="button" onclick="sendOrder()"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.07-.13-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88m8.41-18.3A11.81 11.81 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41"/></svg> Enviar pedido por WhatsApp</button>')+
+    '<p class="err" id="sendErr" role="alert">Falta completar un paso de arriba.</p><div id="sentBox"></div>'+
+    (ORD.where==='mesa'?'<div class="help"><h3>¿Cómo funciona?</h3><ol><li>Presione <b>Enviar mi pedido a barra</b>: llega directo a nuestra barra.</li><li>En esta misma pantalla verá cuando lo estemos preparando y cuando <b>esté listo</b>.</li><li>Pague en el mostrador al terminar o por transferencia.</li></ol></div>':
+    '<div class="help"><h3>¿Cómo se envía?</h3><ol><li>Presione el botón verde <b>Enviar pedido por WhatsApp</b>.</li><li>Se abrirá WhatsApp con su pedido ya escrito.</li><li>Solo presione <b>Enviar ➤</b>. Le confirmaremos por ese mismo chat.</li></ol></div>');
   }
   app.innerHTML='<div class="view cart-page"><nav class="crumbs" aria-label="Ruta"><a href="#/">Menú</a> › <span>Mi pedido</span></nav>'+
     '<a class="back" href="#/">← Seguir viendo el menú</a><h1 tabindex="-1" style="font-size:2.2rem;margin-top:18px">Su pedido</h1>'+body+'</div>';
@@ -730,8 +756,10 @@ function renderCart(){
 
 /* ---------- nombre, hora de recogida y pago ---------- */
 const DIMO='2381880036';
-let ORD={name:'',when:'asap',slot:'',pay:'mostrador'};
+let ORD={name:'',when:'asap',slot:'',pay:'mostrador',where:'',mesa:0};
 try{ORD=Object.assign(ORD,JSON.parse(sessionStorage.getItem('aroma_ord'))||{});}catch(e){}
+/* el QR de cada mesa abre el menú con ?mesa=N */
+try{const qm=+new URLSearchParams(location.search).get('mesa');if(qm>=1&&qm<=MESAS){ORD.where='mesa';ORD.mesa=qm;sessionStorage.setItem('aroma_ord',JSON.stringify(ORD));}}catch(e){}
 try{if(!ORD.name)ORD.name=localStorage.getItem('aroma_name')||'';}catch(e){}
 function saveOrd(){try{sessionStorage.setItem('aroma_ord',JSON.stringify(ORD));localStorage.setItem('aroma_name',ORD.name);}catch(e){}}
 function mxNow(){
@@ -761,19 +789,26 @@ function orderSteps(){
   const ti=timeInfo();
   if(!ti.opts.some(o=>o[0]===ORD.when)) ORD.when=ti.opts[0][0];
   const slotsHTML=ti.slots.map(([d,s])=>{const v=d+' a las '+hhmm(s);return radioCard('slot',v,hhmm(s),d==='Hoy'?'':d,ORD.slot===v);}).join('');
-  return '<section class="ostep"><h2><span class="num">1</span>¿A nombre de quién?</h2>'+
+  const mesa=ORD.where==='mesa';let k=1;
+  let mesas='';for(let n=1;n<=MESAS;n++)mesas+=radioCard('mesa',String(n),'Mesa '+n,'',String(ORD.mesa)===String(n));
+  return '<section class="ostep"><h2><span class="num">'+(k++)+'</span>¿Dónde está usted?</h2>'+
+      '<div class="opts">'+radioCard('where','mesa','🪑 En una mesa del café','Le avisamos aquí',mesa)+radioCard('where','llevar','🏪 Para recoger','En el mostrador',ORD.where==='llevar')+'</div>'+
+      '<p class="err" id="whereErr">Elija si está en una mesa o si pasa a recoger.</p>'+
+      (mesa?'<p class="tip" style="margin-top:14px">¿En qué mesa está? (el número está en la mesa)</p><div class="opts four">'+mesas+'</div><p class="err" id="mesaErr">Toque el número de su mesa.</p>':'')+
+    '</section>'+
+    '<section class="ostep"><h2><span class="num">'+(k++)+'</span>¿A nombre de quién?</h2>'+
       '<label class="sr" for="cName">Su nombre</label><input class="tin" id="cName" type="text" autocomplete="given-name" placeholder="Escriba su nombre" value="'+esc(ORD.name)+'">'+
       '<p class="err" id="nameErr">Por favor escriba su nombre para llamarle cuando su pedido esté listo.</p>'+
       '<p class="tip">Lo usamos para llamarle cuando su pedido esté listo.</p></section>'+
-    '<section class="ostep"><h2><span class="num">2</span>¿Cuándo pasa por su pedido?</h2>'+
+    (mesa?'':'<section class="ostep"><h2><span class="num">'+(k++)+'</span>¿Cuándo pasa por su pedido?</h2>'+
       (ti.open?'':'<p class="pnote" style="background:rgba(176,58,58,.08);color:var(--red);margin:0 0 12px">🕐 '+ti.msg+'</p>')+
       '<div class="opts">'+ti.opts.map(o=>radioCard('when',o[0],o[1],o[2],ORD.when===o[0])).join('')+'</div>'+
       '<div id="slotWrap"'+(ORD.when==='otra'?'':' hidden')+'><p class="tip" style="margin-top:14px">Toque la hora que prefiera:</p><div class="slots">'+slotsHTML+'</div><p class="err" id="slotErr">Toque una hora de la lista.</p></div>'+
-    '</section>'+
-    '<section class="ostep"><h2><span class="num">3</span>¿Cómo desea pagar?</h2>'+
-      '<div class="opts">'+radioCard('pay','mostrador','💵 Al recoger','Pague en el mostrador',ORD.pay==='mostrador')+radioCard('pay','dimo','📱 Transferencia','Por DiMo con número de celular',ORD.pay==='dimo')+'</div>'+
+    '</section>')+
+    '<section class="ostep"><h2><span class="num">'+(k++)+'</span>¿Cómo desea pagar?</h2>'+
+      '<div class="opts">'+radioCard('pay','mostrador',mesa?'💵 En el mostrador':'💵 Al recoger',mesa?'Pague al terminar':'Pague en el mostrador',ORD.pay==='mostrador')+radioCard('pay','dimo','📱 Transferencia','Por DiMo con número de celular',ORD.pay==='dimo')+'</div>'+
       '<div id="dimoBox" class="dimo"'+(ORD.pay==='dimo'?'':' hidden')+'><div>Transfiera <b>'+money(cartTotal())+'</b> al celular:</div><div class="num-big">238 188 0036</div>'+
-        '<ol><li>Abra la app de su banco.</li><li>Elija <b>Transferir con número de celular (DiMo)</b>.</li><li>Escriba el número y el total.</li><li>Después de enviar su pedido, mande la <b>captura del comprobante</b> en el mismo chat de WhatsApp.</li></ol>'+
+        '<ol><li>Abra la app de su banco.</li><li>Elija <b>Transferir con número de celular (DiMo)</b>.</li><li>Escriba el número y el total.</li><li>'+(mesa?'Muestre la <b>captura del comprobante</b> en el mostrador.':'Después de enviar su pedido, mande la <b>captura del comprobante</b> en el mismo chat de WhatsApp.')+'</li></ol>'+
         '<button type="button" class="btn copy" id="copyDimo">📋 Copiar número</button>'+
         '<small>Su pedido se prepara en cuanto confirmemos la transferencia.</small></div>'+
     '</section>';
@@ -781,8 +816,10 @@ function orderSteps(){
 function wireOrder(){
   const nm=document.getElementById('cName');
   nm.addEventListener('input',()=>{ORD.name=nm.value.trim();saveOrd();if(ORD.name){nm.classList.remove('bad');document.getElementById('nameErr').classList.remove('show');document.getElementById('sendErr').classList.remove('show');}});
+  app.querySelectorAll('input[name=where]').forEach(r=>r.addEventListener('change',()=>{ORD.where=r.value;saveOrd();const y=scrollY;renderCart();scrollTo(0,y);}));
+  app.querySelectorAll('input[name=mesa]').forEach(r=>r.addEventListener('change',()=>{ORD.mesa=+r.value;saveOrd();const e=document.getElementById('mesaErr');if(e)e.classList.remove('show');}));
   app.querySelectorAll('input[name=when]').forEach(r=>r.addEventListener('change',()=>{ORD.when=r.value;if(r.value!=='otra')ORD.slot='';saveOrd();document.getElementById('slotWrap').hidden=r.value!=='otra';}));
-  app.querySelectorAll('input[name=slot]').forEach(r=>r.addEventListener('change',()=>{ORD.slot=r.value;saveOrd();document.getElementById('slotErr').classList.remove('show');}));
+  if(document.querySelector('input[name=slot]'))app.querySelectorAll('input[name=slot]').forEach(r=>r.addEventListener('change',()=>{ORD.slot=r.value;saveOrd();document.getElementById('slotErr').classList.remove('show');}));
   app.querySelectorAll('input[name=pay]').forEach(r=>r.addEventListener('change',()=>{ORD.pay=r.value;saveOrd();document.getElementById('dimoBox').hidden=r.value!=='dimo';}));
   const cp=document.getElementById('copyDimo');
   cp.addEventListener('click',()=>{
@@ -801,19 +838,68 @@ function chg(k,d){cart[k].qty+=d;if(cart[k].qty<=0)cart.splice(k,1);save();updat
 function rm(k){cart.splice(k,1);save();updateCartUI();renderCart();}
 function sendOrder(){
   if(!cart.length)return;
+  if(ORD.where!=='mesa'&&ORD.where!=='llevar'){document.getElementById('whereErr').classList.add('show');document.getElementById('sendErr').classList.add('show');document.getElementById('whereErr').scrollIntoView({block:'center'});return;}
+  if(ORD.where==='mesa'&&!(ORD.mesa>=1&&ORD.mesa<=MESAS)){const e=document.getElementById('mesaErr');e.classList.add('show');e.scrollIntoView({block:'center'});return;}
   const nm=document.getElementById('cName');
   if(!ORD.name){nm.classList.add('bad');document.getElementById('nameErr').classList.add('show');document.getElementById('sendErr').classList.add('show');nm.scrollIntoView({block:'center'});nm.focus({preventScroll:true});return;}
-  if(ORD.when==='otra'&&!ORD.slot){document.getElementById('slotErr').classList.add('show');document.getElementById('slotWrap').scrollIntoView({block:'center'});return;}
+  if(ORD.where!=='mesa'&&ORD.when==='otra'&&!ORD.slot){document.getElementById('slotErr').classList.add('show');document.getElementById('slotWrap').scrollIntoView({block:'center'});return;}
   const t=document.getElementById('notes');const notes=t?t.value.trim():'';
-  let msg='¡Hola Aroma a Café! Me gustaría hacer un pedido 😊\n\n';
-  msg+='👤 *Nombre:* '+ORD.name+'\n';
-  msg+='🏪 *Recoger en mostrador:* '+whenText()+'\n';
-  msg+='💳 *Pago:* '+(ORD.pay==='dimo'?'Transferencia por DiMo (envío comprobante)':'Al recoger, en mostrador')+'\n\n*Mi pedido:*\n';
-  cart.forEach(i=>{msg+='  • '+i.qty+'x '+i.name+(i.detail?' ('+i.detail+')':'')+' — $'+(i.price*i.qty)+'\n';});
-  msg+='\n*Total: $'+cartTotal()+' MXN*';
-  if(notes)msg+='\n\n📝 *Notas:* '+notes;
-  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg),'_blank');
+  const ord=webOrder(notes);
+  if(ORD.where==='mesa'){
+    const b=document.getElementById('sendBtn');b.disabled=true;b.textContent='Enviando…';
+    postOrder(ord).then(ok=>{
+      if(ok){saveWeb(ord);clearCart();location.hash='#/estado';return;}
+      b.disabled=false;b.textContent='☕ Enviar mi pedido a barra';
+      document.getElementById('sentBox').innerHTML='<div class="sent" style="border-color:var(--red)"><h3>No se pudo enviar 😕</h3><p>Revise su internet e intente de nuevo, o mándelo por WhatsApp.</p><div class="row2"><button class="btn btn-main" type="button" onclick="sendOrder()">Intentar de nuevo</button><a class="btn btn-wa" href="'+waLink(ord)+'" target="_blank" rel="noopener">💬 Mandar por WhatsApp</a></div></div>';});
+    return;}
+  postOrder(ord,true);saveWeb(ord);
+  window.open(waLink(ord),'_blank');
+  document.getElementById('sentBox').innerHTML='<div class="sent"><h3>📲 Se abrió WhatsApp con su pedido</h3><p>Presione <b>Enviar ➤</b> en WhatsApp. Su pedido también llegó a nuestra barra con el folio <b>'+ord.oid+'</b>.</p><div class="row2"><button class="btn btn-wa" type="button" onclick="clearCart();location.hash=\'#/estado\'">✓ Ya lo envié</button><a class="btn btn-line" href="'+waLink(ord)+'" target="_blank" rel="noopener">Abrir WhatsApp otra vez</a></div></div>';
+  document.getElementById('sentBox').scrollIntoView({block:'center',behavior:'smooth'});
 }
+function newOid(){const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let x='W';for(let i=0;i<5;i++)x+=a[Math.floor(Math.random()*a.length)];return x;}
+function webOrder(notes){return {app:'aroma',t:'ord',v:1,oid:newOid(),ts:Date.now(),mesa:ORD.where==='mesa'?+ORD.mesa:0,nombre:ORD.name,cuando:ORD.where==='mesa'?'':whenText(),pago:ORD.pay,nota:notes,total:cartTotal(),
+  items:cart.map(i=>({pid:i.pid,name:i.name,detail:i.detail,price:i.price,qty:i.qty,si:i.si||0,milk:i.milk||'',flavor:i.flavor||'',temp:i.temp||''}))};}
+function postOrder(o,keep){try{return fetch(WEB_URL,{method:'POST',keepalive:!!keep,body:JSON.stringify({topic:WEB_TOPIC,title:(o.mesa?'Mesa '+o.mesa:'Para recoger')+' · '+o.nombre,message:JSON.stringify(o),tags:['coffee']})}).then(r=>r.ok).catch(()=>false);}catch(e){return Promise.resolve(false);}}
+function clearCart(){cart=[];save();try{sessionStorage.removeItem('aroma_notes');}catch(e){}updateCartUI();}
+function saveWeb(o){try{localStorage.setItem('aroma_web',JSON.stringify({o,st:'sent'}));}catch(e){}}
+function lastWeb(){try{const w=JSON.parse(localStorage.getItem('aroma_web')||'null');return w&&Date.now()-w.o.ts<6*3600e3?w:null;}catch(e){return null;}}
+function waLink(o){let msg='¡Hola Aroma a Café! Me gustaría hacer un pedido 😊\n\n';
+  msg+='🧾 *Folio:* '+o.oid+'\n';
+  msg+='👤 *Nombre:* '+ORD.name+'\n';
+  msg+=(o.mesa?'🪑 *Estoy en la mesa:* '+o.mesa:'🏪 *Recoger en mostrador:* '+whenText())+'\n';
+  msg+='💳 *Pago:* '+(ORD.pay==='dimo'?'Transferencia por DiMo (envío comprobante)':'Al recoger, en mostrador')+'\n\n*Mi pedido:*\n';
+  o.items.forEach(i=>{msg+='  • '+i.qty+'x '+i.name+(i.detail?' ('+i.detail+')':'')+' — $'+(i.price*i.qty)+'\n';});
+  msg+='\n*Total: $'+o.total+' MXN*';
+  if(o.nota)msg+='\n\n📝 *Notas:* '+o.nota;
+  return 'https://wa.me/'+WA+'?text='+encodeURIComponent(msg);
+}
+/* ---------- estado del pedido enviado ---------- */
+let ESS=null;
+function renderStatus(){currentView='estado';const w=lastWeb();
+  if(!w){app.innerHTML='<div class="view stw"><div class="empty"><div class="ic">🧾</div><h2>No hay pedidos recientes</h2><a class="btn btn-main" href="#/">Ver el menú</a></div></div>';return;}
+  const o=w.o,st=w.st;const step=st==='listo'?3:st==='ok'?2:1;
+  const li=(n,t)=>'<li class="'+(step>=n?'on':'')+(step===n&&st!=='listo'?' now':'')+'"><span class="d">'+(step>n||st==='listo'&&n===3?'✓':n)+'</span>'+t+'</li>';
+  app.innerHTML='<div class="view stw"><nav class="crumbs" aria-label="Ruta"><a href="#/">Menú</a> › <span>Mi pedido enviado</span></nav>'+
+    '<h1 tabindex="-1" style="font-size:2rem;margin-top:14px">'+(st==='listo'?'¡Su pedido está listo! ☕':st==='rech'?'Su pedido no se pudo tomar':'¡Gracias, '+esc(o.nombre.split(' ')[0])+'!')+'</h1>'+
+    (st==='listo'?'<div class="big-ok">'+(o.mesa?'Pase a la barra por su pedido 🤎':'Ya puede pasar al mostrador por su pedido 🤎')+'</div>':'')+
+    (st==='rech'?'<div class="big-bad">Por favor acérquese a la barra; con gusto le atendemos.</div>':'')+
+    '<div class="stc"><b>Folio '+esc(o.oid)+'</b> · '+(o.mesa?'🪑 Mesa '+o.mesa:'🏪 Para recoger')+' · '+esc(o.nombre)+
+      '<ul>'+o.items.map(i=>'<li>'+i.qty+' × '+esc(i.name)+(i.detail?' <span style="color:var(--muted)">('+esc(i.detail)+')</span>':'')+'</li>').join('')+'</ul>'+
+      '<p style="margin-top:8px;font-weight:800">Total: '+money(o.total)+'</p>'+
+      (st==='rech'?'':'<ul class="tl">'+li(1,'Pedido enviado')+li(2,'La barra lo recibió y lo está preparando')+li(3,'¡Listo!')+'</ul>')+
+      (step<3&&st!=='rech'?'<p class="tip" style="margin-top:10px;color:var(--muted)">Deje esta pantalla abierta: aquí le avisamos cuando esté listo.</p>':'')+'</div>'+
+    '<p style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-main" href="#/">Pedir algo más</a><a class="btn btn-line" href="https://wa.me/'+WA+'" target="_blank" rel="noopener">💬 Escribirnos</a></p></div>';
+  if(st!=='listo'&&st!=='rech')watchWeb(o);
+}
+function watchWeb(o){if(ESS)return;if(!('EventSource' in window))return;
+  try{ESS=new EventSource(WEB_URL+WEB_TOPIC+'/sse?since='+Math.floor(o.ts/1000-60));}catch(e){return;}
+  ESS.onmessage=e=>{try{const d=JSON.parse(e.data);if(d.event&&d.event!=='message')return;const m=JSON.parse(d.message);if(!m||m.app!=='aroma'||m.t!=='st'||m.oid!==o.oid)return;
+    const w=lastWeb();if(!w||w.o.oid!==o.oid)return;const rank={sent:0,ok:1,listo:2,rech:2};if((rank[m.st]||0)<=(rank[w.st]||0))return;
+    w.st=m.st;localStorage.setItem('aroma_web',JSON.stringify(w));
+    if(m.st==='listo'||m.st==='rech'){try{navigator.vibrate&&navigator.vibrate([300,150,300]);}catch(x){}stopWatch();}
+    if(currentView==='estado')renderStatus();}catch(x){}};}
+function stopWatch(){if(ESS){try{ESS.close();}catch(e){}ESS=null;}}
 
 /* ---------- aviso ---------- */
 const modal=document.getElementById('modal');
@@ -836,12 +922,13 @@ function route(){
   if(h==='menu')return;
   if(LEGACY[h]){history.replaceState(null,'','#/'+LEGACY[h]);h=LEGACY[h];}
   const parts=h.split('/'),v=parts[0],id=parts[1];
-  closeModal();
+  closeModal();if(v!=='estado')stopWatch();
   document.getElementById('dock').innerHTML='';
   let title='Menú — Aroma a Café';
   if(v==='c'&&catById(id)){renderCat(id);title=catById(id).name+' — Aroma a Café';}
   else if(v==='p'&&prodById(id)){renderProd(id);title=prodById(id).name+' — Aroma a Café';}
   else if(v==='pedido'){renderCart();title='Mi pedido — Aroma a Café';}
+  else if(v==='estado'){renderStatus();title='Mi pedido enviado — Aroma a Café';}
   else renderHome(v==='ubicacion');
   document.title=title;
   document.querySelectorAll('.top-nav a[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav==='ubicacion'?v==='ubicacion':(v===''||v==='c'||v==='p')));
