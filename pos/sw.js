@@ -1,7 +1,7 @@
 /* Aroma a Café · POS — funciona sin internet.
    Al subir un index.html nuevo, cambie VERSION para que la tablet tome la actualización. */
-const VERSION = 'aroma-pos-v17';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', '../logo.jpg'];
+const VERSION = 'aroma-pos-v18';
+const CORE = ['./', './index.html', './qr.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', '../logo.jpg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => Promise.all(CORE.map(u => c.add(new Request(u, { cache: 'reload' })).catch(() => null)))).then(() => self.skipWaiting()));

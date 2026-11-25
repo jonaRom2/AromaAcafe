@@ -392,6 +392,10 @@ tr.anul td{opacity:.5;text-decoration:line-through;}
 .tip-q{font-size:.88rem;color:var(--muted);margin:-2px 0 8px;}
 .tip-q.card{color:var(--ink);font-weight:700;background:#f6e6d1;border-radius:10px;padding:8px 10px;}
 .tip-sum{margin-top:8px;font-weight:900;color:var(--gold2);}
+.qr-wrap{background:#fff;border-radius:16px;padding:14px;margin:4px auto 10px;width:max-content;max-width:100%;box-shadow:0 6px 20px -8px rgba(0,0,0,.35);}
+.qr-wrap canvas{display:block;width:min(340px,70vw);height:auto;image-rendering:pixelated;}
+#qrOpen{color:inherit;text-decoration:none}
+.qr-txt{text-align:center;font-size:1.02rem;line-height:1.45;margin:4px 0 2px}
 .wt-prev{display:block;margin:0 auto 12px;max-width:100%;max-height:46vh;border-radius:10px;box-shadow:0 6px 20px -8px rgba(0,0,0,.45);}
 .wt-alt{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
 .ver-res{margin-top:12px;padding:12px;border-radius:12px;font-weight:700;}
@@ -732,7 +736,7 @@ body.tk-vis #goTicket{display:none!important;}
 
 <div class="mod" id="mDone"><div class="mbox" style="max-width:420px"><div class="mb" style="padding-top:24px">
   <div style="text-align:center;font-size:2.4rem">✅</div><div class="done-big money" id="doneTot"></div><div class="done-ch" id="doneCh"></div><p class="muted" style="text-align:center;margin-top:6px" id="doneSub"></p><div class="sellos" id="doneSellos" hidden></div></div>
-  <div class="mf"><button class="btn b-line" id="donePrint">🖨️ Imprimir</button><button class="btn wa-btn" id="doneWa">📲 WhatsApp</button><button class="btn b-ok" id="doneOk">Listo</button></div></div></div>
+  <div class="mf"><button class="btn b-line" id="donePrint">🖨️ Imprimir</button><button class="btn b-dark" id="doneWa">📱 Comprobante QR</button><button class="btn b-ok" id="doneOk">Listo</button></div></div></div>
 
 <div class="mod" id="mPromo"><div class="mbox" style="max-width:480px"><div class="mh"><div><h2 id="prTitle">Promoción</h2></div><button class="cl" data-close>×</button></div>
   <div class="mb">
@@ -746,6 +750,15 @@ body.tk-vis #goTicket{display:none!important;}
     <label style="display:flex;gap:8px;align-items:center;font-weight:700;margin-top:10px"><input type="checkbox" id="prPin" style="width:20px;height:20px">Pedir PIN del dueño al aplicarla</label>
   </div>
   <div class="mf"><button class="btn b-line" data-close>Cancelar</button><button class="btn b-main" id="prOk">Guardar</button></div></div></div>
+
+<div class="mod" id="mQr"><div class="mbox" style="max-width:460px"><div class="mh"><div><h2>Comprobante digital</h2><div class="sub" id="qrSub"></div></div><button class="cl" data-close>×</button></div>
+  <div class="mb" style="text-align:center">
+    <div class="qr-wrap"><canvas id="qrCv" width="340" height="340"></canvas></div>
+    <p class="qr-txt"><b>Que el cliente lo escanee con la cámara de su celular.</b><br>Se abre su comprobante y lo guarda como imagen.</p>
+    <p class="muted" style="font-size:.85rem" id="qrNote">El cliente necesita internet en su celular para abrirlo.</p>
+    <p style="margin-top:10px"><a class="btn b-line b-sm" id="qrOpen" target="_blank" rel="noopener">👁️ Ver cómo lo ve el cliente</a> <button class="btn b-line b-sm" id="qrWa">💬 Mejor por WhatsApp</button></p>
+  </div>
+  <div class="mf"><button class="btn b-ok" id="qrOk">Listo</button></div></div></div>
 
 <div class="mod" id="mWaT"><div class="mbox" style="max-width:480px"><div class="mh"><div><h2>Enviar comprobante</h2><div class="sub" id="wtSub"></div></div><button class="cl" data-close>×</button></div>
   <div class="mb">
@@ -810,6 +823,7 @@ body.tk-vis #goTicket{display:none!important;}
 <div id="printArea"></div>
 <div class="toast" id="toast"></div>
 
+<script src="qr.js"></script>
 <script>
 /* ================= DATOS DEL MENÚ (generados del menú digital) ================= */
 const MENU_CATS=[{"id":"calientes","name":"Bebidas Calientes","short":"Calientes","icon":"☕","group":"Bebidas"},{"id":"frappes","name":"Frappés","short":"Frappés","icon":"🧋","group":"Bebidas"},{"id":"frias","name":"Bebidas Frías","short":"Frías","icon":"🧊","group":"Bebidas"},{"id":"coldbrew","name":"Cold Brew","short":"Cold Brew","icon":"❄️","group":"Bebidas"},{"id":"especialidad","name":"Frappés de Especialidad","short":"Especialidad","icon":"🍹","group":"Bebidas"},{"id":"matcha","name":"Matcha","short":"Matcha","icon":"🍵","group":"Bebidas"},{"id":"sin-cafe","name":"Bebidas sin café","short":"Sin café","icon":"🌿","group":"Bebidas","virtual":true},{"id":"combos","name":"Combos para cada ocasión","short":"Combos","icon":"🎁","group":"Combos"},{"id":"croissants","name":"Croissants","short":"Croissants","icon":"🥐","group":"Alimentos"},{"id":"postres","name":"Postres","short":"Postres","icon":"🍰","group":"Alimentos"},{"id":"grano","name":"Café para casa","short":"Café en grano","icon":"🫘","group":"Para llevar a casa"},{"id":"extras","name":"Extras","short":"Extras","icon":"🥃","group":"Extras"}];
@@ -1226,7 +1240,7 @@ $('cbCli').addEventListener('click',e=>{if(e.target.id!=='cbGift')return;const l
   if(Object.values(CBU).includes(l.id))return toast('Ya se aplicó la bebida gratis de la tarjeta','err');
   const u=units(o).filter(u=>!CBU[u.key]&&promoFits(l,u.it)).sort((a,b)=>b.it.precioU-a.it.precioU)[0];if(!u)return toast('No hay bebida para aplicar','err');CBU[u.key]=l.id;renderPromo();cbUpd();toast('🎁 Bebida gratis aplicada: '+u.it.nombre);});
 let CB={pay:'Efectivo',desc:'none'};
-const APPVER='v17',APPDATE='23/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
+const APPVER='v18',APPDATE='24/11/2026';try{$('verTag').textContent='POS '+APPVER;}catch(e){}
 const PAYS=[['Efectivo','💵 Efectivo'],['Tarjeta','💳 Tarjeta'],['Transferencia','📱 Transferencia / DiMo']];
 const DESCS=[['none','Ninguno'],['cortesia','Cortesía (100%)'],['otro','Otro monto']];
 function firstDrink(o){return o.items.find(i=>{const p=prod(i.pid);return p&&!['croissants','postres','grano','combos'].includes(p.cat);});}
@@ -1434,9 +1448,9 @@ function renderVentas(){
     CIERRES.slice().reverse().map(c=>'<tr><td>'+esc(c.rango)+'</td><td>'+c.tickets+'</td><td>'+money(c.efec||0)+'</td><td>'+money(c.tarj||0)+'</td><td>'+money(c.transf||0)+'</td><td style="text-align:right;font-weight:900">'+money(c.total)+'</td></tr>').join('')+'</tbody></table></div>':'';
   $('vrows').innerHTML=L.slice().reverse().slice(0,300).map(v=>'<tr class="'+(v.estado==='anulada'?'anul':'')+'"><td>'+v.id+'</td><td>'+esc(v.fecha)+'<br><span class="muted">'+esc(v.hora)+'</span></td><td>'+esc(v.mesaNombre||'')+'</td><td style="font-size:.85rem">'+
     (v.usuario?'<span class="muted" style="font-size:.78rem">👤 '+esc(v.usuario)+'</span><br>':'')+v.items.map(i=>qtxt(i.qty)+'× '+esc(i.nombre)+(i.detalle?' ('+esc(i.detalle)+')':(i.tamano?' ('+esc(i.tamano)+')':''))).join('<br>')+(v.descuento?'<br><span class="pill">−'+money(v.descuento)+' '+esc(v.motivoDesc||'')+'</span>':'')+'</td><td>'+esc(v.pago)+'</td><td style="text-align:right;font-weight:900">'+money(v.total)+'</td><td>'+
-    '<button class="x" data-print="'+v.id+'" style="color:var(--ink2)">🖨️</button><button class="x" data-wa="'+v.id+'" style="color:#1f8f4e">📲</button>'+(v.estado==='ok'?'<button class="x" data-anul="'+v.id+'">Anular</button>':'<span class="pill">Anulada</span>')+'</td></tr>').join('')||'<tr><td colspan="7" class="muted">Sin ventas en este periodo</td></tr>';
+    '<button class="x" data-print="'+v.id+'" style="color:var(--ink2)">🖨️</button><button class="x" data-wa="'+v.id+'" title="Comprobante (QR o WhatsApp)">📱</button>'+(v.estado==='ok'?'<button class="x" data-anul="'+v.id+'">Anular</button>':'<span class="pill">Anulada</span>')+'</td></tr>').join('')||'<tr><td colspan="7" class="muted">Sin ventas en este periodo</td></tr>';
 }
-$('vrows').addEventListener('click',e=>{const wb=e.target.closest('[data-wa]');if(wb){const v=VENTAS.find(x=>String(x.id)===wb.dataset.wa);if(v)openWaT(v);return;}
+$('vrows').addEventListener('click',e=>{const wb=e.target.closest('[data-wa]');if(wb){const v=VENTAS.find(x=>String(x.id)===wb.dataset.wa);if(v)openQr(v);return;}
   const pr=e.target.closest('[data-print]');if(pr){const v=VENTAS.find(x=>String(x.id)===pr.dataset.print);if(v)printTicket(v,true);return;}
   const b=e.target.closest('[data-anul]');if(!b)return;const v=VENTAS.find(x=>String(x.id)===b.dataset.anul);if(!v||!confirm('¿Anular el ticket #'+v.id+' por '+money(v.total)+'?'))return;owner('Anular ticket #'+v.id,()=>{log('Anular ticket','#'+v.id+' · '+money(v.total));v.estado='anulada';cliRevert(v);if(v.consumo)applyStock(v.consumo,1);S.set('ventas',VENTAS);renderVentas();toast('Ticket anulado'+(v.consumo?' · insumos regresados al inventario':''));});});
 function closeWeek(){
@@ -2032,7 +2046,7 @@ function showDone(v){DONE=v;$('doneTot').textContent=money(v.total);
   if(CFG.print==='siempre')printTicket(v);}
 $('doneOk').onclick=()=>{closeM('mDone');if(SPLIT_NEXT){SPLIT_NEXT=false;const o=cur();if(o&&o.items.length)openSplit();}};
 $('donePrint').onclick=()=>{if(DONE)printTicket(DONE);};
-$('doneWa').onclick=()=>{if(DONE)openWaT(DONE);};
+$('doneWa').onclick=()=>{if(DONE)openQr(DONE);};
 function ticketText(v){const L=[];const m=x=>money(x);
   L.push('☕ *Aroma a Café*','Café de especialidad','','🧾 *Ticket #'+v.id+'*',v.fecha+' · '+v.hora+(v.mesaNombre?' · '+v.mesaNombre:''),'');
   v.items.forEach(i=>{const d=[i.detalle||i.tamano,i.leche?'leche '+i.leche.toLowerCase():''].filter(Boolean).join(', ');L.push(qtxt(i.qty)+' × '+i.nombre+(d?' ('+d+')':'')+' — '+m(i.total));});
@@ -2141,6 +2155,39 @@ function wtKeep(){const t=cleanTel($('wtTel').value);if(t.length===10&&WAT&&!WAT
 $('wtShare').onclick=async()=>{if(!WAT_FILE)return;wtKeep();const data={files:[WAT_FILE]};
   if(navigator.canShare&&navigator.canShare({files:[WAT_FILE]})){try{await navigator.share(data);log('Comprobante en imagen',folio(WAT.id));}catch(e){if(e.name!=='AbortError')toast('No se pudo compartir: '+e.message,'err');}}
   else{const a=document.createElement('a');a.href=URL.createObjectURL(WAT_FILE);a.download=WAT_FILE.name;document.body.appendChild(a);a.click();a.remove();toast('Se descargó la imagen; adjúntela en WhatsApp');}};
+/* ---- comprobante por QR (sin WhatsApp) ---- */
+const QR_BASE=/^https?:$/.test(location.protocol)?new URL('../c/',location.href).href:'https://jonarom2.github.io/AromaAcafe/c/';
+/* formato: bytes [fmt, len alto, len bajo, datos] (fmt 1 = deflate-raw) → bloques de 7 bytes en 17 dígitos (modo numérico del QR, ~25% más chico) */
+async function qrPack(str){const raw=new TextEncoder().encode(str);let fmt=0,body=raw;
+  try{const z=FFL.deflateSync(raw,{level:9});if(z.length<raw.length){fmt=1;body=z;}}catch(e){}
+  const out=new Uint8Array(body.length+3);out[0]=fmt;out[1]=raw.length>>8&255;out[2]=raw.length&255;out.set(body,3);return out;}
+const QR_DIG=[0,3,5,8,10,13,15,17];
+function qrDigits(b){let s='';for(let i=0;i<b.length;i+=7){const ch=Array.from(b.subarray(i,i+7));let d='';
+    while(ch.some(x=>x)){let r=0;for(let k=0;k<ch.length;k++){const v=r*256+ch[k];ch[k]=Math.floor(v/10);r=v%10;}d=r+d;}
+    s+=d.padStart(QR_DIG[Math.min(7,b.length-i)],'0');}return s;}
+const r2=n=>Math.round((+n||0)*100)/100;
+async function qrUrl(v){const k=(await vHash(v)).toUpperCase().slice(0,16);
+  const o={f:v.id,d:v.fecha,h:v.hora,t:r2(v.total),k};
+  const m=(v.mesaNombre||'')+(v.cliente&&v.cliente!==v.mesaNombre?' · '+v.cliente:'');if(m)o.m=m;
+  if(v.usuario)o.u=v.usuario;if(v.pago)o.pg=v.pago;
+  o.i=v.items.map(i=>{const d=[i.detalle||i.tamano,i.leche?'leche '+String(i.leche).toLowerCase():''].filter(Boolean).join(' · ');const a=[r2(i.qty),i.nombre,d,r2(i.total)];if(!d)a[2]='';return a;});
+  if(v.descuento){o.ds=r2(v.descuento);o.s=r2(v.subtotal);if(v.promos)o.pr=v.promos.map(g=>[g.nombre,g.n||1,r2(g.monto)]);if(v.descExtra)o.dx=r2(v.descExtra);if(v.motivoDesc)o.md=v.motivoDesc;}
+  if(v.propina)o.p=r2(v.propina);if(v.recibido!=null)o.r=r2(v.recibido);
+  if(v.selloMeta){o.sm=v.selloMeta;o.st=v.selloTot||0;}if(v.sellos)o.sn=v.sellos;
+  if(v.estado==='anulada')o.a=1;
+  const dg=qrDigits(await qrPack(JSON.stringify(o)));return {url:QR_BASE+'#'+dg,pre:QR_BASE+'#',dg};}
+function drawQR(cv,u){let q=null;for(const ec of ['M','L']){try{q=qrcode(0,ec);q.addData(u.pre,'Byte');q.addData(u.dg,'Numeric');q.make();if(ec==='M'&&q.getModuleCount()>69){q=null;continue;}break;}catch(e){q=null;}}
+  if(!q)throw new Error('El ticket es demasiado largo para un QR');
+  const n=q.getModuleCount(),qz=4,tot=n+qz*2,px=Math.max(3,Math.floor(680/tot)),S2=tot*px;cv.width=S2;cv.height=S2;
+  const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,S2,S2);c.fillStyle='#0d0b09';
+  for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))c.fillRect((k+qz)*px,(r+qz)*px,px,px);return n;}
+let QRV=null;
+async function openQr(v){QRV=v;$('qrSub').textContent='Ticket '+folio(v.id)+' · '+money(v.total+(v.propina||0));
+  if(typeof qrcode!=='function'){toast('No se cargó el generador de QR; recargue la página','err');openWaT(v);return;}
+  try{const u=await qrUrl(v);const n=drawQR($('qrCv'),u);$('qrOpen').href=u.url;$('qrNote').textContent=(n>97?'Pedido grande: acerque bien el celular. ':'')+'El cliente necesita internet en su celular para abrirlo.';openM('mQr');log('Comprobante por QR',folio(v.id));}
+  catch(e){toast('No se pudo crear el QR: '+e.message,'err');openWaT(v);}}
+$('qrOk').onclick=()=>{closeM('mQr');if($('mDone').classList.contains('on'))$('doneOk').click();};
+$('qrWa').onclick=()=>{const v=QRV;closeM('mQr');if(v)openWaT(v);};
 /* clientes */
 let CLED=null;
 function clRender(){const q=norm($('clQ').value),qd=$('clQ').value.replace(/\D/g,''),m=meta();

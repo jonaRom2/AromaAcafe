@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0d0b09">
+<title>Su comprobante · Aroma a Café</title>
+<link rel="icon" href="../logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;700&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0d0b09;--cream:#f5efe5;--gold:#c9a227;--gold2:#a88720;--mut:#cfc5b7}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--ink)}
+body{background:radial-gradient(ellipse at top,#1d1611 0%,var(--ink) 60%);color:var(--cream);font-family:Lato,Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:26px 14px 40px}
+.logo{width:58px;height:58px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;margin-bottom:10px}
+h1{font-family:"EB Garamond",Georgia,serif;font-weight:700;font-size:1.85rem;text-align:center;line-height:1.15}
+.sub{color:var(--mut);text-align:center;font-size:.98rem;margin:8px 0 18px;max-width:420px;line-height:1.45}
+.tk{width:100%;max-width:420px;display:block;border-radius:4px;-webkit-touch-callout:default;user-select:auto}
+.acts{display:flex;gap:10px;width:100%;max-width:420px;margin:18px 0 6px}
+.btn{flex:1;font:900 1rem Lato,Arial,sans-serif;padding:15px 10px;border-radius:14px;border:1.5px solid var(--gold);background:var(--gold);color:var(--ink);cursor:pointer;text-decoration:none;text-align:center;-webkit-tap-highlight-color:transparent}
+.btn:active{background:var(--gold2)}
+.btn.ln{background:transparent;color:var(--gold)}
+.tip{color:var(--mut);font-size:.88rem;text-align:center;max-width:420px;line-height:1.45}
+.ver{margin-top:14px;font-size:.82rem;color:var(--mut);text-align:center;max-width:420px;line-height:1.45;border-top:1px solid rgba(201,162,39,.25);padding-top:12px}
+.foot{margin-top:22px;color:var(--mut);font-size:.9rem;text-align:center;line-height:1.75}
+.foot a{color:var(--gold);text-decoration:none;font-weight:700}
+.err{background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.35);border-radius:14px;padding:18px;max-width:420px;text-align:center;line-height:1.5}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<img class="logo" src="../logo.jpg" alt="Aroma a Café">
+<h1>Su comprobante ☕</h1>
+<p class="sub" id="sub">Preparando su comprobante…</p>
+<div class="err" id="err" hidden></div>
+<img class="tk" id="tk" alt="Comprobante de compra de Aroma a Café" hidden>
+<div class="acts" id="acts" hidden><button class="btn" id="save">⬇️ Guardar imagen</button><button class="btn ln" id="share" hidden>📤 Compartir</button></div>
+<p class="tip" id="tip" hidden>También puede mantener presionada la imagen y elegir «Guardar imagen» o tomarle captura de pantalla.</p>
+<p class="ver" id="ver" hidden></p>
+<div class="foot">¡Gracias por su visita! 🤎<br>
+<a href="../">Ver menú y hacer pedidos</a><br>
+<a href="https://instagram.com/ar.cafe.teh" target="_blank" rel="noopener">Instagram @ar.cafe.teh</a> · <a href="https://wa.me/522381858982" target="_blank" rel="noopener">WhatsApp 238 185 8982</a></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const money=n=>'$'+(Math.round(n*100)/100).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:2});
+function qtxt(q){q=+q||0;if(Math.abs(q-Math.round(q))<1e-4)return String(Math.round(q));for(let n=2;n<=12;n++){const x=q*n;if(Math.abs(x-Math.round(x))<0.02)return Math.round(x)+'/'+n;}return (Math.round(q*100)/100).toString();}
+function stx(t,m){return t>=m?m+' de '+m+(t>m?' +'+(t-m):''):t+' de '+m;}
+function folio(id){return '#'+String(id).padStart(6,'0');}
+let LOGO=null;
+function loadLogo(){return new Promise(res=>{const im=new Image();im.onload=()=>{LOGO=im;res();};im.onerror=()=>res();im.src='../logo.jpg';setTimeout(res,2500);});}
+/* tiny-inflate 1.0.3 · (c) Devon Govett · MIT */
+var tinf=function(){var t={exports:{}};function e(){this.table=new Uint16Array(16),this.trans=new Uint16Array(288)}function r(t,r){this.source=t,this.sourceIndex=0,this.tag=0,this.bitcount=0,this.dest=r,this.destLen=0,this.ltree=new e,this.dtree=new e}var n=new e,o=new e,a=new Uint8Array(30),s=new Uint16Array(30),u=new Uint8Array(30),i=new Uint16Array(30),c=new Uint8Array([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]),f=new e,d=new Uint8Array(320);function b(t,e,r,n){var o,a;for(o=0;o<r;++o)t[o]=0;for(o=0;o<30-r;++o)t[o+r]=o/r|0;for(a=n,o=0;o<30;++o)e[o]=a,a+=1<<t[o]}var l=new Uint16Array(16);function w(t,e,r,n){var o,a;for(o=0;o<16;++o)t.table[o]=0;for(o=0;o<n;++o)t.table[e[r+o]]++;for(t.table[0]=0,a=0,o=0;o<16;++o)l[o]=a,a+=t.table[o];for(o=0;o<n;++o)e[r+o]&&(t.trans[l[e[r+o]]++]=o)}function v(t){t.bitcount--||(t.tag=t.source[t.sourceIndex++],t.bitcount=7);var e=1&t.tag;return t.tag>>>=1,e}function h(t,e,r){if(!e)return r;for(;t.bitcount<24;)t.tag|=t.source[t.sourceIndex++]<<t.bitcount,t.bitcount+=8;var n=t.tag&65535>>>16-e;return t.tag>>>=e,t.bitcount-=e,n+r}function x(t,e){for(;t.bitcount<24;)t.tag|=t.source[t.sourceIndex++]<<t.bitcount,t.bitcount+=8;var r=0,n=0,o=0,a=t.tag;do{n=2*n+(1&a),a>>>=1,++o,r+=e.table[o],n-=e.table[o]}while(n>=0);return t.tag=a,t.bitcount-=o,e.trans[r+n]}function g(t,e,r){var n,o,a,s,u,i;for(n=h(t,5,257),o=h(t,5,1),a=h(t,4,4),s=0;s<19;++s)d[s]=0;for(s=0;s<a;++s){var b=h(t,3,0);d[c[s]]=b}for(w(f,d,0,19),u=0;u<n+o;){var l=x(t,f);switch(l){case 16:var v=d[u-1];for(i=h(t,2,3);i;--i)d[u++]=v;break;case 17:for(i=h(t,3,3);i;--i)d[u++]=0;break;case 18:for(i=h(t,7,11);i;--i)d[u++]=0;break;default:d[u++]=l}}w(e,d,0,n),w(r,d,n,o)}function y(t,e,r){for(;;){var n,o,c,f,d=x(t,e);if(256===d)return 0;if(d<256)t.dest[t.destLen++]=d;else for(n=h(t,a[d-=257],s[d]),o=x(t,r),f=c=t.destLen-h(t,u[o],i[o]);f<c+n;++f)t.dest[t.destLen++]=t.dest[f]}}function I(t){for(var e,r;t.bitcount>8;)t.sourceIndex--,t.bitcount-=8;if((e=256*(e=t.source[t.sourceIndex+1])+t.source[t.sourceIndex])!==(65535&~(256*t.source[t.sourceIndex+3]+t.source[t.sourceIndex+2])))return-3;for(t.sourceIndex+=4,r=e;r;--r)t.dest[t.destLen++]=t.source[t.sourceIndex++];return t.bitcount=0,0}return function(t,e){var r;for(r=0;r<7;++r)t.table[r]=0;for(t.table[7]=24,t.table[8]=152,t.table[9]=112,r=0;r<24;++r)t.trans[r]=256+r;for(r=0;r<144;++r)t.trans[24+r]=r;for(r=0;r<8;++r)t.trans[168+r]=280+r;for(r=0;r<112;++r)t.trans[176+r]=144+r;for(r=0;r<5;++r)e.table[r]=0;for(e.table[5]=32,r=0;r<32;++r)e.trans[r]=r}(n,o),b(a,s,4,3),b(u,i,2,1),a[28]=0,s[28]=258,t.exports=function(t,e){var a,s,u=new r(t,e);do{switch(a=v(u),h(u,2,0)){case 0:s=I(u);break;case 1:s=y(u,n,o);break;case 2:g(u,u.ltree,u.dtree),s=y(u,u.ltree,u.dtree);break;default:s=-3}if(0!==s)throw new Error("Data error")}while(!a);return u.destLen<u.dest.length?"function"==typeof u.dest.slice?u.dest.slice(0,u.destLen):u.dest.subarray(0,u.destLen):u.dest},t.exports}();
+const QR_DIG=[0,3,5,8,10,13,15,17];
+function decode(h){const s=h.replace(/^#/,'');if(!/^\d+$/.test(s))throw new Error('formato');const out=[];
+  for(let i=0;i<s.length;){let n=7;const left=s.length-i;if(left<17){n=QR_DIG.indexOf(left);if(n<1)throw new Error('largo');}
+    const d=s.substr(i,QR_DIG[n]).split('').map(Number),by=[];i+=QR_DIG[n];
+    for(let k=0;k<n;k++){let r=0;for(let j=0;j<d.length;j++){const v=r*10+d[j];d[j]=Math.floor(v/256);r=v%256;}by.unshift(r);}
+    if(d.some(x=>x))throw new Error('bloque');out.push(...by);}
+  const b=new Uint8Array(out),len=b[1]<<8|b[2];let raw=b.subarray(3);
+  if(b[0]===1)raw=tinf(raw,new Uint8Array(len));else if(b[0]!==0)throw new Error('fmt');
+  if(raw.length!==len)throw new Error('len');return JSON.parse(new TextDecoder().decode(raw));}
+function toV(o){
+  if(!o||!Number.isFinite(+o.f)||!Number.isFinite(+o.t)||!Array.isArray(o.i)||!/^[0-9A-F]{16}$/i.test(o.k||''))throw new Error('incompleto');
+  return {id:+o.f,fecha:String(o.d||''),hora:String(o.h||''),mesaNombre:String(o.m||''),cliente:'',usuario:o.u?String(o.u):'',
+    items:o.i.map(a=>({qty:+a[0]||0,nombre:String(a[1]||''),detalle:String(a[2]||''),total:+a[3]||0})),
+    descuento:+o.ds||0,subtotal:+o.s||0,promos:Array.isArray(o.pr)?o.pr.map(a=>({nombre:String(a[0]||''),n:+a[1]||1,monto:+a[2]||0})):null,
+    descExtra:+o.dx||0,motivoDesc:o.md?String(o.md):'',total:+o.t,pago:String(o.pg||''),propina:+o.p||0,recibido:o.r==null?null:+o.r,
+    selloMeta:+o.sm||0,selloTot:+o.st||0,sellos:+o.sn||0,estado:o.a?'anulada':'ok',hash:String(o.k).toUpperCase()};}
+async function ticketCanvas(v){
+  try{await Promise.race([Promise.all(['700 30px "EB Garamond"','500 16px "EB Garamond"','400 14px Lato','700 14px Lato','900 14px Lato'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,1500))]);}catch(e){}
+  const hash=v.hash,code=hash.slice(0,4)+'-'+hash.slice(4,8);
+  const W=540,PX=34,PW=W-PX*2,SC=2,GOLD='#c9a227',GOLD2='#a88720',INK='#2a1d16',MUT='#7b6a5c',CREAM='#fbf6ee';
+  const SER='"EB Garamond", Georgia, serif',SAN='Lato, Arial, sans-serif';
+  const mc=document.createElement('canvas').getContext('2d');
+  function wrap(t,font,max){mc.font=font;const w=String(t).split(' ');const L=[];let cur='';w.forEach(x=>{const tt=cur?cur+' '+x:x;if(mc.measureText(tt).width>max&&cur){L.push(cur);cur=x;}else cur=tt;});if(cur)L.push(cur);return L;}
+  /* contenido en renglones */
+  const ops=[];const add=(h,fn)=>ops.push([h,fn]);
+  const txt=(t,font,col,align,x)=>(c,y)=>{c.font=font;c.fillStyle=col;c.textAlign=align||'left';c.fillText(t,x!=null?x:(align==='center'?W/2:align==='right'?W-PX-18:PX+18),y);};
+  const pair=(a,b,font,col)=>(c,y)=>{c.font=font;c.fillStyle=col||INK;c.textAlign='left';c.fillText(a,PX+18,y);c.textAlign='right';c.fillText(b,W-PX-18,y);};
+  const dash=(c,y)=>{c.save();c.strokeStyle='rgba(168,135,32,.55)';c.setLineDash([5,4]);c.lineWidth=1;c.beginPath();c.moveTo(PX+18,y-5);c.lineTo(W-PX-18,y-5);c.stroke();c.restore();};
+  add(132,(c,y)=>{const cx=W/2,cy=y-58,r=46;
+    c.save();for(let k=0;k<36;k++){c.beginPath();c.strokeStyle='rgba(201,162,39,.22)';c.lineWidth=.6;c.ellipse(cx,cy,r+18,r+6,k*Math.PI/18,0,Math.PI*2);c.stroke();}c.restore();
+    c.save();c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.fillStyle='#0d0b09';c.fill();c.clip();if(LOGO)c.drawImage(LOGO,cx-r,cy-r,r*2,r*2);else{c.fillStyle=GOLD;c.font='700 20px '+SER;c.textAlign='center';c.fillText('AaC',cx,cy+7);}c.restore();
+    c.beginPath();c.arc(cx,cy,r+2,0,Math.PI*2);c.strokeStyle=GOLD;c.lineWidth=2.5;c.stroke();});
+  add(36,txt('Aroma a Café','700 32px '+SER,INK,'center'));
+  add(20,txt('C A F É   D E   E S P E C I A L I D A D','700 10px '+SAN,GOLD2,'center'));
+  add(30,txt('COMPROBANTE DE VENTA','900 12px '+SAN,INK,'center'));
+  add(14,dash);
+  add(26,pair('Folio '+folio(v.id),v.fecha,'900 16px '+SAN));
+  add(20,pair((v.mesaNombre||'')+(v.cliente&&v.cliente!==v.mesaNombre?' · '+v.cliente:''),v.hora,'400 13px '+SAN,MUT));
+  if(v.usuario)add(20,txt('Le atendió: '+v.usuario,'400 13px '+SAN,MUT));
+  add(16,dash);
+  v.items.forEach(i=>{const nm=qtxt(i.qty)+' × '+i.nombre;const lines=wrap(nm,'700 15px '+SAN,PW-130);
+    lines.forEach((l,k)=>add(k?19:22,k?txt(l,'700 15px '+SAN,INK):pair(l,money(i.total),'700 15px '+SAN)));
+    const d=[i.detalle||i.tamano,i.leche?'leche '+i.leche.toLowerCase():''].filter(Boolean).join(' · ');
+    if(d)wrap(d,'400 12px '+SAN,PW-60).forEach(l=>add(17,txt(l,'400 12px '+SAN,MUT,'left',PX+34)));});
+  add(14,dash);
+  if(v.descuento){add(21,pair('Subtotal',money(v.subtotal),'400 14px '+SAN));
+    (v.promos||[]).forEach(g=>add(20,pair('🎁 '+g.nombre+(g.n>1?' ×'+g.n:''),'−'+money(g.monto),'700 13px '+SAN,'#1f7a45')));
+    if(v.descExtra||!v.promos)add(20,pair('Descuento'+(!v.promos&&v.motivoDesc?' ('+v.motivoDesc+')':''),'−'+money(v.descExtra||v.descuento),'700 13px '+SAN,'#1f7a45'));}
+  add(40,(c,y)=>{c.fillStyle='rgba(201,162,39,.16)';c.fillRect(PX+10,y-29,PW-20,38);pair('TOTAL',money(v.total),'900 24px '+SAN)(c,y-2);});
+  add(24,pair('Forma de pago',v.pago,'400 14px '+SAN));
+  if(v.propina){add(20,pair('Propina (voluntaria) · ¡gracias!',money(v.propina),'400 14px '+SAN));add(22,pair('Total pagado',money(v.total+v.propina),'900 15px '+SAN));}
+  if(v.recibido!=null){add(20,pair('Recibido',money(v.recibido),'400 13px '+SAN,MUT));add(20,pair('Cambio',money(Math.round((v.recibido-v.total-(v.propina||0))*100)/100),'400 13px '+SAN,MUT));}
+  if(v.selloMeta){add(30,txt('🤎 Sellos de lealtad: '+stx(v.selloTot,v.selloMeta)+(v.sellos?'  (+'+v.sellos+' hoy)':''),'700 14px '+SAN,GOLD2,'center'));
+    add(26,(c,y)=>{const m=v.selloMeta,r=7,gap=6,w=m*(r*2)+(m-1)*gap;let x=W/2-w/2+r;for(let k=0;k<m;k++){c.beginPath();c.arc(x,y-8,r,0,Math.PI*2);c.lineWidth=1.6;c.strokeStyle=GOLD;c.stroke();if(k<v.selloTot){c.fillStyle=GOLD;c.fill();}x+=r*2+gap;}});
+    add(20,txt(v.selloTot>=v.selloMeta?'🎁 ¡Su próxima bebida es gratis!':'Le faltan '+(v.selloMeta-v.selloTot)+' para su bebida gratis','400 12px '+SAN,MUT,'center'));}
+  else if(v.sellos)add(30,txt('🤎 Sellos de lealtad de esta compra: '+v.sellos,'700 14px '+SAN,GOLD2,'center'));
+  add(16,dash);
+  add(48,(c,y)=>{/* barras de seguridad derivadas del código */let x=PX+40;const top=y-40,end=W-PX-40;c.fillStyle=INK;let k=0;
+    while(x<end){const d=parseInt(hash[k%hash.length],16);const bw=1+(d&3)*.8;c.fillRect(x,top,bw,34);x+=bw+1.2+((d>>2)&3)*.9;k++;}});
+  add(22,txt('Código de verificación: '+code,'900 14px '+SAN,INK,'center'));
+  add(12,(c,y)=>{c.font='400 5px '+SAN;c.fillStyle='rgba(42,29,22,.55)';c.textAlign='left';let t='';while(t.length<260)t+='AROMAACAFE·'+folio(v.id).slice(1)+'·'+hash.slice(8,16)+'·';c.save();c.beginPath();c.rect(PX+18,y-8,PW-36,10);c.clip();c.fillText(t,PX+18,y);c.restore();});
+  add(28,txt('¡Gracias por su visita! Le esperamos pronto ✨','500 17px '+SER,INK,'center'));
+  add(18,txt('@ar.cafe.teh · WhatsApp 238 185 8982','400 12px '+SAN,MUT,'center'));
+  add(18,txt('Menú: jonarom2.github.io/AromaAcafe','400 12px '+SAN,MUT,'center'));
+  add(22,txt('Comprobante de venta · no es factura fiscal','700 10px '+SAN,MUT,'center'));
+  const topPad=46,botPad=40;let H=topPad+botPad+ops.reduce((s,o)=>s+o[0],0)+30;
+  const cv=document.createElement('canvas');cv.width=W*SC;cv.height=H*SC;const c=cv.getContext('2d');c.scale(SC,SC);
+  /* fondo oscuro */
+  const bg=c.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#1a1410');bg.addColorStop(1,'#0d0b09');c.fillStyle=bg;c.fillRect(0,0,W,H);
+  /* papel con orillas de corte */
+  const t0=22,b0=H-22,zz=9;c.beginPath();c.moveTo(PX,t0+zz);for(let x=PX;x<W-PX;x+=zz*2){c.lineTo(x+zz,t0);c.lineTo(Math.min(x+zz*2,W-PX),t0+zz);}
+  c.lineTo(W-PX,b0-zz);for(let x=W-PX;x>PX;x-=zz*2){c.lineTo(x-zz,b0);c.lineTo(Math.max(x-zz*2,PX),b0-zz);}c.closePath();
+  c.save();c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=18;c.fillStyle=CREAM;c.fill();c.restore();
+  c.save();c.clip();
+  /* guilloché */
+  c.lineWidth=.55;for(let row=0;row<H;row+=26){for(let k=0;k<3;k++){c.beginPath();c.strokeStyle=k?'rgba(201,162,39,.13)':'rgba(168,135,32,.17)';
+    for(let x=PX;x<=W-PX;x+=3){const yy=row+Math.sin(x/(18+k*5)+row*.07+k*2.1)*8*(1+.35*Math.sin(x/61+k))+Math.cos(x/29+k)*3;x===PX?c.moveTo(x,yy):c.lineTo(x,yy);}c.stroke();}}
+  /* marca de agua */
+  c.save();c.translate(W/2,H/2);c.rotate(-Math.PI/7);c.font='700 20px '+SER;c.fillStyle='rgba(168,135,32,.075)';c.textAlign='center';
+  for(let yy=-H;yy<H;yy+=58)for(let xx=-W;xx<W;xx+=210)c.fillText('Aroma a Café',xx+((yy/58)%2?105:0),yy);c.restore();
+  /* marco interior */
+  c.strokeStyle='rgba(168,135,32,.6)';c.lineWidth=1;c.strokeRect(PX+8,t0+16,PW-16,b0-t0-32);c.strokeStyle='rgba(168,135,32,.3)';c.strokeRect(PX+11,t0+19,PW-22,b0-t0-38);
+  let y=topPad+12;ops.forEach(([h,fn])=>{y+=h;fn(c,y);});
+  if(v.estado==='anulada'){c.save();c.translate(W/2,H/2);c.rotate(-Math.PI/9);c.strokeStyle='rgba(190,40,30,.85)';c.lineWidth=5;c.strokeRect(-150,-40,300,80);c.font='900 52px '+SAN;c.fillStyle='rgba(190,40,30,.85)';c.textAlign='center';c.fillText('ANULADO',0,18);c.restore();}
+  c.restore();
+  return {cv,code};}
+let FILE=null;
+async function main(){
+  let v;try{v=toV(decode(location.hash));}catch(e){
+    $('sub').hidden=true;$('err').hidden=false;
+    $('err').innerHTML='Este enlace de comprobante está incompleto o no es válido. 🤎<br>Por favor pida en la barra que se lo muestren de nuevo, o escríbanos por WhatsApp.';return;}
+  document.title='Comprobante '+folio(v.id)+' · Aroma a Café';
+  await loadLogo();
+  let cv;try{cv=(await ticketCanvas(v)).cv;cv.toDataURL();}catch(e){LOGO=null;cv=(await ticketCanvas(v)).cv;}
+  $('tk').src=cv.toDataURL('image/png');$('tk').hidden=false;
+  $('sub').textContent='Folio '+folio(v.id)+' · '+v.fecha+' · '+money(v.total+(v.propina||0))+'. Guárdelo en su celular ✨';
+  $('acts').hidden=false;$('tip').hidden=false;
+  $('ver').hidden=false;$('ver').textContent='Código de verificación '+v.hash.slice(0,4)+'-'+v.hash.slice(4,8)+'. Con el folio y este código, la cafetería puede confirmar que su comprobante es auténtico.';
+  const name='comprobante-aroma-'+String(v.id).padStart(6,'0')+'.png';
+  cv.toBlob(b=>{if(!b)return;FILE=new File([b],name,{type:'image/png'});
+    try{if(navigator.canShare&&navigator.canShare({files:[FILE]}))$('share').hidden=false;}catch(e){}},'image/png');
+  $('save').onclick=()=>{const a=document.createElement('a');a.download=name;a.href=FILE?URL.createObjectURL(FILE):$('tk').src;document.body.appendChild(a);a.click();a.remove();};
+  $('share').onclick=async()=>{if(!FILE)return;try{await navigator.share({files:[FILE],title:'Comprobante Aroma a Café'});}catch(e){}};
+}
+main();
+window.addEventListener('hashchange',()=>location.reload());
+</script>
+</body>
+</html>
